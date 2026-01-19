@@ -1,0 +1,15 @@
+{
+  "projectName": "capstone_fe_sp26",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "npm",
+  "tailwind": true,
+  "addOnOptions": {},
+  "git": true,
+  "version": 1,
+  "framework": "react-cra",
+  "chosenAddOns": [
+    "nitro",
+    "start"
+  ]
+}
