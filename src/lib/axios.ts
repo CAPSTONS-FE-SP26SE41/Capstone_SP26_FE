@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // 1. Tạo instance (bản sao) của axios với cấu hình mặc định
 export const axiosClient = axios.create({
-  baseURL: 'https://api.domain-backend-cua-ban.com/api/v1', // <-- Thay link API thật vào đây
+  baseURL: import.meta.env.VITE_API_BASE_URL, // Đọc từ file .env
   headers: {
     'Content-Type': 'application/json',
   },
