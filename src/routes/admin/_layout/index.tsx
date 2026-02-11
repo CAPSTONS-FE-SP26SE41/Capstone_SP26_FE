@@ -1,6 +1,11 @@
-import StatCard from "../../components/admin/StatCard"
+import { createFileRoute } from '@tanstack/react-router'
+import StatCard from '../../../components/admin/StatCard'
 
-export default function AdminDashboard() {
+export const Route = createFileRoute('/admin/_layout/')({
+  component: AdminDashboard,
+})
+
+function AdminDashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Dashboard Overview</h1>
