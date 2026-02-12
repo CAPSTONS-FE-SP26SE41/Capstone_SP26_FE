@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-
+import { Plus } from 'lucide-react'
 export const Route = createFileRoute('/admin/_layout/bookings')({
   component: AdminBookings,
 })
@@ -40,9 +40,17 @@ function AdminBookings() {
             Filter
           </button>
 
-          <button className="flex items-center gap-2 bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
-            New Booking
-          </button>
+          <button className="flex items-center gap-2 
+  bg-blue-600 hover:bg-blue-700 
+  text-white font-semibold
+  px-6 py-3 
+  rounded-2xl 
+  shadow-lg hover:shadow-xl
+  transition-all duration-200">
+  <Plus size={18} />
+  Add User
+</button>
+
         </div>
       </div>
 

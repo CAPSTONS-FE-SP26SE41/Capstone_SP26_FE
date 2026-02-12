@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-
+import { Plus } from 'lucide-react'
 export const Route = createFileRoute('/admin/_layout/users')({
   component: UsersPage,
 })
@@ -21,7 +21,7 @@ function UsersPage() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      await new Promise((res) => setTimeout(res, 800))
+      await new Promise((res) => setTimeout(res, 600))
 
       setUsers([
         {
@@ -50,147 +50,134 @@ function UsersPage() {
     fetchUsers()
   }, [])
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="flex justify-center items-center py-20 text-text-secondary">
+      <div className="flex justify-center items-center py-24 text-sm text-text-secondary">
         Loading users...
       </div>
     )
+  }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start">
         <div>
-          <h2 className="text-2xl font-bold text-text-main">
+          <h2 className="text-2xl font-semibold text-text-main">
             User Management
           </h2>
-          <p className="text-text-secondary">
+          <p className="text-sm text-text-secondary mt-1">
             Manage access and user profiles
           </p>
         </div>
 
-        <button className="flex items-center gap-2 bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
-          <span className="material-symbols-outlined text-[20px]">
-            add
-          </span>
-          Add User
-        </button>
+        <button className="flex items-center gap-2 
+  bg-blue-600 hover:bg-blue-700 
+  text-white font-semibold
+  px-6 py-3 
+  rounded-2xl 
+  shadow-lg hover:shadow-xl
+  transition-all duration-200">
+  <Plus size={18} />
+  Add User
+</button>
+
+
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm overflow-hidden">
+      {/* Card */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left">
             <thead>
-              <tr className="bg-[#f8fafc] text-text-secondary text-xs uppercase tracking-wider font-semibold border-b border-[#e7edf4]">
-                <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">Role</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Last Active</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+              <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
+                <th className="px-8 py-4 font-semibold">Name</th>
+                <th className="px-8 py-4 font-semibold">Role</th>
+                <th className="px-8 py-4 font-semibold">Status</th>
+                <th className="px-8 py-4 font-semibold">Last Active</th>
+                <th className="px-8 py-4 text-right font-semibold">
+                  Actions
+                </th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-[#e7edf4]">
-              {users.length > 0 ? (
-                users.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="hover:bg-[#f8fafc] transition-colors"
-                  >
-                    {/* Name */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="size-10 rounded-full bg-cover bg-center"
-                          style={{
-                            backgroundImage: `url("${user.avatarUrl}")`,
-                          }}
-                        />
-                        <div>
-                          <p className="font-medium text-text-main">
-                            {user.name}
-                          </p>
-                          <p className="text-xs text-text-secondary">
-                            {user.email}
-                          </p>
-                        </div>
+            <tbody className="divide-y divide-slate-200">
+              {users.map((user) => (
+                <tr
+                  key={user.id}
+                  className="hover:bg-slate-50 transition"
+                >
+                  {/* Name */}
+                  <td className="px-8 py-5">
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={user.avatarUrl}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                      <div>
+                        <p className="text-sm font-semibold text-text-main">
+                          {user.name}
+                        </p>
+                        <p className="text-xs text-text-secondary">
+                          {user.email}
+                        </p>
                       </div>
-                    </td>
-
-                    {/* Role */}
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded border border-slate-200 bg-slate-50 text-xs font-medium text-slate-600">
-                        {user.role}
-                      </span>
-                    </td>
-
-                    {/* Status */}
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
-                          ${
-                            user.status === 'Active'
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : user.status === 'Pending'
-                              ? 'bg-amber-100 text-amber-700'
-                              : 'bg-slate-100 text-slate-600'
-                          }`}
-                      >
-                        <span className="size-1.5 rounded-full bg-current"></span>
-                        {user.status}
-                      </span>
-                    </td>
-
-                    {/* Last Active */}
-                    <td className="px-6 py-4 text-sm text-text-secondary">
-                      {user.lastActive}
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-6 py-4 text-right">
-                      <button className="text-text-secondary hover:text-primary p-2">
-                        <span className="material-symbols-outlined text-[20px]">
-                          more_vert
-                        </span>
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-6 py-12 text-center text-text-secondary"
-                  >
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <span className="material-symbols-outlined text-4xl text-slate-300">
-                        group_off
-                      </span>
-                      <p className="font-medium">No users found</p>
-                      <p className="text-xs">
-                        Add a new user to get started
-                      </p>
                     </div>
                   </td>
+
+                  {/* Role */}
+                  <td className="px-8 py-5">
+                    <span className="inline-flex items-center px-3 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium">
+                      {user.role}
+                    </span>
+                  </td>
+
+                  {/* Status */}
+                  <td className="px-8 py-5">
+                    <span
+                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold
+                        ${user.status === 'Active'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : user.status === 'Pending'
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}
+                    >
+                      <span className="h-2 w-2 rounded-full bg-current"></span>
+                      {user.status}
+                    </span>
+                  </td>
+
+                  {/* Last Active */}
+                  <td className="px-8 py-5 text-sm text-text-secondary">
+                    {user.lastActive}
+                  </td>
+
+                  {/* Actions */}
+                  <td className="px-8 py-5 text-right">
+                    <button className="p-2 rounded-md hover:bg-slate-100 transition">
+                      <span className="material-symbols-outlined text-[20px] text-slate-500">
+                        more_vert
+                      </span>
+                    </button>
+                  </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-[#f8fafc]">
+        <div className="px-8 py-4 border-t border-slate-200 flex justify-between items-center bg-slate-50">
           <span className="text-sm text-text-secondary">
             Showing {users.length} of {users.length} users
           </span>
 
           <div className="flex gap-2">
-            <button className="px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50 opacity-50 cursor-not-allowed">
+            <button className="px-4 py-1.5 text-sm border border-slate-200 bg-white rounded-md text-slate-500 opacity-50 cursor-not-allowed">
               Previous
             </button>
-            <button className="px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50 opacity-50 cursor-not-allowed">
+            <button className="px-4 py-1.5 text-sm border border-slate-200 bg-white rounded-md text-slate-500 opacity-50 cursor-not-allowed">
               Next
             </button>
           </div>
