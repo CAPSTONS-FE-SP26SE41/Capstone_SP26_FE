@@ -2,155 +2,173 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/admin/_layout/analytics')({
-  component: AdminBookings,
+  component: AdminAnalytics,
 })
 
-type Booking = {
-  id: string
-  destination: string
-  date: string
-  amount: string
-  status: 'Confirmed' | 'Pending' | 'Cancelled'
+type Revenue = {
+  name: string
+  income: number
+  expense: number
 }
 
-function AdminBookings() {
-  const [bookings] = useState<Booking[]>([]) // sau này fetch API
+type Device = {
+  name: string
+  value: number
+}
 
-  const statusList: Booking['status'][] = [
-    'Confirmed',
-    'Pending',
-    'Cancelled',
-  ]
+type PageMetric = {
+  page: string
+  views: number
+  bounce: string
+  conv: string
+}
+
+function AdminAnalytics() {
+  const [revenueData] = useState<Revenue[]>([
+    { name: 'Jan', income: 4000, expense: 2400 },
+    { name: 'Feb', income: 3000, expense: 1398 },
+    { name: 'Mar', income: 5000, expense: 2800 },
+  ])
+
+  const [deviceData] = useState<Device[]>([
+    { name: 'Desktop', value: 400 },
+    { name: 'Mobile', value: 300 },
+    { name: 'Tablet', value: 200 },
+  ])
+
+  const [topPages] = useState<PageMetric[]>([
+    { page: '/home', views: 1200, bounce: '45%', conv: '12%' },
+    { page: '/booking', views: 850, bounce: '38%', conv: '18%' },
+  ])
 
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-text-main">
-            Bookings
-          </h2>
-          <p className="text-text-secondary">
-            Track and manage travel reservations
+      <div>
+        <h2 className="text-2xl font-bold text-text-main">
+          Analytics
+        </h2>
+        <p className="text-text-secondary">
+          Performance metrics and insights
+        </p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-4 rounded-xl border border-[#e7edf4]">
+          <p className="text-text-secondary text-sm font-medium">
+            Total Revenue
+          </p>
+          <p className="text-2xl font-bold text-text-main mt-1">
+            $12,500
           </p>
         </div>
 
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 bg-white border border-[#e7edf4] text-text-secondary hover:text-primary px-4 py-2 rounded-lg font-medium transition-colors">
-            Filter
-          </button>
+        <div className="bg-white p-4 rounded-xl border border-[#e7edf4]">
+          <p className="text-text-secondary text-sm font-medium">
+            Total Bookings
+          </p>
+          <p className="text-2xl font-bold text-text-main mt-1">
+            320
+          </p>
+        </div>
 
-          <button className="flex items-center gap-2 bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
-            New Booking
-          </button>
+        <div className="bg-white p-4 rounded-xl border border-[#e7edf4]">
+          <p className="text-text-secondary text-sm font-medium">
+            Active Users
+          </p>
+          <p className="text-2xl font-bold text-text-main mt-1">
+            89
+          </p>
         </div>
       </div>
 
-      {/* Status Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {statusList.map((status) => (
-          <div
-            key={status}
-            className="bg-white p-4 rounded-xl border border-[#e7edf4] flex items-center justify-between"
-          >
-            <div>
-              <p className="text-text-secondary text-sm font-medium">
-                Total {status}
-              </p>
-              <p className="text-2xl font-bold text-text-main mt-1">
-                0
-              </p>
-            </div>
-
+      {/* Revenue Table (giữ style giống booking list) */}
+      <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm flex flex-col">
+        {revenueData.length > 0 ? (
+          revenueData.map((item) => (
             <div
-              className={`p-3 rounded-lg bg-opacity-10 ${
-                status === 'Confirmed'
-                  ? 'bg-emerald-500 text-emerald-600'
-                  : status === 'Pending'
-                  ? 'bg-amber-500 text-amber-600'
-                  : 'bg-red-500 text-red-600'
-              }`}
+              key={item.name}
+              className="flex items-center justify-between p-6 border-b border-[#e7edf4] last:border-0"
             >
-              {status === 'Confirmed'
-                ? '✔'
-                : status === 'Pending'
-                ? '⏳'
-                : '✖'}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Booking List */}
-      <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm flex flex-col min-h-[300px]">
-        {bookings.length > 0 ? (
-          bookings.map((booking) => (
-            <div
-              key={booking.id}
-              className="flex flex-col md:flex-row items-center p-6 border-b border-[#e7edf4] last:border-0 hover:bg-[#f8fafc] transition-colors gap-4"
-            >
-              <div className="flex items-center gap-4 w-full md:w-1/3">
-                <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
-                  ✈
-                </div>
-
-                <div>
-                  <p className="font-bold text-lg text-text-main">
-                    {booking.destination}
-                  </p>
-                  <p className="text-sm text-text-secondary">
-                    ID: #{booking.id}
-                  </p>
-                </div>
+              <div>
+                <p className="font-bold text-lg text-text-main">
+                  {item.name}
+                </p>
+                <p className="text-sm text-text-secondary">
+                  Monthly Overview
+                </p>
               </div>
 
-              <div className="w-full md:w-1/3 grid grid-cols-2 gap-4">
+              <div className="flex gap-10">
                 <div>
                   <p className="text-xs text-text-secondary uppercase font-bold">
-                    Date
+                    Income
                   </p>
-                  <p className="text-sm font-medium text-text-main">
-                    {booking.date}
+                  <p className="text-sm font-medium text-emerald-600">
+                    ${item.income}
                   </p>
                 </div>
 
                 <div>
                   <p className="text-xs text-text-secondary uppercase font-bold">
-                    Amount
+                    Expense
                   </p>
-                  <p className="text-sm font-medium text-text-main">
-                    {booking.amount}
+                  <p className="text-sm font-medium text-rose-600">
+                    ${item.expense}
                   </p>
                 </div>
-              </div>
-
-              <div className="w-full md:w-1/3 flex justify-between items-center">
-                <span
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
-                    booking.status === 'Confirmed'
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : booking.status === 'Pending'
-                      ? 'bg-amber-100 text-amber-700'
-                      : 'bg-rose-100 text-rose-700'
-                  }`}
-                >
-                  {booking.status}
-                </span>
-
-                <button className="text-text-secondary hover:text-primary font-medium text-sm">
-                  View Details
-                </button>
               </div>
             </div>
           ))
         ) : (
-          <div className="flex flex-col flex-1 items-center justify-center p-8 text-text-secondary">
-            <div className="bg-slate-50 p-4 rounded-full mb-3 text-4xl text-slate-300">
-              📅
+          <div className="flex flex-1 items-center justify-center p-8 text-text-secondary">
+            No revenue data
+          </div>
+        )}
+      </div>
+
+      {/* Top Pages */}
+      <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm flex flex-col">
+        {topPages.length > 0 ? (
+          topPages.map((page, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between p-6 border-b border-[#e7edf4] last:border-0"
+            >
+              <div>
+                <p className="font-bold text-lg text-text-main">
+                  {page.page}
+                </p>
+                <p className="text-sm text-text-secondary">
+                  Views: {page.views}
+                </p>
+              </div>
+
+              <div className="flex gap-10">
+                <div>
+                  <p className="text-xs text-text-secondary uppercase font-bold">
+                    Bounce
+                  </p>
+                  <p className="text-sm font-medium text-text-main">
+                    {page.bounce}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-text-secondary uppercase font-bold">
+                    Conversion
+                  </p>
+                  <p className="text-sm font-medium text-emerald-600">
+                    {page.conv}
+                  </p>
+                </div>
+              </div>
             </div>
-            <p className="font-medium">
-              No bookings available
-            </p>
+          ))
+        ) : (
+          <div className="flex flex-1 items-center justify-center p-8 text-text-secondary">
+            No page data
           </div>
         )}
       </div>
