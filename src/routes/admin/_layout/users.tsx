@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
+import { Plus, MoreVertical, Eye, Pencil, UserX } from 'lucide-react'
+
 export const Route = createFileRoute('/admin/_layout/users')({
   component: UsersPage,
 })
@@ -18,6 +19,8 @@ type User = {
 function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
+  const [openMenu, setOpenMenu] = useState<string | null>(null)
+  const menuRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -50,6 +53,19 @@ function UsersPage() {
     fetchUsers()
   }, [])
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenu(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () =>
+      document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-24 text-sm text-text-secondary">
@@ -71,31 +87,33 @@ function UsersPage() {
           </p>
         </div>
 
-        <button className="flex items-center gap-2 
-  bg-blue-600 hover:bg-blue-700 
-  text-white font-semibold
-  px-6 py-3 
-  rounded-2xl 
-  shadow-lg hover:shadow-xl
-  transition-all duration-200">
-  <Plus size={18} />
-  Add User
-</button>
-
-
+        <button
+          className="flex items-center gap-2 
+            bg-blue-600 hover:bg-blue-700 
+            text-white font-semibold
+            px-6 py-3 
+            rounded-2xl 
+            shadow-lg hover:shadow-xl
+            transition-all duration-200"
+        >
+          <Plus size={18} />
+          Add User
+        </button>
       </div>
 
-      {/* Card */}
+      {/* Table Card */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full table-fixed text-left">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
-                <th className="px-8 py-4 font-semibold">Name</th>
-                <th className="px-8 py-4 font-semibold">Role</th>
-                <th className="px-8 py-4 font-semibold">Status</th>
-                <th className="px-8 py-4 font-semibold">Last Active</th>
-                <th className="px-8 py-4 text-right font-semibold">
+                <th className="px-8 py-4 font-semibold w-[30%]">Name</th>
+                <th className="px-8 py-4 font-semibold w-[15%]">Role</th>
+                <th className="px-8 py-4 font-semibold w-[15%]">Status</th>
+                <th className="px-8 py-4 font-semibold w-[20%]">
+                  Last Active
+                </th>
+                <th className="px-8 py-4 font-semibold text-right w-[20%]">
                   Actions
                 </th>
               </tr>
@@ -103,10 +121,7 @@ function UsersPage() {
 
             <tbody className="divide-y divide-slate-200">
               {users.map((user) => (
-                <tr
-                  key={user.id}
-                  className="hover:bg-slate-50 transition"
-                >
+                <tr key={user.id} className="hover:bg-slate-50 transition">
                   {/* Name */}
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-4">
@@ -136,12 +151,13 @@ function UsersPage() {
                   <td className="px-8 py-5">
                     <span
                       className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold
-                        ${user.status === 'Active'
+                      ${
+                        user.status === 'Active'
                           ? 'bg-emerald-100 text-emerald-700'
                           : user.status === 'Pending'
-                            ? 'bg-amber-100 text-amber-700'
-                            : 'bg-slate-100 text-slate-600'
-                        }`}
+                          ? 'bg-amber-100 text-amber-700'
+                          : 'bg-slate-100 text-slate-600'
+                      }`}
                     >
                       <span className="h-2 w-2 rounded-full bg-current"></span>
                       {user.status}
@@ -154,12 +170,38 @@ function UsersPage() {
                   </td>
 
                   {/* Actions */}
-                  <td className="px-8 py-5 text-right">
-                    <button className="p-2 rounded-md hover:bg-slate-100 transition">
-                      <span className="material-symbols-outlined text-[20px] text-slate-500">
-                        more_vert
-                      </span>
-                    </button>
+                  <td className="px-8 py-5 text-right relative">
+                    <div ref={menuRef} className="inline-block relative">
+                      <button
+                        onClick={() =>
+                          setOpenMenu(
+                            openMenu === user.id ? null : user.id
+                          )
+                        }
+                        className="p-2 rounded-lg hover:bg-slate-100 transition"
+                      >
+                        <MoreVertical
+                          size={18}
+                          className="text-slate-500"
+                        />
+                      </button>
+
+                      {openMenu === user.id && (
+                        <div className="absolute right-0 mt-2 w-44 bg-white border border-slate-200 rounded-xl shadow-lg z-20 animate-in fade-in zoom-in-95 duration-100">
+                          <button className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-slate-50">
+                            <Eye size={16} /> View Profile
+                          </button>
+
+                          <button className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-slate-50">
+                            <Pencil size={16} /> Edit User
+                          </button>
+
+                          <button className="flex items-center gap-2 w-full px-4 py-2 text-sm text-rose-600 hover:bg-rose-50">
+                            <UserX size={16} /> Deactivate
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

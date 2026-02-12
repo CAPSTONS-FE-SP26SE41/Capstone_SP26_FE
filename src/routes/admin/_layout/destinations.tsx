@@ -37,7 +37,7 @@ function AdminDestinations() {
   shadow-lg hover:shadow-xl
   transition-all duration-200">
   <Plus size={18} />
-  Add User
+  Add Destination
 </button>
       </div>
 

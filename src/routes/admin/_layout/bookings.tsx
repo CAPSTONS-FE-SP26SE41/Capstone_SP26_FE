@@ -59,7 +59,7 @@ function AdminBookings() {
   shadow-lg hover:shadow-xl
   transition-all duration-200">
             <Plus size={18} />
-            Add User
+            Add Booking
           </button>
 
         </div>
