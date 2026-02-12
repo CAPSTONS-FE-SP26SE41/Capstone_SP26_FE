@@ -1,170 +1,158 @@
 import { createFileRoute } from '@tanstack/react-router'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  PieChart,
-  Pie,
-  Cell,
-} from 'recharts'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/admin/analytics')({
-  component: AdminAnalytics,
+  component: AdminBookings,
 })
 
-type Revenue = {
-  name: string
-  income: number
-  expense: number
+type Booking = {
+  id: string
+  destination: string
+  date: string
+  amount: string
+  status: 'Confirmed' | 'Pending' | 'Cancelled'
 }
 
-type Device = {
-  name: string
-  value: number
-}
+function AdminBookings() {
+  const [bookings] = useState<Booking[]>([]) // sau này fetch API
 
-type Page = {
-  page: string
-  views: number
-  bounce: string
-  conv: string
-}
-
-function AdminAnalytics() {
-  // Sau này fetch API bằng React Query
-  const [revenueData] = useState<Revenue[]>([])
-  const [deviceData] = useState<Device[]>([])
-  const [topPages] = useState<Page[]>([])
-
-  const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444']
+  const statusList: Booking['status'][] = [
+    'Confirmed',
+    'Pending',
+    'Cancelled',
+  ]
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h2 className="text-2xl font-bold">Analytics Report</h2>
-        <p className="text-gray-500">
-          Performance metrics and insights
-        </p>
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Chart */}
-        <div className="bg-white p-6 rounded-xl border shadow-sm">
-          <h3 className="text-lg font-bold mb-4">
-            Revenue vs Expenses
-          </h3>
-
-          <div className="h-75">
-            {revenueData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={revenueData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="income" fill="#2563eb" radius={[4,4,0,0]} />
-                  <Bar dataKey="expense" fill="#cbd5e1" radius={[4,4,0,0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center bg-gray-50 border border-dashed rounded-lg text-gray-400">
-                📊 No revenue data
-              </div>
-            )}
-          </div>
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-text-main">
+            Bookings
+          </h2>
+          <p className="text-text-secondary">
+            Track and manage travel reservations
+          </p>
         </div>
 
-        {/* Device Chart */}
-        <div className="bg-white p-6 rounded-xl border shadow-sm">
-          <h3 className="text-lg font-bold mb-4">
-            Traffic by Device
-          </h3>
+        <div className="flex gap-2">
+          <button className="flex items-center gap-2 bg-white border border-[#e7edf4] text-text-secondary hover:text-primary px-4 py-2 rounded-lg font-medium transition-colors">
+            Filter
+          </button>
 
-          <div className="h-75">
-            {deviceData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={deviceData}
-                    dataKey="value"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                  >
-                    {deviceData.map((_, index) => (
-                      <Cell
-                        key={index}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center bg-gray-50 border border-dashed rounded-lg text-gray-400">
-                🥧 No device data
-              </div>
-            )}
-          </div>
+          <button className="flex items-center gap-2 bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+            New Booking
+          </button>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white p-6 rounded-xl border shadow-sm">
-        <h3 className="text-lg font-bold mb-4">
-          Top Performing Pages
-        </h3>
+      {/* Status Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {statusList.map((status) => (
+          <div
+            key={status}
+            className="bg-white p-4 rounded-xl border border-[#e7edf4] flex items-center justify-between"
+          >
+            <div>
+              <p className="text-text-secondary text-sm font-medium">
+                Total {status}
+              </p>
+              <p className="text-2xl font-bold text-text-main mt-1">
+                0
+              </p>
+            </div>
 
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b text-gray-500 text-sm">
-              <th className="pb-3 font-medium">Page Name</th>
-              <th className="pb-3 font-medium">Views</th>
-              <th className="pb-3 font-medium">Bounce Rate</th>
-              <th className="pb-3 font-medium text-right">
-                Conversion
-              </th>
-            </tr>
-          </thead>
+            <div
+              className={`p-3 rounded-lg bg-opacity-10 ${
+                status === 'Confirmed'
+                  ? 'bg-emerald-500 text-emerald-600'
+                  : status === 'Pending'
+                  ? 'bg-amber-500 text-amber-600'
+                  : 'bg-red-500 text-red-600'
+              }`}
+            >
+              {status === 'Confirmed'
+                ? '✔'
+                : status === 'Pending'
+                ? '⏳'
+                : '✖'}
+            </div>
+          </div>
+        ))}
+      </div>
 
-          <tbody className="divide-y">
-            {topPages.length > 0 ? (
-              topPages.map((row, i) => (
-                <tr key={i}>
-                  <td className="py-4 font-medium">
-                    {row.page}
-                  </td>
-                  <td className="py-4 text-gray-500">
-                    {row.views}
-                  </td>
-                  <td className="py-4 text-gray-500">
-                    {row.bounce}
-                  </td>
-                  <td className="py-4 text-right text-emerald-600 font-bold">
-                    {row.conv}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} className="py-8 text-center text-gray-400">
-                  No page data recorded
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      {/* Booking List */}
+      <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm flex flex-col min-h-[300px]">
+        {bookings.length > 0 ? (
+          bookings.map((booking) => (
+            <div
+              key={booking.id}
+              className="flex flex-col md:flex-row items-center p-6 border-b border-[#e7edf4] last:border-0 hover:bg-[#f8fafc] transition-colors gap-4"
+            >
+              <div className="flex items-center gap-4 w-full md:w-1/3">
+                <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                  ✈
+                </div>
+
+                <div>
+                  <p className="font-bold text-lg text-text-main">
+                    {booking.destination}
+                  </p>
+                  <p className="text-sm text-text-secondary">
+                    ID: #{booking.id}
+                  </p>
+                </div>
+              </div>
+
+              <div className="w-full md:w-1/3 grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-text-secondary uppercase font-bold">
+                    Date
+                  </p>
+                  <p className="text-sm font-medium text-text-main">
+                    {booking.date}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-text-secondary uppercase font-bold">
+                    Amount
+                  </p>
+                  <p className="text-sm font-medium text-text-main">
+                    {booking.amount}
+                  </p>
+                </div>
+              </div>
+
+              <div className="w-full md:w-1/3 flex justify-between items-center">
+                <span
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
+                    booking.status === 'Confirmed'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : booking.status === 'Pending'
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-rose-100 text-rose-700'
+                  }`}
+                >
+                  {booking.status}
+                </span>
+
+                <button className="text-text-secondary hover:text-primary font-medium text-sm">
+                  View Details
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="flex flex-col flex-1 items-center justify-center p-8 text-text-secondary">
+            <div className="bg-slate-50 p-4 rounded-full mb-3 text-4xl text-slate-300">
+              📅
+            </div>
+            <p className="font-medium">
+              No bookings available
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -27,18 +27,20 @@ function AdminBookings() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Bookings</h2>
-          <p className="text-gray-500">
+          <h2 className="text-2xl font-bold text-text-main">
+            Bookings
+          </h2>
+          <p className="text-text-secondary">
             Track and manage travel reservations
           </p>
         </div>
 
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 bg-white border text-gray-600 hover:text-blue-600 px-4 py-2 rounded-lg font-medium transition">
+          <button className="flex items-center gap-2 bg-white border border-[#e7edf4] text-text-secondary hover:text-primary px-4 py-2 rounded-lg font-medium transition-colors">
             Filter
           </button>
 
-          <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition">
+          <button className="flex items-center gap-2 bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
             New Booking
           </button>
         </div>
@@ -49,13 +51,15 @@ function AdminBookings() {
         {statusList.map((status) => (
           <div
             key={status}
-            className="bg-white p-4 rounded-xl border flex items-center justify-between"
+            className="bg-white p-4 rounded-xl border border-[#e7edf4] flex items-center justify-between"
           >
             <div>
-              <p className="text-gray-500 text-sm font-medium">
+              <p className="text-text-secondary text-sm font-medium">
                 Total {status}
               </p>
-              <p className="text-2xl font-bold mt-1">0</p>
+              <p className="text-2xl font-bold text-text-main mt-1">
+                0
+              </p>
             </div>
 
             <div
@@ -78,12 +82,12 @@ function AdminBookings() {
       </div>
 
       {/* Booking List */}
-      <div className="bg-white rounded-xl border shadow-sm flex flex-col min-h-[300px]">
+      <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm flex flex-col min-h-[300px]">
         {bookings.length > 0 ? (
           bookings.map((booking) => (
             <div
               key={booking.id}
-              className="flex flex-col md:flex-row items-center p-6 border-b last:border-0 hover:bg-gray-50 transition gap-4"
+              className="flex flex-col md:flex-row items-center p-6 border-b border-[#e7edf4] last:border-0 hover:bg-[#f8fafc] transition-colors gap-4"
             >
               <div className="flex items-center gap-4 w-full md:w-1/3">
                 <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
@@ -91,10 +95,10 @@ function AdminBookings() {
                 </div>
 
                 <div>
-                  <p className="font-bold text-lg">
+                  <p className="font-bold text-lg text-text-main">
                     {booking.destination}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-text-secondary">
                     ID: #{booking.id}
                   </p>
                 </div>
@@ -102,19 +106,19 @@ function AdminBookings() {
 
               <div className="w-full md:w-1/3 grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-gray-500 uppercase font-bold">
+                  <p className="text-xs text-text-secondary uppercase font-bold">
                     Date
                   </p>
-                  <p className="text-sm font-medium">
+                  <p className="text-sm font-medium text-text-main">
                     {booking.date}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-xs text-gray-500 uppercase font-bold">
+                  <p className="text-xs text-text-secondary uppercase font-bold">
                     Amount
                   </p>
-                  <p className="text-sm font-medium">
+                  <p className="text-sm font-medium text-text-main">
                     {booking.amount}
                   </p>
                 </div>
@@ -133,20 +137,20 @@ function AdminBookings() {
                   {booking.status}
                 </span>
 
-                <button className="text-gray-600 hover:text-blue-600 font-medium text-sm">
+                <button className="text-text-secondary hover:text-primary font-medium text-sm">
                   View Details
                 </button>
               </div>
             </div>
           ))
         ) : (
-          <div className="flex flex-1 items-center justify-center p-8 text-gray-500">
-            <div className="flex flex-col items-center gap-2">
-              <div className="text-4xl">📅</div>
-              <p className="font-medium">
-                No bookings available
-              </p>
+          <div className="flex flex-col flex-1 items-center justify-center p-8 text-text-secondary">
+            <div className="bg-slate-50 p-4 rounded-full mb-3 text-4xl text-slate-300">
+              📅
             </div>
+            <p className="font-medium">
+              No bookings available
+            </p>
           </div>
         )}
       </div>

@@ -21,13 +21,15 @@ function AdminDestinations() {
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Popular Destinations</h2>
-          <p className="text-gray-500">
+          <h2 className="text-2xl font-bold text-text-main">
+            Popular Destinations
+          </h2>
+          <p className="text-text-secondary">
             Trending locations for this season
           </p>
         </div>
 
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition">
+        <button className="bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
           Add Destination
         </button>
       </div>
@@ -37,40 +39,44 @@ function AdminDestinations() {
           {destinations.map((dest) => (
             <div
               key={dest.id}
-              className="bg-white rounded-xl border shadow-sm overflow-hidden group cursor-pointer hover:shadow-lg transition"
+              className="bg-white rounded-xl border border-[#e7edf4] shadow-sm overflow-hidden group cursor-pointer hover:shadow-lg transition-all"
             >
-              <div className="relative h-48 overflow-hidden bg-gray-100">
+              {/* Image */}
+              <div className="relative h-48 overflow-hidden bg-slate-100">
                 <img
                   src={dest.imageUrl}
                   alt={dest.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
 
-                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
                   ⭐ {dest.rating}
                 </div>
               </div>
 
+              {/* Content */}
               <div className="p-5">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h3 className="text-lg font-bold">{dest.name}</h3>
-                    <p className="text-gray-500 text-sm">
+                    <h3 className="text-lg font-bold text-text-main">
+                      {dest.name}
+                    </h3>
+                    <p className="text-text-secondary text-sm">
                       {dest.country}
                     </p>
                   </div>
 
-                  <div className="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-bold">
+                  <div className="bg-blue-50 text-primary px-2 py-1 rounded text-xs font-bold">
                     Trend
                   </div>
                 </div>
 
                 <div className="mt-4 flex items-center justify-between text-sm">
-                  <span className="text-gray-500">
+                  <span className="text-text-secondary">
                     👥 {dest.visitors} visitors
                   </span>
 
-                  <button className="text-blue-600 font-semibold hover:underline">
+                  <button className="text-primary font-semibold hover:underline">
                     Manage
                   </button>
                 </div>
@@ -79,8 +85,8 @@ function AdminDestinations() {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-dashed text-gray-500">
-          <div className="p-4 bg-gray-50 rounded-full mb-3 text-4xl">
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-dashed border-[#e7edf4] text-text-secondary">
+          <div className="p-4 bg-slate-50 rounded-full mb-3 text-4xl text-slate-300">
             🗺️
           </div>
           <p className="font-medium text-lg">

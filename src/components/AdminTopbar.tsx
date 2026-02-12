@@ -2,7 +2,7 @@ import { Bell, Search } from 'lucide-react'
 
 export default function AdminTopbar() {
   return (
-    <header className="h-[72px] bg-white border-b border-slate-200 flex items-center justify-between px-8">
+    <header className="h-18 bg-white border-b border-slate-200 flex items-center justify-between px-8">
 
       {/* Search */}
       <div className="relative w-[320px]">

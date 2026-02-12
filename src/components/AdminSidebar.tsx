@@ -35,7 +35,7 @@ export default function AdminSidebar() {
   )
 
   return (
-    <aside className="w-[280px] bg-white border-r border-slate-200 flex flex-col justify-between">
+    <aside className="w-70 bg-white border-r border-slate-200 flex flex-col justify-between">
 
       {/* Logo */}
       <div className="p-6">

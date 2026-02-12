@@ -43,17 +43,19 @@ function AdminSettings() {
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-8">
       <div>
-        <h2 className="text-2xl font-bold">Settings</h2>
-        <p className="text-gray-500">
+        <h2 className="text-2xl font-bold text-text-main">Settings</h2>
+        <p className="text-text-secondary">
           Manage your account preferences and system configuration
         </p>
       </div>
 
       {/* Profile Section */}
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-        <div className="p-6 border-b">
-          <h3 className="text-lg font-bold">Profile Information</h3>
-          <p className="text-sm text-gray-500 mt-1">
+      <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-[#e7edf4]">
+          <h3 className="text-lg font-bold text-text-main">
+            Profile Information
+          </h3>
+          <p className="text-sm text-text-secondary mt-1">
             Update your account's profile information and email address.
           </p>
         </div>
@@ -61,7 +63,7 @@ function AdminSettings() {
         <div className="p-6 grid gap-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-medium text-text-main mb-2">
                 First Name
               </label>
               <input
@@ -70,12 +72,12 @@ function AdminSettings() {
                 value={form.firstName}
                 onChange={handleChange}
                 placeholder="Enter first name"
-                className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                className="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary placeholder:text-slate-400"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-medium text-text-main mb-2">
                 Last Name
               </label>
               <input
@@ -84,13 +86,13 @@ function AdminSettings() {
                 value={form.lastName}
                 onChange={handleChange}
                 placeholder="Enter last name"
-                className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                className="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary placeholder:text-slate-400"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium text-text-main mb-2">
               Email Address
             </label>
             <input
@@ -99,14 +101,14 @@ function AdminSettings() {
               value={form.email}
               onChange={handleChange}
               placeholder="Enter email address"
-              className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+              className="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary placeholder:text-slate-400"
             />
           </div>
 
           <div className="flex justify-end">
             <button
               onClick={handleSubmit}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+              className="bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors"
             >
               Save Changes
             </button>
@@ -115,10 +117,12 @@ function AdminSettings() {
       </div>
 
       {/* Notification Section */}
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-        <div className="p-6 border-b">
-          <h3 className="text-lg font-bold">Notifications</h3>
-          <p className="text-sm text-gray-500 mt-1">
+      <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-[#e7edf4]">
+          <h3 className="text-lg font-bold text-text-main">
+            Notifications
+          </h3>
+          <p className="text-sm text-text-secondary mt-1">
             Control which notifications you receive.
           </p>
         </div>
@@ -129,9 +133,11 @@ function AdminSettings() {
               type="checkbox"
               checked={form.notifications.booking}
               onChange={() => handleCheckbox('booking')}
-              className="w-5 h-5"
+              className="w-5 h-5 rounded text-primary focus:ring-primary border-gray-300"
             />
-            <span>Email me when a new booking is created</span>
+            <span className="text-text-main">
+              Email me when a new booking is created
+            </span>
           </label>
 
           <label className="flex items-center gap-3 cursor-pointer">
@@ -139,9 +145,11 @@ function AdminSettings() {
               type="checkbox"
               checked={form.notifications.signup}
               onChange={() => handleCheckbox('signup')}
-              className="w-5 h-5"
+              className="w-5 h-5 rounded text-primary focus:ring-primary border-gray-300"
             />
-            <span>Email me when a user signs up</span>
+            <span className="text-text-main">
+              Email me when a user signs up
+            </span>
           </label>
 
           <label className="flex items-center gap-3 cursor-pointer">
@@ -149,9 +157,11 @@ function AdminSettings() {
               type="checkbox"
               checked={form.notifications.reports}
               onChange={() => handleCheckbox('reports')}
-              className="w-5 h-5"
+              className="w-5 h-5 rounded text-primary focus:ring-primary border-gray-300"
             />
-            <span>Browser notifications for daily reports</span>
+            <span className="text-text-main">
+              Browser notifications for daily reports
+            </span>
           </label>
         </div>
       </div>
