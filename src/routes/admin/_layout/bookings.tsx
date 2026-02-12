@@ -27,18 +27,29 @@ function AdminBookings() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-text-main">
+          <h2 className="text-2xl font-semibold text-text-main">
             Bookings
           </h2>
-          <p className="text-text-secondary">
+          <p className="text-sm text-text-secondary mt-1">
             Track and manage travel reservations
           </p>
         </div>
 
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 bg-white border border-[#e7edf4] text-text-secondary hover:text-primary px-4 py-2 rounded-lg font-medium transition-colors">
+          <button
+            className="flex items-center gap-2
+  bg-white
+  text-text-main
+  font-semibold
+  px-6 py-3
+  rounded-2xl
+  shadow-lg hover:shadow-xl
+  border border-[#e7edf4]
+  transition-all duration-200"
+          >
             Filter
           </button>
+
 
           <button className="flex items-center gap-2 
   bg-blue-600 hover:bg-blue-700 
@@ -47,9 +58,9 @@ function AdminBookings() {
   rounded-2xl 
   shadow-lg hover:shadow-xl
   transition-all duration-200">
-  <Plus size={18} />
-  Add User
-</button>
+            <Plus size={18} />
+            Add User
+          </button>
 
         </div>
       </div>
@@ -71,19 +82,18 @@ function AdminBookings() {
             </div>
 
             <div
-              className={`p-3 rounded-lg bg-opacity-10 ${
-                status === 'Confirmed'
+              className={`p-3 rounded-lg bg-opacity-10 ${status === 'Confirmed'
                   ? 'bg-emerald-500 text-emerald-600'
                   : status === 'Pending'
-                  ? 'bg-amber-500 text-amber-600'
-                  : 'bg-red-500 text-red-600'
-              }`}
+                    ? 'bg-amber-500 text-amber-600'
+                    : 'bg-red-500 text-red-600'
+                }`}
             >
               {status === 'Confirmed'
                 ? '✔'
                 : status === 'Pending'
-                ? '⏳'
-                : '✖'}
+                  ? '⏳'
+                  : '✖'}
             </div>
           </div>
         ))}
@@ -134,13 +144,12 @@ function AdminBookings() {
 
               <div className="w-full md:w-1/3 flex justify-between items-center">
                 <span
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
-                    booking.status === 'Confirmed'
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${booking.status === 'Confirmed'
                       ? 'bg-emerald-100 text-emerald-700'
                       : booking.status === 'Pending'
-                      ? 'bg-amber-100 text-amber-700'
-                      : 'bg-rose-100 text-rose-700'
-                  }`}
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-rose-100 text-rose-700'
+                    }`}
                 >
                   {booking.status}
                 </span>

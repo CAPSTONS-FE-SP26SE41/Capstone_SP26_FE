@@ -43,8 +43,8 @@ function AdminSettings() {
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-8">
       <div>
-        <h2 className="text-2xl font-bold text-text-main">Settings</h2>
-        <p className="text-text-secondary">
+        <h2 className="text-2xl font-semibold text-text-main">Settings</h2>
+        <p className="text-sm text-text-secondary mt-1">
           Manage your account preferences and system configuration
         </p>
       </div>

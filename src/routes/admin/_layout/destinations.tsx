@@ -21,10 +21,10 @@ function AdminDestinations() {
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-text-main">
+          <h2 className="text-2xl font-semibold text-text-main">
             Popular Destinations
           </h2>
-          <p className="text-text-secondary">
+          <p className="text-sm text-text-secondary mt-1">
             Trending locations for this season
           </p>
         </div>
