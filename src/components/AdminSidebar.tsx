@@ -20,34 +20,63 @@ export default function AdminSidebar() {
   const Item = ({ to, icon: Icon, label }: any) => (
     <Link
       to={to}
-      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-50"
-      activeProps={{ className: 'bg-blue-100 text-blue-700' }}
+      className="group flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-medium transition-all"
+      activeProps={{
+        className:
+          'flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-50 text-blue-600 font-semibold',
+      }}
     >
-      <Icon size={20} />
-      <span>{label}</span>
+      <Icon
+        size={20}
+        className="transition-colors group-hover:text-blue-600"
+      />
+      <span className="text-sm">{label}</span>
     </Link>
   )
 
   return (
-    <aside className="w-64 bg-white border-r flex flex-col">
-      <div className="p-4 font-bold text-xl">TripAdmin</div>
+    <aside className="w-[280px] bg-white border-r border-slate-200 flex flex-col justify-between">
 
-      <nav className="flex-1 space-y-1 px-2">
+      {/* Logo */}
+      <div className="p-6">
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-100 flex items-center justify-center rounded-xl h-10 w-10">
+            <LayoutDashboard size={20} className="text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-slate-800">
+              TripAdmin
+            </h1>
+            <p className="text-xs text-slate-500">
+              Trip Planner Panel
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 px-4 space-y-2">
         <Item to="/admin" icon={LayoutDashboard} label="Overview" />
         <Item to="/admin/users" icon={Users} label="Users" />
         <Item to="/admin/bookings" icon={Calendar} label="Bookings" />
         <Item to="/admin/destinations" icon={Map} label="Destinations" />
         <Item to="/admin/analytics" icon={BarChart2} label="Analytics" />
+
+        <div className="h-px bg-slate-200 my-4" />
+
         <Item to="/admin/settings" icon={Settings} label="Settings" />
       </nav>
 
-      <button
-        onClick={logout}
-        className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50"
-      >
-        <LogOut size={20} />
-        Logout
-      </button>
+      {/* Logout */}
+      <div className="p-4 border-t border-slate-200">
+        <button
+          onClick={logout}
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all w-full"
+        >
+          <LogOut size={20} />
+          <span className="text-sm font-medium">Logout</span>
+        </button>
+      </div>
     </aside>
   )
 }
