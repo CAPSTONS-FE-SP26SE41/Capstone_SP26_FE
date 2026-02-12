@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 
-export const Route = createFileRoute('/admin/settings')({
+export const Route = createFileRoute('/admin/_layout/settings')({
   component: AdminSettings,
 })
 

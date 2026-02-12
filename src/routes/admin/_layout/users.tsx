@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
-export const Route = createFileRoute('/admin/users')({
+export const Route = createFileRoute('/admin/_layout/users')({
   component: UsersPage,
 })
 
