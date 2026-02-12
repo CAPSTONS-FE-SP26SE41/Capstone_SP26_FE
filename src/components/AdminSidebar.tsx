@@ -21,6 +21,7 @@ export default function AdminSidebar() {
   const Item = ({ to, icon: Icon, label }: any) => (
     <Link
       to={to}
+      activeOptions={{ exact: true }} 
       className="group flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-medium transition-all"
       activeProps={{
         className:
