@@ -7,6 +7,7 @@ import {
   BarChart2,
   Settings,
   LogOut,
+  PlaneTakeoff,
 } from 'lucide-react'
 
 export default function AdminSidebar() {
@@ -41,7 +42,7 @@ export default function AdminSidebar() {
       <div className="p-6">
         <div className="flex items-center gap-3">
           <div className="bg-blue-100 flex items-center justify-center rounded-xl h-10 w-10">
-            <LayoutDashboard size={20} className="text-blue-600" />
+            <PlaneTakeoff size={32} />
           </div>
           <div>
             <h1 className="text-lg font-bold text-slate-800">

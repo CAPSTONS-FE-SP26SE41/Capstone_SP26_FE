@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { PlaneTakeoff } from 'lucide-react'
 
 export const Route = createFileRoute('/admin/login')({
   component: AdminLogin,
@@ -26,11 +27,10 @@ function AdminLogin() {
 
         {/* Header */}
         <div className="flex flex-col items-center pt-10 pb-6 px-10">
-          <div className="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-4 text-blue-600">
-            <span className="material-symbols-outlined text-[30px]">
-              
-            </span>
-          </div>
+          <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 text-primary">
+  <PlaneTakeoff size={32} />
+</div>
+
 
 
 
