@@ -1,5 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts'
 
 export const Route = createFileRoute('/admin/_layout/analytics')({
   component: AdminAnalytics,
@@ -23,11 +36,14 @@ type PageMetric = {
   conv: string
 }
 
+const COLORS = ['#258cf4', '#10b981', '#f59e0b', '#ef4444']
+
 function AdminAnalytics() {
   const [revenueData] = useState<Revenue[]>([
     { name: 'Jan', income: 4000, expense: 2400 },
     { name: 'Feb', income: 3000, expense: 1398 },
     { name: 'Mar', income: 5000, expense: 2800 },
+    { name: 'Apr', income: 4200, expense: 2100 },
   ])
 
   const [deviceData] = useState<Device[]>([
@@ -39,6 +55,7 @@ function AdminAnalytics() {
   const [topPages] = useState<PageMetric[]>([
     { page: '/home', views: 1200, bounce: '45%', conv: '12%' },
     { page: '/booking', views: 850, bounce: '38%', conv: '18%' },
+    { page: '/destinations', views: 620, bounce: '52%', conv: '9%' },
   ])
 
   return (
@@ -55,123 +72,153 @@ function AdminAnalytics() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-4 rounded-xl border border-[#e7edf4]">
+        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
           <p className="text-text-secondary text-sm font-medium">
             Total Revenue
           </p>
-          <p className="text-2xl font-bold text-text-main mt-1">
-            $12,500
+          <p className="text-2xl font-bold text-text-main mt-2">
+            $18,200
           </p>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-[#e7edf4]">
+        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
           <p className="text-text-secondary text-sm font-medium">
             Total Bookings
           </p>
-          <p className="text-2xl font-bold text-text-main mt-1">
-            320
+          <p className="text-2xl font-bold text-text-main mt-2">
+            540
           </p>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-[#e7edf4]">
+        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
           <p className="text-text-secondary text-sm font-medium">
             Active Users
           </p>
-          <p className="text-2xl font-bold text-text-main mt-1">
-            89
+          <p className="text-2xl font-bold text-text-main mt-2">
+            126
           </p>
         </div>
       </div>
 
-      {/* Revenue Table (giữ style giống booking list) */}
-      <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm flex flex-col">
-        {revenueData.length > 0 ? (
-          revenueData.map((item) => (
-            <div
-              key={item.name}
-              className="flex items-center justify-between p-6 border-b border-[#e7edf4] last:border-0"
-            >
-              <div>
-                <p className="font-bold text-lg text-text-main">
-                  {item.name}
-                </p>
-                <p className="text-sm text-text-secondary">
-                  Monthly Overview
-                </p>
-              </div>
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Revenue Chart */}
+        <div className="bg-white p-6 rounded-xl border border-[#e7edf4] shadow-sm">
+          <h3 className="text-lg font-bold text-text-main mb-4">
+            Revenue vs Expenses
+          </h3>
 
-              <div className="flex gap-10">
-                <div>
-                  <p className="text-xs text-text-secondary uppercase font-bold">
-                    Income
-                  </p>
-                  <p className="text-sm font-medium text-emerald-600">
-                    ${item.income}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-xs text-text-secondary uppercase font-bold">
-                    Expense
-                  </p>
-                  <p className="text-sm font-medium text-rose-600">
-                    ${item.expense}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="flex flex-1 items-center justify-center p-8 text-text-secondary">
-            No revenue data
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={revenueData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                <YAxis axisLine={false} tickLine={false} />
+                <Tooltip
+                  cursor={{ fill: '#f1f5f9' }}
+                  contentStyle={{
+                    borderRadius: '12px',
+                    border: 'none',
+                    boxShadow:
+                      '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                  }}
+                />
+                <Legend />
+                <Bar
+                  dataKey="income"
+                  fill="#258cf4"
+                  radius={[6, 6, 0, 0]}
+                />
+                <Bar
+                  dataKey="expense"
+                  fill="#cbd5e1"
+                  radius={[6, 6, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-        )}
+        </div>
+
+        {/* Device Pie */}
+        <div className="bg-white p-6 rounded-xl border border-[#e7edf4] shadow-sm">
+          <h3 className="text-lg font-bold text-text-main mb-4">
+            Traffic by Device
+          </h3>
+
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={deviceData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={70}
+                  outerRadius={100}
+                  paddingAngle={4}
+                >
+                  {deviceData.map((_, index) => (
+                    <Cell
+                      key={index}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend verticalAlign="middle" align="right" layout="vertical" />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
 
-      {/* Top Pages */}
-      <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm flex flex-col">
-        {topPages.length > 0 ? (
-          topPages.map((page, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-6 border-b border-[#e7edf4] last:border-0"
-            >
-              <div>
-                <p className="font-bold text-lg text-text-main">
-                  {page.page}
-                </p>
-                <p className="text-sm text-text-secondary">
-                  Views: {page.views}
-                </p>
-              </div>
+      {/* Top Pages Table */}
+      <div className="bg-white p-6 rounded-xl border border-[#e7edf4] shadow-sm">
+        <h3 className="text-lg font-bold text-text-main mb-4">
+          Top Performing Pages
+        </h3>
 
-              <div className="flex gap-10">
-                <div>
-                  <p className="text-xs text-text-secondary uppercase font-bold">
-                    Bounce
-                  </p>
-                  <p className="text-sm font-medium text-text-main">
-                    {page.bounce}
-                  </p>
-                </div>
+        <table className="w-full table-fixed text-left">
+          <thead>
+            <tr className="border-b border-[#e7edf4] text-text-secondary text-sm">
+              <th className="pb-3 font-medium w-[40%]">
+                Page Name
+              </th>
+              <th className="pb-3 font-medium w-[20%]">
+                Views
+              </th>
+              <th className="pb-3 font-medium w-[20%]">
+                Bounce Rate
+              </th>
+              <th className="pb-3 font-medium text-right w-[20%]">
+                Conversion
+              </th>
+            </tr>
+          </thead>
 
-                <div>
-                  <p className="text-xs text-text-secondary uppercase font-bold">
-                    Conversion
-                  </p>
-                  <p className="text-sm font-medium text-emerald-600">
-                    {page.conv}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="flex flex-1 items-center justify-center p-8 text-text-secondary">
-            No page data
-          </div>
-        )}
+          <tbody className="divide-y divide-[#e7edf4]">
+            {topPages.map((row, i) => (
+              <tr key={i} className="hover:bg-slate-50 transition">
+                <td className="py-4 font-medium text-text-main">
+                  {row.page}
+                </td>
+                <td className="py-4 text-text-secondary">
+                  {row.views}
+                </td>
+                <td className="py-4 text-text-secondary">
+                  {row.bounce}
+                </td>
+                <td className="py-4 text-right text-emerald-600 font-bold">
+                  {row.conv}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   )
 }
+
+export default AdminAnalytics
