@@ -111,15 +111,6 @@ function AdminLogin() {
             Sign In
           </button>
 
-          {/* Back to Home */}
-          <div
-            onClick={() => navigate({ to: '/' })}
-            className="text-center text-sm text-slate-500 hover:text-blue-600 
-            cursor-pointer transition-colors pt-2"
-          >
-            ← Back to Home
-          </div>
-
         </form>
       </div>
 

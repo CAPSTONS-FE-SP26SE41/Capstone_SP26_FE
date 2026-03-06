@@ -1,4 +1,4 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import { HeadContent, Scripts, createRootRoute, useLocation } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
@@ -17,13 +17,18 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'TravelPlanner',
       },
     ],
     links: [
       {
         rel: 'stylesheet',
         href: appCss,
+      },
+      {
+        rel: 'icon',
+        type: 'image/svg+xml',
+        href: '/favicon.svg',
       },
     ],
   }),
@@ -32,13 +37,17 @@ export const Route = createRootRoute({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const location = useLocation()
+  // Ẩn Header ở tất cả các trang admin và dashboard
+  const isAdminPage = location.pathname.startsWith('/admin')
+
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body>
-        <Header />
+        {!isAdminPage && <Header />}
         {children}
         <TanStackDevtools
           config={{
