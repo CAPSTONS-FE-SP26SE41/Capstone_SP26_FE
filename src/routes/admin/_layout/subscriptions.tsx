@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { Plus, MoreVertical, Eye, Pencil, Trash2 } from 'lucide-react'
+import { Plus, MoreVertical, Eye, Pencil, Trash2, X } from 'lucide-react'
 
 export const Route = createFileRoute('/admin/_layout/subscriptions')({
   component: SubscriptionsPage,
@@ -9,53 +9,136 @@ export const Route = createFileRoute('/admin/_layout/subscriptions')({
 type Subscription = {
   id: string
   name: string
-  price: string
+  price: number
   billing: 'Monthly' | 'Yearly'
   users: number
   status: 'Active' | 'Inactive'
 }
 
 function SubscriptionsPage() {
+
+  const API = 'https://localhost:7176/api/ad-subscription-packages'
+
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [loading, setLoading] = useState(true)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchSubscriptions = async () => {
-      await new Promise((res) => setTimeout(res, 600))
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editing, setEditing] = useState<Subscription | null>(null)
 
-      setSubscriptions([
-        {
-          id: '1',
-          name: 'Free',
-          price: '$0',
-          billing: 'Monthly',
-          users: 1240,
-          status: 'Active',
-        },
-        {
-          id: '2',
-          name: 'Premium',
-          price: '$9',
-          billing: 'Monthly',
-          users: 540,
-          status: 'Active',
-        },
-        {
-          id: '3',
-          name: 'Business',
-          price: '$29',
-          billing: 'Yearly',
-          users: 80,
-          status: 'Inactive',
-        },
-      ])
+  const [form, setForm] = useState({
+    name: '',
+    price: 0,
+    billing: 'Monthly',
+    status: 'Active',
+  })
 
+  // ================= FETCH =================
+
+  const fetchSubscriptions = async () => {
+    try {
+      const res = await fetch(API)
+      const data = await res.json()
+      setSubscriptions(data)
+    } catch (err) {
+      console.error(err)
+    } finally {
       setLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchSubscriptions()
   }, [])
+
+  // ================= CREATE / UPDATE =================
+
+  const openCreate = () => {
+    setEditing(null)
+    setForm({
+      name: '',
+      price: 0,
+      billing: 'Monthly',
+      status: 'Active',
+    })
+    setModalOpen(true)
+  }
+
+  const openEdit = (sub: Subscription) => {
+    setEditing(sub)
+    setForm({
+      name: sub.name,
+      price: sub.price,
+      billing: sub.billing,
+      status: sub.status,
+    })
+    setModalOpen(true)
+  }
+
+  const handleSubmit = async () => {
+
+    try {
+
+      if (editing) {
+
+        await fetch(`${API}/${editing.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(form),
+        })
+
+      } else {
+
+        await fetch(API, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(form),
+        })
+
+      }
+
+      setModalOpen(false)
+      fetchSubscriptions()
+
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  // ================= DELETE =================
+
+  const deleteSubscription = async (id: string) => {
+
+    if (!confirm('Delete this package?')) return
+
+    try {
+
+      await fetch(`${API}/${id}`, {
+        method: 'DELETE',
+      })
+
+      setSubscriptions((prev) => prev.filter((s) => s.id !== id))
+
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  // ================= VIEW =================
+
+  const viewPackage = async (id: string) => {
+
+    const res = await fetch(`${API}/${id}`)
+    const data = await res.json()
+
+    alert(JSON.stringify(data, null, 2))
+  }
+
+  // ================= LOADING =================
 
   if (loading) {
     return (
@@ -65,120 +148,210 @@ function SubscriptionsPage() {
     )
   }
 
+  // ================= UI =================
+
   return (
     <div className="flex flex-col gap-8">
 
-      {/* Header */}
+      {/* HEADER */}
+
       <div className="flex justify-between items-start">
         <div>
-          <h2 className="text-2xl font-semibold text-text-main">
+          <h2 className="text-2xl font-semibold">
             Subscription Packages
           </h2>
-          <p className="text-sm text-text-secondary mt-1">
-            Manage subscription plans for users
+          <p className="text-sm text-slate-500">
+            Manage subscription plans
           </p>
         </div>
 
-        <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg">
+        <button
+          onClick={openCreate}
+          className="flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-xl"
+        >
           <Plus size={18} />
           Add Package
         </button>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      {/* TABLE */}
+
+      <div className="bg-white border rounded-xl overflow-hidden">
 
         <table className="w-full text-left">
-          <thead>
-            <tr className="bg-slate-50 border-b text-xs uppercase text-slate-500">
-              <th className="px-8 py-4">Package</th>
-              <th className="px-8 py-4">Price</th>
-              <th className="px-8 py-4">Billing</th>
-              <th className="px-8 py-4">Users</th>
-              <th className="px-8 py-4">Status</th>
-              <th className="px-8 py-4 text-right">Actions</th>
+
+          <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+            <tr>
+              <th className="px-6 py-4">Package</th>
+              <th className="px-6 py-4">Price</th>
+              <th className="px-6 py-4">Billing</th>
+              <th className="px-6 py-4">Users</th>
+              <th className="px-6 py-4">Status</th>
+              <th className="px-6 py-4 text-right">Actions</th>
             </tr>
           </thead>
 
           <tbody className="divide-y">
 
             {subscriptions.map((sub) => (
+
               <tr key={sub.id} className="hover:bg-slate-50">
 
-                {/* Package */}
-                <td className="px-8 py-5">
-                  <p className="font-semibold">{sub.name}</p>
+                <td className="px-6 py-4 font-semibold">
+                  {sub.name}
                 </td>
 
-                {/* Price */}
-                <td className="px-8 py-5 text-sm text-slate-600">
-                  {sub.price}
+                <td className="px-6 py-4">
+                  ${sub.price}
                 </td>
 
-                {/* Billing */}
-                <td className="px-8 py-5 text-sm text-slate-600">
+                <td className="px-6 py-4">
                   {sub.billing}
                 </td>
 
-                {/* Users */}
-                <td className="px-8 py-5 text-sm text-slate-600">
+                <td className="px-6 py-4">
                   {sub.users}
                 </td>
 
-                {/* Status */}
-                <td className="px-8 py-5">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      sub.status === 'Active'
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-slate-100 text-slate-600'
-                    }`}
-                  >
+                <td className="px-6 py-4">
+
+                  <span className={`px-3 py-1 text-xs rounded-full ${
+                    sub.status === 'Active'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
                     {sub.status}
                   </span>
+
                 </td>
 
-                {/* Actions */}
-                <td className="px-8 py-5 text-right relative">
+                <td className="px-6 py-4 text-right relative">
 
                   <button
                     onClick={() =>
                       setOpenMenu(openMenu === sub.id ? null : sub.id)
                     }
-                    className="p-2 rounded hover:bg-slate-100"
+                    className="p-2 hover:bg-slate-100 rounded"
                   >
                     <MoreVertical size={18} />
                   </button>
 
                   {openMenu === sub.id && (
-                    <div className="absolute right-0 mt-2 w-44 bg-white border border-slate-200 rounded-xl shadow-lg">
 
-                      <button className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-slate-50">
+                    <div className="absolute right-0 mt-2 w-44 bg-white border rounded-xl shadow">
+
+                      <button
+                        onClick={() => viewPackage(sub.id)}
+                        className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-slate-50"
+                      >
                         <Eye size={16} />
-                        View Package
+                        View
                       </button>
 
-                      <button className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-slate-50">
+                      <button
+                        onClick={() => openEdit(sub)}
+                        className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-slate-50"
+                      >
                         <Pencil size={16} />
-                        Edit Package
+                        Edit
                       </button>
 
-                      <button className="flex items-center gap-2 w-full px-4 py-2 text-sm text-rose-600 hover:bg-rose-50">
+                      <button
+                        onClick={() => deleteSubscription(sub.id)}
+                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      >
                         <Trash2 size={16} />
                         Delete
                       </button>
 
                     </div>
                   )}
+
                 </td>
 
               </tr>
+
             ))}
 
           </tbody>
+
         </table>
 
       </div>
+
+      {/* MODAL */}
+
+      {modalOpen && (
+
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+
+          <div className="bg-white w-96 rounded-xl p-6 flex flex-col gap-4">
+
+            <div className="flex justify-between items-center">
+
+              <h3 className="font-semibold text-lg">
+                {editing ? 'Edit Package' : 'Create Package'}
+              </h3>
+
+              <button onClick={() => setModalOpen(false)}>
+                <X size={18} />
+              </button>
+
+            </div>
+
+            <input
+              placeholder="Name"
+              value={form.name}
+              onChange={(e) =>
+                setForm({ ...form, name: e.target.value })
+              }
+              className="border px-3 py-2 rounded"
+            />
+
+            <input
+              type="number"
+              placeholder="Price"
+              value={form.price}
+              onChange={(e) =>
+                setForm({ ...form, price: Number(e.target.value) })
+              }
+              className="border px-3 py-2 rounded"
+            />
+
+            <select
+              value={form.billing}
+              onChange={(e) =>
+                setForm({ ...form, billing: e.target.value as any })
+              }
+              className="border px-3 py-2 rounded"
+            >
+              <option>Monthly</option>
+              <option>Yearly</option>
+            </select>
+
+            <select
+              value={form.status}
+              onChange={(e) =>
+                setForm({ ...form, status: e.target.value as any })
+              }
+              className="border px-3 py-2 rounded"
+            >
+              <option>Active</option>
+              <option>Inactive</option>
+            </select>
+
+            <button
+              onClick={handleSubmit}
+              className="bg-blue-600 text-white py-2 rounded"
+            >
+              {editing ? 'Update' : 'Create'}
+            </button>
+
+          </div>
+
+        </div>
+
+      )}
 
     </div>
   )
