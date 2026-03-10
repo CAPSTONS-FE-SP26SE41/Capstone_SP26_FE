@@ -23,26 +23,38 @@ function LoginPage() {
 
 
     try {
-      const response = await fetch("https://localhost:7176/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: email, password: password }),
-      })
+    const response = await fetch("https://localhost:7176/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password,
+      }),
+    })
 
-      if (!response.ok) {
-        throw new Error("Login failed")
-      }
-
-      const data = await response.json()
-      // ví dụ backend trả token
-      localStorage.setItem("admin_token", data.token)
-      navigate({ to: "/admin" })
-    } catch (error) {
-      alert("Login failed. Please check email/password.")
+    if (!response.ok) {
+      throw new Error("Login failed")
     }
+
+    const data = await response.json()
+
+    localStorage.setItem("admin_token", data.token)
+    localStorage.setItem("role", data.role)
+
+    if (data.role === "Admin") {
+      navigate({ to: "/admin" })
+    } else if (data.role === "Staff") {
+      navigate({ to: "/staff" })
+    } else {
+      navigate({ to: "/" })
+    }
+
+  } catch (error) {
+    alert("Login failed. Please check email/password.")
   }
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 px-4">
