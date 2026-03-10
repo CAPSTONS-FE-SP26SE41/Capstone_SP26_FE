@@ -8,8 +8,6 @@ import {
   Settings,
   LogOut,
   PlaneTakeoff,
-  CreditCard,
-  UserCog,
 } from 'lucide-react'
 
 export default function AdminSidebar() {
@@ -62,11 +60,9 @@ export default function AdminSidebar() {
       <nav className="flex-1 px-4 space-y-2">
         <Item to="/admin" icon={LayoutDashboard} label="Overview" />
         <Item to="/admin/users" icon={Users} label="Users" />
-        <Item to="/admin/account" icon={UserCog} label="Account" />
         <Item to="/admin/bookings" icon={Calendar} label="Bookings" />
         <Item to="/admin/destinations" icon={Map} label="Destinations" />
         <Item to="/admin/analytics" icon={BarChart2} label="Analytics" />
-        <Item to="/admin/subscriptions" icon={CreditCard} label="Subscriptions" />
 
         <div className="h-px bg-slate-200 my-4" />
 
