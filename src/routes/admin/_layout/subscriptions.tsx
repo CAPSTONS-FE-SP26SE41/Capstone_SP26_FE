@@ -1,8 +1,16 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import { Plus, MoreVertical, Eye, Pencil, Trash2, X } from 'lucide-react'
+import { createFileRoute } from "@tanstack/react-router"
+import { useEffect, useState } from "react"
+import { Plus, MoreVertical, Eye, Pencil, Trash2, X } from "lucide-react"
 
-export const Route = createFileRoute('/admin/_layout/subscriptions')({
+import {
+  getSubscriptions,
+  getSubscriptionById,
+  createSubscription,
+  updateSubscription,
+  deleteSubscription
+} from "../../../services/subscriptionService"
+
+export const Route = createFileRoute("/admin/_layout/subscriptions")({
   component: SubscriptionsPage,
 })
 
@@ -10,14 +18,12 @@ type Subscription = {
   id: string
   name: string
   price: number
-  billing: 'Monthly' | 'Yearly'
+  billing: "Monthly" | "Yearly"
   users: number
-  status: 'Active' | 'Inactive'
+  status: "Active" | "Inactive"
 }
 
 function SubscriptionsPage() {
-
-  const API = 'https://localhost:7176/api/ad-subscription-packages'
 
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [loading, setLoading] = useState(true)
@@ -27,18 +33,15 @@ function SubscriptionsPage() {
   const [editing, setEditing] = useState<Subscription | null>(null)
 
   const [form, setForm] = useState({
-    name: '',
+    name: "",
     price: 0,
-    billing: 'Monthly',
-    status: 'Active',
+    billing: "Monthly",
+    status: "Active",
   })
-
-  // ================= FETCH =================
 
   const fetchSubscriptions = async () => {
     try {
-      const res = await fetch(API)
-      const data = await res.json()
+      const data = await getSubscriptions()
       setSubscriptions(data)
     } catch (err) {
       console.error(err)
@@ -51,15 +54,13 @@ function SubscriptionsPage() {
     fetchSubscriptions()
   }, [])
 
-  // ================= CREATE / UPDATE =================
-
   const openCreate = () => {
     setEditing(null)
     setForm({
-      name: '',
+      name: "",
       price: 0,
-      billing: 'Monthly',
-      status: 'Active',
+      billing: "Monthly",
+      status: "Active",
     })
     setModalOpen(true)
   }
@@ -80,25 +81,9 @@ function SubscriptionsPage() {
     try {
 
       if (editing) {
-
-        await fetch(`${API}/${editing.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(form),
-        })
-
+        await updateSubscription(editing.id, form)
       } else {
-
-        await fetch(API, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(form),
-        })
-
+        await createSubscription(form)
       }
 
       setModalOpen(false)
@@ -109,36 +94,29 @@ function SubscriptionsPage() {
     }
   }
 
-  // ================= DELETE =================
+  const handleDelete = async (id: string) => {
 
-  const deleteSubscription = async (id: string) => {
-
-    if (!confirm('Delete this package?')) return
+    if (!confirm("Delete this package?")) return
 
     try {
 
-      await fetch(`${API}/${id}`, {
-        method: 'DELETE',
-      })
+      await deleteSubscription(id)
 
-      setSubscriptions((prev) => prev.filter((s) => s.id !== id))
+      setSubscriptions((prev) =>
+        prev.filter((s) => s.id !== id)
+      )
 
     } catch (err) {
       console.error(err)
     }
   }
 
-  // ================= VIEW =================
-
   const viewPackage = async (id: string) => {
 
-    const res = await fetch(`${API}/${id}`)
-    const data = await res.json()
+    const data = await getSubscriptionById(id)
 
     alert(JSON.stringify(data, null, 2))
   }
-
-  // ================= LOADING =================
 
   if (loading) {
     return (
@@ -148,12 +126,8 @@ function SubscriptionsPage() {
     )
   }
 
-  // ================= UI =================
-
   return (
     <div className="flex flex-col gap-8">
-
-      {/* HEADER */}
 
       <div className="flex justify-between items-start">
         <div>
@@ -173,8 +147,6 @@ function SubscriptionsPage() {
           Add Package
         </button>
       </div>
-
-      {/* TABLE */}
 
       <div className="bg-white border rounded-xl overflow-hidden">
 
@@ -214,15 +186,13 @@ function SubscriptionsPage() {
                 </td>
 
                 <td className="px-6 py-4">
-
                   <span className={`px-3 py-1 text-xs rounded-full ${
-                    sub.status === 'Active'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-600'
+                    sub.status === "Active"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-600"
                   }`}>
                     {sub.status}
                   </span>
-
                 </td>
 
                 <td className="px-6 py-4 text-right relative">
@@ -257,7 +227,7 @@ function SubscriptionsPage() {
                       </button>
 
                       <button
-                        onClick={() => deleteSubscription(sub.id)}
+                        onClick={() => handleDelete(sub.id)}
                         className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                       >
                         <Trash2 size={16} />
@@ -265,6 +235,7 @@ function SubscriptionsPage() {
                       </button>
 
                     </div>
+
                   )}
 
                 </td>
@@ -279,8 +250,6 @@ function SubscriptionsPage() {
 
       </div>
 
-      {/* MODAL */}
-
       {modalOpen && (
 
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
@@ -290,7 +259,7 @@ function SubscriptionsPage() {
             <div className="flex justify-between items-center">
 
               <h3 className="font-semibold text-lg">
-                {editing ? 'Edit Package' : 'Create Package'}
+                {editing ? "Edit Package" : "Create Package"}
               </h3>
 
               <button onClick={() => setModalOpen(false)}>
@@ -344,7 +313,7 @@ function SubscriptionsPage() {
               onClick={handleSubmit}
               className="bg-blue-600 text-white py-2 rounded"
             >
-              {editing ? 'Update' : 'Create'}
+              {editing ? "Update" : "Create"}
             </button>
 
           </div>
@@ -356,4 +325,3 @@ function SubscriptionsPage() {
     </div>
   )
 }
-
