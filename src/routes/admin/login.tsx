@@ -17,29 +17,27 @@ function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
 
-    e.preventDefault()
+  e.preventDefault()
 
-    try {
+  try {
 
-      const data = await login(email, password)
+    const data = await login(email, password)
 
-      localStorage.setItem("admin_token", data.token)
-      localStorage.setItem("role", data.role)
+    console.log("LOGIN DATA:", data)
 
-      if (data.role === "Admin") {
-        navigate({ to: "/admin" })
-      } else if (data.role === "Staff") {
-        navigate({ to: "/staff" })
-      } else {
-        navigate({ to: "/" })
-      }
+    localStorage.setItem("admin_token", data.token)
+    localStorage.setItem("role", data.role)
 
-    } catch (error) {
+    navigate({ to: "/admin" })
 
-      alert("Login failed. Please check email/password.")
+  } catch (error) {
 
-    }
+    console.log(error)
+
+    alert("Login failed")
+
   }
+}
 
   return (
 
