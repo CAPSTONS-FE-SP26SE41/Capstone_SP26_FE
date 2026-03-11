@@ -1,0 +1,51 @@
+import { Outlet } from '@tanstack/react-router'
+import AppSidebar, { type NavItem, type SidebarBrand } from './AppSidebar'
+import AppTopbar from './AppTopbar'
+
+type DashboardLayoutProps = {
+  brand: SidebarBrand
+  navItems: NavItem[]
+  logoutTo: string
+  logoutTokenKey: string
+  userName?: string
+  userRole?: string
+  userAvatarUrl?: string
+  searchPlaceholder?: string
+}
+
+export default function DashboardLayout({
+  brand,
+  navItems,
+  logoutTo,
+  logoutTokenKey,
+  userName,
+  userRole,
+  userAvatarUrl,
+  searchPlaceholder,
+}: DashboardLayoutProps) {
+  return (
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <AppSidebar
+        brand={brand}
+        navItems={navItems}
+        logoutTo={logoutTo}
+        logoutTokenKey={logoutTokenKey}
+      />
+
+      {/* Main Area */}
+      <div className="flex-1 flex flex-col">
+        <AppTopbar
+          userName={userName}
+          userRole={userRole}
+          userAvatarUrl={userAvatarUrl}
+          searchPlaceholder={searchPlaceholder}
+        />
+
+        <main className="flex-1 p-6 overflow-auto">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  )
+}
