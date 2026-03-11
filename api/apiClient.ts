@@ -20,5 +20,12 @@ export const apiClient = async (
     throw new Error("API Error")
   }
 
-  return res.json()
+  const contentType = res.headers.get("content-type")
+
+  if (contentType && contentType.includes("application/json")) {
+    return res.json()
+  }
+
+
+  return res.text()
 }

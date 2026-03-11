@@ -1,7 +1,21 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import { Plus, MoreVertical, Eye, Pencil, UserX } from 'lucide-react'
-export const Route = createFileRoute('/admin/_layout/accounts')({
+import { createFileRoute } from "@tanstack/react-router"
+import { useEffect, useState } from "react"
+import {
+  Plus,
+  MoreVertical,
+  Eye,
+  Pencil,
+  UserX,
+  UserCheck,
+} from "lucide-react"
+
+import {
+  getAccounts,
+  deactivateAccount,
+  activateAccount,
+} from "../../../services/accountService"
+
+export const Route = createFileRoute("/admin/_layout/accounts")({
   component: AccountsPage,
 })
 
@@ -10,8 +24,11 @@ type Account = {
   name: string
   email: string
   avatarUrl: string
-  role: string
-  status: 'Active' | 'Suspended'
+  role: {
+    id: string
+    name: string
+  }
+  status: "Active" | "Suspended"
   createdAt: string
 }
 
@@ -22,34 +39,50 @@ function AccountsPage() {
 
   useEffect(() => {
     const fetchAccounts = async () => {
-      await new Promise((res) => setTimeout(res, 600))
-
-      setAccounts([
-        {
-          id: '1',
-          name: 'Admin One',
-          email: 'admin1@example.com',
-          avatarUrl: 'https://i.pravatar.cc/100?img=3',
-          role: 'Super Admin',
-          status: 'Active',
-          createdAt: 'Jan 2025',
-        },
-        {
-          id: '2',
-          name: 'Admin Two',
-          email: 'admin2@example.com',
-          avatarUrl: 'https://i.pravatar.cc/100?img=4',
-          role: 'Moderator',
-          status: 'Suspended',
-          createdAt: 'Feb 2025',
-        },
-      ])
-
-      setLoading(false)
+      try {
+        const data = await getAccounts()
+        setAccounts(data)
+      } catch (error) {
+        console.error("Failed to fetch accounts", error)
+      } finally {
+        setLoading(false)
+      }
     }
 
     fetchAccounts()
   }, [])
+
+  const handleDisable = async (id: string) => {
+    try {
+      await deactivateAccount(id)
+
+      setAccounts((prev) =>
+        prev.map((acc) =>
+          acc.id === id ? { ...acc, status: "Suspended" } : acc
+        )
+      )
+
+      setOpenMenu(null)
+    } catch (error) {
+      console.error("Disable account failed", error)
+    }
+  }
+
+  const handleActivate = async (id: string) => {
+    try {
+      await activateAccount(id)
+
+      setAccounts((prev) =>
+        prev.map((acc) =>
+          acc.id === id ? { ...acc, status: "Active" } : acc
+        )
+      )
+
+      setOpenMenu(null)
+    } catch (error) {
+      console.error("Activate account failed", error)
+    }
+  }
 
   if (loading) {
     return (
@@ -68,6 +101,7 @@ function AccountsPage() {
           <h2 className="text-2xl font-semibold text-text-main">
             Account Management
           </h2>
+
           <p className="text-sm text-text-secondary mt-1">
             Manage administrator accounts
           </p>
@@ -80,9 +114,10 @@ function AccountsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
 
         <table className="w-full text-left">
+
           <thead>
             <tr className="bg-slate-50 border-b text-xs uppercase text-slate-500">
               <th className="px-8 py-4">Name</th>
@@ -101,8 +136,9 @@ function AccountsPage() {
                 {/* Name */}
                 <td className="px-8 py-5">
                   <div className="flex items-center gap-4">
+
                     <img
-                      src={account.avatarUrl}
+                      src={account.avatarUrl ? account.avatarUrl : undefined}
                       className="h-10 w-10 rounded-full"
                     />
 
@@ -115,32 +151,34 @@ function AccountsPage() {
                         {account.email}
                       </p>
                     </div>
+
                   </div>
                 </td>
 
                 {/* Role */}
                 <td className="px-8 py-5">
                   <span className="px-3 py-1 rounded bg-slate-100 text-xs">
-                    {account.role}
+                    {account.role.name}
                   </span>
                 </td>
 
                 {/* Status */}
                 <td className="px-8 py-5">
+
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      account.status === 'Active'
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-rose-100 text-rose-700'
-                    }`}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${account.status === "Active"
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-rose-100 text-rose-700"
+                      }`}
                   >
                     {account.status}
                   </span>
+
                 </td>
 
                 {/* Created */}
                 <td className="px-8 py-5 text-sm text-slate-500">
-                  {account.createdAt}
+                  {new Date(account.createdAt).toLocaleDateString("en-GB")}
                 </td>
 
                 {/* Actions */}
@@ -158,7 +196,8 @@ function AccountsPage() {
                   </button>
 
                   {openMenu === account.id && (
-                    <div className="absolute right-0 mt-2 w-44 bg-white border rounded-xl shadow-lg">
+
+                    <div className="absolute right-0 mt-2 w-44 bg-white border rounded-xl shadow-lg z-50">
 
                       <button className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-slate-50">
                         <Eye size={16} />
@@ -170,23 +209,37 @@ function AccountsPage() {
                         Edit Account
                       </button>
 
-                      <button className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                      <button
+                        onClick={() => handleActivate(account.id)}
+                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-50"
+                      >
+                        <UserCheck size={16} />
+                        Activate
+                      </button>
+
+                      <button
+                        onClick={() => handleDisable(account.id)}
+                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      >
                         <UserX size={16} />
                         Disable
                       </button>
 
                     </div>
+
                   )}
+
                 </td>
 
               </tr>
             ))}
 
           </tbody>
+
         </table>
 
       </div>
+
     </div>
   )
-} 
-
+}
