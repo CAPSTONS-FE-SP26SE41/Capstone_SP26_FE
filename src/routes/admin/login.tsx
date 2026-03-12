@@ -17,27 +17,30 @@ function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
 
-  e.preventDefault()
+    e.preventDefault()
 
-  try {
+    try {
 
-    const data = await login(email, password)
+      const data = await login(email, password)
 
-    console.log("LOGIN DATA:", data)
+      console.log("LOGIN DATA:", data)
 
-    localStorage.setItem("admin_token", data.token)
-    localStorage.setItem("role", data.role)
+      localStorage.setItem(
+        "admin_token",
+        data.token.replace("Bearer ", "")
+      )
+      localStorage.setItem("role", data.role)
 
-    navigate({ to: "/admin" })
+      navigate({ to: "/admin" })
 
-  } catch (error) {
+    } catch (error) {
 
-    console.log(error)
+      console.log(error)
 
-    alert("Login failed")
+      alert("Login failed")
 
+    }
   }
-}
 
   return (
 

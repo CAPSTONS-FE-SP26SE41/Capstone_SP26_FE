@@ -31,7 +31,6 @@ function AdminLayout() {
       }}
       navItems={[
         { to: '/admin', icon: LayoutDashboard, label: 'Overview', exact: true },
-        { to: '/admin/users', icon: Users, label: 'Users' },
         { to: '/admin/accounts', icon: UserCog, label: 'Accounts' },
         { to: '/admin/bookings', icon: Calendar, label: 'Bookings' },
         { to: '/admin/destinations', icon: Map, label: 'Destinations' },
