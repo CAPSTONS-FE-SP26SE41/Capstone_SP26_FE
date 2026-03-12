@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { Plus, MoreVertical, Eye, Pencil, Trash2, X } from "lucide-react"
+import { Plus, MoreVertical, Pencil, Trash2, X } from "lucide-react"
 
 import {
   getSubscriptions,
-  getSubscriptionById,
   createSubscription,
   updateSubscription,
   deleteSubscription
@@ -111,13 +110,9 @@ function SubscriptionsPage() {
     try {
 
       if (editing) {
-
         await updateSubscription(editing.packageId, form)
-
       } else {
-
         await createSubscription(form)
-
       }
 
       setModalOpen(false)
@@ -152,14 +147,6 @@ function SubscriptionsPage() {
 
   }
 
-  const viewPackage = async (id: string) => {
-
-    const data = await getSubscriptionById(id)
-
-    alert(JSON.stringify(data, null, 2))
-
-  }
-
   if (loading) {
     return (
       <div className="flex justify-center py-20 text-sm text-slate-500">
@@ -170,22 +157,25 @@ function SubscriptionsPage() {
 
   return (
 
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
 
-      <div className="flex justify-between items-start">
+      {/* Header */}
+
+      <div className="flex justify-between items-center">
 
         <div>
-          <h2 className="text-2xl font-semibold">
+          <h2 className="text-2xl font-bold text-text-main">
             Subscription Packages
           </h2>
-          <p className="text-sm text-slate-500">
+
+          <p className="text-text-secondary">
             Manage subscription plans
           </p>
         </div>
 
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-xl"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl shadow"
         >
           <Plus size={18} />
           Add Package
@@ -193,107 +183,151 @@ function SubscriptionsPage() {
 
       </div>
 
-      <div className="bg-white border rounded-xl overflow-hidden">
 
-        <table className="w-full text-left">
+      {/* Table */}
 
-          <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+      <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm overflow-hidden">
 
-            <tr>
-              <th className="px-6 py-4">Package</th>
-              <th className="px-6 py-4">Price</th>
-              <th className="px-6 py-4">Duration</th>
-              <th className="px-6 py-4">Max Ads</th>
-              <th className="px-6 py-4">Status</th>
-              <th className="px-6 py-4 text-right">Actions</th>
-            </tr>
+        <div className="overflow-x-auto">
 
-          </thead>
+          <table className="w-full text-left border-collapse">
 
-          <tbody className="divide-y">
+            <thead>
+              <tr className="bg-[#f8fafc] text-text-secondary text-xs uppercase tracking-wider font-semibold border-b border-[#e7edf4]">
+                <th className="px-6 py-4">Package</th>
+                <th className="px-6 py-4">Price</th>
+                <th className="px-6 py-4">Duration</th>
+                <th className="px-6 py-4">Max Ads</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
 
-            {subscriptions.map((sub) => (
+            <tbody className="divide-y divide-[#e7edf4]">
 
-              <tr key={sub.packageId} className="hover:bg-slate-50">
+              {subscriptions.length > 0 ? (
 
-                <td className="px-6 py-4 font-semibold">
-                  {sub.title}
-                </td>
+                subscriptions.map((sub) => (
 
-                <td className="px-6 py-4">
-                  {sub.price} {sub.currency}
-                </td>
-
-                <td className="px-6 py-4">
-                  {sub.durationDays} days
-                </td>
-
-                <td className="px-6 py-4">
-                  {sub.maxAdsPerPeriod}
-                </td>
-
-                <td className="px-6 py-4">
-
-                  <span className={`px-3 py-1 text-xs rounded-full ${
-                    sub.status === "active"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-gray-100 text-gray-600"
-                  }`}>
-
-                    {sub.status}
-
-                  </span>
-
-                </td>
-
-                <td className="px-6 py-4 text-right relative">
-
-                  <button
-                    onClick={() =>
-                      setOpenMenu(openMenu === sub.packageId ? null : sub.packageId)
-                    }
-                    className="p-2 hover:bg-slate-100 rounded"
+                  <tr
+                    key={sub.packageId}
+                    className="hover:bg-[#f8fafc] transition-colors"
                   >
-                    <MoreVertical size={18} />
-                  </button>
 
-                  {openMenu === sub.packageId && (
+                    <td className="px-6 py-4 font-medium text-text-main">
+                      {sub.title}
+                    </td>
 
-                    <div className="absolute right-0 mt-2 w-44 bg-white border rounded-xl shadow z-10">
+                    <td className="px-6 py-4 text-sm text-text-secondary">
+                      {sub.price} {sub.currency}
+                    </td>
 
-                      
+                    <td className="px-6 py-4 text-sm text-text-secondary">
+                      {sub.durationDays} days
+                    </td>
 
-                      <button
-                        onClick={() => openEdit(sub)}
-                        className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-slate-50"
+                    <td className="px-6 py-4 text-sm text-text-secondary">
+                      {sub.maxAdsPerPeriod}
+                    </td>
+
+                    <td className="px-6 py-4">
+
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
+                        ${sub.status === "active"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-slate-100 text-slate-600"
+                          }`}
                       >
-                        <Pencil size={16} />
-                        Edit
-                      </button>
 
-                      <button
-                        onClick={() => handleDelete(sub.packageId)}
-                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 size={16} />
-                        Delete
-                      </button>
+                        <span className="size-1.5 rounded-full bg-current"></span>
+
+                        {sub.status}
+
+                      </span>
+
+                    </td>
+
+                    <td className="px-6 py-4 text-right">
+
+                      <div className="relative inline-block">
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setOpenMenu(openMenu === sub.packageId ? null : sub.packageId)
+                          }}
+                          className="text-text-secondary hover:text-primary p-2"
+                        >
+                          <MoreVertical size={18} />
+                        </button>
+
+                        {openMenu === sub.packageId && (
+
+                          <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 w-40 bg-white border border-[#e7edf4] rounded-xl shadow-lg z-[999]">
+
+                            <button
+                              onClick={() => openEdit(sub)}
+                              className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-slate-50"
+                            >
+                              <Pencil size={16} />
+                              Edit
+                            </button>
+
+                            <button
+                              onClick={() => handleDelete(sub.packageId)}
+                              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 size={16} />
+                              Delete
+                            </button>
+
+                          </div>
+
+                        )}
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                ))
+
+              ) : (
+
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-text-secondary">
+
+                    <div className="flex flex-col items-center gap-2">
+
+                      <span className="text-4xl text-slate-300">📦</span>
+
+                      <p className="font-medium">
+                        No subscription packages
+                      </p>
+
+                      <p className="text-xs">
+                        Create your first subscription plan
+                      </p>
 
                     </div>
 
-                  )}
+                  </td>
+                </tr>
 
-                </td>
+              )}
 
-              </tr>
+            </tbody>
 
-            ))}
+          </table>
 
-          </tbody>
-
-        </table>
+        </div>
 
       </div>
+
+
+      {/* Modal */}
 
       {modalOpen && (
 
@@ -379,3 +413,5 @@ function SubscriptionsPage() {
   )
 
 }
+
+export default SubscriptionsPage
