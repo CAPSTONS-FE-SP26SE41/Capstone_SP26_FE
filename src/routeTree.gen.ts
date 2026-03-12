@@ -9,10 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PartnerLoginRouteImport } from './routes/partner/login'
+import { Route as PartnerLayoutRouteImport } from './routes/partner/_layout'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminLayoutRouteImport } from './routes/admin/_layout'
+import { Route as PartnerLayoutIndexRouteImport } from './routes/partner/_layout/index'
 import { Route as AdminLayoutIndexRouteImport } from './routes/admin/_layout/index'
+import { Route as PartnerLayoutRevenueRouteImport } from './routes/partner/_layout/revenue'
+import { Route as PartnerLayoutProfileRouteImport } from './routes/partner/_layout/profile'
+import { Route as PartnerLayoutPackagesRouteImport } from './routes/partner/_layout/packages'
+import { Route as PartnerLayoutAdsRouteImport } from './routes/partner/_layout/ads'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
@@ -26,9 +34,24 @@ import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnerLoginRoute = PartnerLoginRouteImport.update({
+  id: '/partner/login',
+  path: '/partner/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnerLayoutRoute = PartnerLayoutRouteImport.update({
+  id: '/partner/_layout',
+  path: '/partner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
@@ -41,10 +64,35 @@ const AdminLayoutRoute = AdminLayoutRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PartnerLayoutIndexRoute = PartnerLayoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PartnerLayoutRoute,
+} as any)
 const AdminLayoutIndexRoute = AdminLayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminLayoutRoute,
+} as any)
+const PartnerLayoutRevenueRoute = PartnerLayoutRevenueRouteImport.update({
+  id: '/revenue',
+  path: '/revenue',
+  getParentRoute: () => PartnerLayoutRoute,
+} as any)
+const PartnerLayoutProfileRoute = PartnerLayoutProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => PartnerLayoutRoute,
+} as any)
+const PartnerLayoutPackagesRoute = PartnerLayoutPackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
+  getParentRoute: () => PartnerLayoutRoute,
+} as any)
+const PartnerLayoutAdsRoute = PartnerLayoutAdsRouteImport.update({
+  id: '/ads',
+  path: '/ads',
+  getParentRoute: () => PartnerLayoutRoute,
 } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
   id: '/demo/start/server-funcs',
@@ -109,8 +157,11 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/admin': typeof AdminLayoutRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/partner': typeof PartnerLayoutRouteWithChildren
+  '/partner/login': typeof PartnerLoginRoute
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/bookings': typeof AdminLayoutBookingsRoute
   '/admin/destinations': typeof AdminLayoutDestinationsRoute
@@ -119,7 +170,12 @@ export interface FileRoutesByFullPath {
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/partner/ads': typeof PartnerLayoutAdsRoute
+  '/partner/packages': typeof PartnerLayoutPackagesRoute
+  '/partner/profile': typeof PartnerLayoutProfileRoute
+  '/partner/revenue': typeof PartnerLayoutRevenueRoute
   '/admin/': typeof AdminLayoutIndexRoute
+  '/partner/': typeof PartnerLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -127,7 +183,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/admin/login': typeof AdminLoginRoute
+  '/partner/login': typeof PartnerLoginRoute
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/bookings': typeof AdminLayoutBookingsRoute
   '/admin/destinations': typeof AdminLayoutDestinationsRoute
@@ -136,7 +194,12 @@ export interface FileRoutesByTo {
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/partner/ads': typeof PartnerLayoutAdsRoute
+  '/partner/packages': typeof PartnerLayoutPackagesRoute
+  '/partner/profile': typeof PartnerLayoutProfileRoute
+  '/partner/revenue': typeof PartnerLayoutRevenueRoute
   '/admin': typeof AdminLayoutIndexRoute
+  '/partner': typeof PartnerLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -145,8 +208,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/admin/_layout': typeof AdminLayoutRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/partner/_layout': typeof PartnerLayoutRouteWithChildren
+  '/partner/login': typeof PartnerLoginRoute
   '/admin/_layout/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/_layout/bookings': typeof AdminLayoutBookingsRoute
   '/admin/_layout/destinations': typeof AdminLayoutDestinationsRoute
@@ -155,7 +221,12 @@ export interface FileRoutesById {
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/partner/_layout/ads': typeof PartnerLayoutAdsRoute
+  '/partner/_layout/packages': typeof PartnerLayoutPackagesRoute
+  '/partner/_layout/profile': typeof PartnerLayoutProfileRoute
+  '/partner/_layout/revenue': typeof PartnerLayoutRevenueRoute
   '/admin/_layout/': typeof AdminLayoutIndexRoute
+  '/partner/_layout/': typeof PartnerLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -165,8 +236,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/login'
     | '/admin'
     | '/admin/login'
+    | '/partner'
+    | '/partner/login'
     | '/admin/analytics'
     | '/admin/bookings'
     | '/admin/destinations'
@@ -175,7 +249,12 @@ export interface FileRouteTypes {
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/partner/ads'
+    | '/partner/packages'
+    | '/partner/profile'
+    | '/partner/revenue'
     | '/admin/'
+    | '/partner/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -183,7 +262,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/login'
     | '/admin/login'
+    | '/partner/login'
     | '/admin/analytics'
     | '/admin/bookings'
     | '/admin/destinations'
@@ -192,7 +273,12 @@ export interface FileRouteTypes {
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/partner/ads'
+    | '/partner/packages'
+    | '/partner/profile'
+    | '/partner/revenue'
     | '/admin'
+    | '/partner'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -200,8 +286,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/login'
     | '/admin/_layout'
     | '/admin/login'
+    | '/partner/_layout'
+    | '/partner/login'
     | '/admin/_layout/analytics'
     | '/admin/_layout/bookings'
     | '/admin/_layout/destinations'
@@ -210,7 +299,12 @@ export interface FileRouteTypes {
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/partner/_layout/ads'
+    | '/partner/_layout/packages'
+    | '/partner/_layout/profile'
+    | '/partner/_layout/revenue'
     | '/admin/_layout/'
+    | '/partner/_layout/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -219,8 +313,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
   AdminLayoutRoute: typeof AdminLayoutRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
+  PartnerLayoutRoute: typeof PartnerLayoutRouteWithChildren
+  PartnerLoginRoute: typeof PartnerLoginRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
   DemoStartServerFuncsRoute: typeof DemoStartServerFuncsRoute
@@ -232,11 +329,32 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partner/login': {
+      id: '/partner/login'
+      path: '/partner/login'
+      fullPath: '/partner/login'
+      preLoaderRoute: typeof PartnerLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partner/_layout': {
+      id: '/partner/_layout'
+      path: '/partner'
+      fullPath: '/partner'
+      preLoaderRoute: typeof PartnerLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/login': {
@@ -253,12 +371,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/partner/_layout/': {
+      id: '/partner/_layout/'
+      path: '/'
+      fullPath: '/partner/'
+      preLoaderRoute: typeof PartnerLayoutIndexRouteImport
+      parentRoute: typeof PartnerLayoutRoute
+    }
     '/admin/_layout/': {
       id: '/admin/_layout/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminLayoutIndexRouteImport
       parentRoute: typeof AdminLayoutRoute
+    }
+    '/partner/_layout/revenue': {
+      id: '/partner/_layout/revenue'
+      path: '/revenue'
+      fullPath: '/partner/revenue'
+      preLoaderRoute: typeof PartnerLayoutRevenueRouteImport
+      parentRoute: typeof PartnerLayoutRoute
+    }
+    '/partner/_layout/profile': {
+      id: '/partner/_layout/profile'
+      path: '/profile'
+      fullPath: '/partner/profile'
+      preLoaderRoute: typeof PartnerLayoutProfileRouteImport
+      parentRoute: typeof PartnerLayoutRoute
+    }
+    '/partner/_layout/packages': {
+      id: '/partner/_layout/packages'
+      path: '/packages'
+      fullPath: '/partner/packages'
+      preLoaderRoute: typeof PartnerLayoutPackagesRouteImport
+      parentRoute: typeof PartnerLayoutRoute
+    }
+    '/partner/_layout/ads': {
+      id: '/partner/_layout/ads'
+      path: '/ads'
+      fullPath: '/partner/ads'
+      preLoaderRoute: typeof PartnerLayoutAdsRouteImport
+      parentRoute: typeof PartnerLayoutRoute
     }
     '/demo/start/server-funcs': {
       id: '/demo/start/server-funcs'
@@ -369,10 +522,33 @@ const AdminLayoutRouteWithChildren = AdminLayoutRoute._addFileChildren(
   AdminLayoutRouteChildren,
 )
 
+interface PartnerLayoutRouteChildren {
+  PartnerLayoutAdsRoute: typeof PartnerLayoutAdsRoute
+  PartnerLayoutPackagesRoute: typeof PartnerLayoutPackagesRoute
+  PartnerLayoutProfileRoute: typeof PartnerLayoutProfileRoute
+  PartnerLayoutRevenueRoute: typeof PartnerLayoutRevenueRoute
+  PartnerLayoutIndexRoute: typeof PartnerLayoutIndexRoute
+}
+
+const PartnerLayoutRouteChildren: PartnerLayoutRouteChildren = {
+  PartnerLayoutAdsRoute: PartnerLayoutAdsRoute,
+  PartnerLayoutPackagesRoute: PartnerLayoutPackagesRoute,
+  PartnerLayoutProfileRoute: PartnerLayoutProfileRoute,
+  PartnerLayoutRevenueRoute: PartnerLayoutRevenueRoute,
+  PartnerLayoutIndexRoute: PartnerLayoutIndexRoute,
+}
+
+const PartnerLayoutRouteWithChildren = PartnerLayoutRoute._addFileChildren(
+  PartnerLayoutRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
   AdminLayoutRoute: AdminLayoutRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
+  PartnerLayoutRoute: PartnerLayoutRouteWithChildren,
+  PartnerLoginRoute: PartnerLoginRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,
   DemoStartServerFuncsRoute: DemoStartServerFuncsRoute,

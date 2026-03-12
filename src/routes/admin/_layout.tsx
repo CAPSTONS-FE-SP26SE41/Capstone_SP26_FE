@@ -13,7 +13,7 @@ import DashboardLayout from '../../components/layouts/DashboardLayout'
 export const Route = createFileRoute('/admin/_layout')({
   beforeLoad: () => {
     if (typeof window !== 'undefined' && !localStorage.getItem('admin_token')) {
-      throw redirect({ to: '/admin/login' })
+      throw redirect({ to: '/login' })
     }
   },
   component: AdminLayout,
@@ -35,7 +35,7 @@ function AdminLayout() {
         { to: '/admin/analytics', icon: BarChart2, label: 'Analytics' },
         { to: '/admin/settings', icon: Settings, label: 'Settings' },
       ]}
-      logoutTo="/admin/login"
+      logoutTo="/login"
       logoutTokenKey="admin_token"
       userName="Admin Profile"
       userRole="Super Admin"
