@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StaffLoginRouteImport } from './routes/staff/login'
-import { Route as StaffLayoutRouteImport } from './routes/staff/_layout'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminLayoutRouteImport } from './routes/admin/_layout'
 import { Route as AdminLayoutIndexRouteImport } from './routes/admin/_layout/index'
@@ -37,11 +36,6 @@ const IndexRoute = IndexRouteImport.update({
 const StaffLoginRoute = StaffLoginRouteImport.update({
   id: '/staff/login',
   path: '/staff/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StaffLayoutRoute = StaffLayoutRouteImport.update({
-  id: '/staff/_layout',
-  path: '/staff',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
@@ -130,7 +124,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminLayoutRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
-  '/staff': typeof StaffLayoutRoute
   '/staff/login': typeof StaffLoginRoute
   '/admin/accounts': typeof AdminLayoutAccountsRoute
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
@@ -150,7 +143,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/login': typeof AdminLoginRoute
-  '/staff': typeof StaffLayoutRoute
   '/staff/login': typeof StaffLoginRoute
   '/admin/accounts': typeof AdminLayoutAccountsRoute
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
@@ -172,7 +164,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin/_layout': typeof AdminLayoutRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
-  '/staff/_layout': typeof StaffLayoutRoute
   '/staff/login': typeof StaffLoginRoute
   '/admin/_layout/accounts': typeof AdminLayoutAccountsRoute
   '/admin/_layout/analytics': typeof AdminLayoutAnalyticsRoute
@@ -195,7 +186,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin/login'
-    | '/staff'
     | '/staff/login'
     | '/admin/accounts'
     | '/admin/analytics'
@@ -215,7 +205,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin/login'
-    | '/staff'
     | '/staff/login'
     | '/admin/accounts'
     | '/admin/analytics'
@@ -236,7 +225,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/_layout'
     | '/admin/login'
-    | '/staff/_layout'
     | '/staff/login'
     | '/admin/_layout/accounts'
     | '/admin/_layout/analytics'
@@ -258,7 +246,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminLayoutRoute: typeof AdminLayoutRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
-  StaffLayoutRoute: typeof StaffLayoutRoute
   StaffLoginRoute: typeof StaffLoginRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
@@ -283,13 +270,6 @@ declare module '@tanstack/react-router' {
       path: '/staff/login'
       fullPath: '/staff/login'
       preLoaderRoute: typeof StaffLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/staff/_layout': {
-      id: '/staff/_layout'
-      path: '/staff'
-      fullPath: '/staff'
-      preLoaderRoute: typeof StaffLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/login': {
@@ -435,7 +415,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminLayoutRoute: AdminLayoutRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
-  StaffLayoutRoute: StaffLayoutRoute,
   StaffLoginRoute: StaffLoginRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,
