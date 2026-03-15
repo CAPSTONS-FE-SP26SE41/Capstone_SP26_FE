@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 import { PlaneTakeoff } from "lucide-react"
+import { jwtDecode } from "jwt-decode"
 
 import { login } from "../../services/authService"
 
@@ -16,26 +17,26 @@ function StaffLoginPage() {
   const [password, setPassword] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
-
     e.preventDefault()
 
     try {
 
       const data = await login(email, password)
 
-      console.log("LOGIN DATA:", data)
+      const token = data.token.replace("Bearer ", "")
 
-      if (data.role !== "Staff") {
+      const decoded: any = jwtDecode(token)
+
+      const role =
+        decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
+
+      if (role !== "Staff") {
         alert("This account is not staff")
         return
       }
 
-      localStorage.setItem(
-        "staff_token",
-        data.token.replace("Bearer ", "")
-      )
-
-      localStorage.setItem("role", data.role)
+      localStorage.setItem("staff_token", token)
+      localStorage.setItem("role", role)
 
       navigate({ to: "/staff" })
 
