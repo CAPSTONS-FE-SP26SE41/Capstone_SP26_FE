@@ -93,6 +93,13 @@ function LoginPage() {
 
           </form>
 
+          <button
+            onClick={() => navigate({ to: "/" })}
+            className="mt-6 w-full h-10 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-100"
+          >
+            ← Back to Login Portal
+          </button>
+
         </div>
 
       </div>

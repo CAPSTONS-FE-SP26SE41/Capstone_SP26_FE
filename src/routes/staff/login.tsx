@@ -3,6 +3,7 @@ import { useState } from "react"
 import { PlaneTakeoff } from "lucide-react"
 import { jwtDecode } from "jwt-decode"
 
+
 import { login } from "../../services/authService"
 
 export const Route = createFileRoute("/staff/login")({
@@ -98,6 +99,13 @@ function StaffLoginPage() {
             </button>
 
           </form>
+
+          <button
+            onClick={() => navigate({ to: "/" })}
+            className="mt-6 w-full h-10 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-100"
+          >
+            ← Back to Login Portal
+          </button>
 
         </div>
 
