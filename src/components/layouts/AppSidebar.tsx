@@ -67,14 +67,16 @@ export default function AppSidebar({
               className="group flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-medium transition-all hover:bg-slate-50"
               activeProps={{
                 className:
-                  'flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-50 text-blue-600 font-semibold',
+                  'group flex items-center gap-3 px-4 py-3 rounded-xl bg-[#5ab473] text-white font-semibold',
               }}
             >
               <Icon
                 size={20}
-                className="transition-colors group-hover:text-blue-600"
+                className="transition-colors group-hover:text-[#5ab473] group-[.active]:text-white"
               />
-              <span className="text-sm">{item.label}</span>
+              <span className="text-sm group-hover:text-[#5ab473] group-[.active]:text-white">
+                {item.label}
+              </span>
             </Link>
           )
         })}

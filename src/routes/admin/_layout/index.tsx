@@ -51,7 +51,7 @@ function AdminDashboard() {
   ]
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
+    <div className="min-h-screen bg-white p-8">
 
       {/* Header */}
       <div className="mb-8">
@@ -93,7 +93,7 @@ function AdminDashboard() {
           <h3 className="text-lg font-semibold text-slate-800">
             Recent Trip Activity
           </h3>
-          <button className="text-sm font-semibold text-blue-600 hover:text-blue-700">
+          <button className="text-sm font-semibold text-blue-600 hover:text-blue-700 bg-[#5ab473]/10 px-3 py-1.5 rounded-lg">
             View All
           </button>
         </div>

@@ -24,7 +24,7 @@ export default function DashboardLayout({
   searchPlaceholder,
 }: DashboardLayoutProps) {
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-white">
       {/* Sidebar */}
       <AppSidebar
         brand={brand}

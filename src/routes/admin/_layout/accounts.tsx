@@ -277,7 +277,7 @@ ${account.status === "Active"
 
           </table>
         </div>
-        <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-[#f8fafc]">
+        <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-white">
 
           <span className="text-sm text-text-secondary">
             Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, accounts.length)} of {accounts.length} accounts

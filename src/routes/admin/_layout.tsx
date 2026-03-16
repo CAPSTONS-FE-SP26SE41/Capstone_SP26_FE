@@ -30,13 +30,10 @@ function AdminLayout() {
         icon: PlaneTakeoff,
       }}
       navItems={[
-        { to: '/admin', icon: LayoutDashboard, label: 'Overview', exact: true },
-        { to: '/admin/accounts', icon: UserCog, label: 'Accounts' },
-        { to: '/admin/bookings', icon: Calendar, label: 'Bookings' },
-        { to: '/admin/destinations', icon: Map, label: 'Destinations' },
+        { to: '/admin/accounts', icon: UserCog, label: 'Account', exact: true },
+        { to: '/admin/subscriptions', icon: CreditCard, label: 'Subscription' },
+        { to: '/admin/settings', icon: Settings, label: 'System' },
         { to: '/admin/analytics', icon: BarChart2, label: 'Analytics' },
-        { to: '/admin/settings', icon: Settings, label: 'Settings' },
-        { to: '/admin/subscriptions', icon: CreditCard, label: 'Subscriptions' },
       ]}
       logoutTo="/admin/login"
       logoutTokenKey="admin_token"
