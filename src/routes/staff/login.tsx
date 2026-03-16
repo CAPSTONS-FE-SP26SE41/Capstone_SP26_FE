@@ -1,14 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 import { PlaneTakeoff } from "lucide-react"
+import { jwtDecode } from "jwt-decode"
+
 
 import { login } from "../../services/authService"
 
-export const Route = createFileRoute("/admin/login")({
-  component: LoginPage,
+export const Route = createFileRoute("/staff/login")({
+  component: StaffLoginPage,
 })
 
-function LoginPage() {
+function StaffLoginPage() {
 
   const navigate = useNavigate()
 
@@ -16,27 +18,32 @@ function LoginPage() {
   const [password, setPassword] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
-
     e.preventDefault()
 
     try {
 
       const data = await login(email, password)
 
-      console.log("LOGIN DATA:", data)
+      const token = data.token.replace("Bearer ", "")
 
-      localStorage.setItem(
-        "admin_token",
-        data.token.replace("Bearer ", "")
-      )
-      localStorage.setItem("role", data.role)
+      const decoded: any = jwtDecode(token)
 
-      navigate({ to: "/admin" })
+      const role =
+        decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
+
+      if (role !== "Staff") {
+        alert("This account is not staff")
+        return
+      }
+
+      localStorage.setItem("staff_token", token)
+      localStorage.setItem("role", role)
+
+      navigate({ to: "/staff" })
 
     } catch (error) {
 
       console.log(error)
-
       alert("Login failed")
 
     }
@@ -55,7 +62,7 @@ function LoginPage() {
           </div>
 
           <h2 className="text-3xl font-bold text-slate-900">
-            Admin Portal
+            Staff Portal
           </h2>
 
           <p className="text-slate-500 text-sm mt-2 text-center">
@@ -70,7 +77,7 @@ function LoginPage() {
 
             <input
               type="email"
-              placeholder="admin@travelapp.com"
+              placeholder="staff@travelapp.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="h-12 px-4 rounded-xl border border-slate-300"
@@ -105,6 +112,5 @@ function LoginPage() {
       </div>
 
     </div>
-
   )
 }

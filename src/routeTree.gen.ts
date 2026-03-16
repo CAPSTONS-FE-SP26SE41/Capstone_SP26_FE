@@ -10,10 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as StaffIndexRouteImport } from './routes/staff/index'
+import { Route as StaffLoginRouteImport } from './routes/staff/login'
+import { Route as StaffLayoutRouteImport } from './routes/staff/_layout'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminLayoutRouteImport } from './routes/admin/_layout'
+import { Route as StaffLayoutIndexRouteImport } from './routes/staff/_layout/index'
 import { Route as AdminLayoutIndexRouteImport } from './routes/admin/_layout/index'
+import { Route as StaffLayoutAdvertisementsRouteImport } from './routes/staff/_layout/advertisements'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
@@ -33,9 +36,14 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StaffIndexRoute = StaffIndexRouteImport.update({
-  id: '/staff/',
-  path: '/staff/',
+const StaffLoginRoute = StaffLoginRouteImport.update({
+  id: '/staff/login',
+  path: '/staff/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaffLayoutRoute = StaffLayoutRouteImport.update({
+  id: '/staff/_layout',
+  path: '/staff',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
@@ -48,11 +56,22 @@ const AdminLayoutRoute = AdminLayoutRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StaffLayoutIndexRoute = StaffLayoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StaffLayoutRoute,
+} as any)
 const AdminLayoutIndexRoute = AdminLayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminLayoutRoute,
 } as any)
+const StaffLayoutAdvertisementsRoute =
+  StaffLayoutAdvertisementsRouteImport.update({
+    id: '/advertisements',
+    path: '/advertisements',
+    getParentRoute: () => StaffLayoutRoute,
+  } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
   id: '/demo/start/server-funcs',
   path: '/demo/start/server-funcs',
@@ -124,7 +143,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminLayoutRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
-  '/staff/': typeof StaffIndexRoute
+  '/staff': typeof StaffLayoutRouteWithChildren
+  '/staff/login': typeof StaffLoginRoute
   '/admin/accounts': typeof AdminLayoutAccountsRoute
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/bookings': typeof AdminLayoutBookingsRoute
@@ -134,7 +154,9 @@ export interface FileRoutesByFullPath {
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/staff/advertisements': typeof StaffLayoutAdvertisementsRoute
   '/admin/': typeof AdminLayoutIndexRoute
+  '/staff/': typeof StaffLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -143,7 +165,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/login': typeof AdminLoginRoute
-  '/staff': typeof StaffIndexRoute
+  '/staff/login': typeof StaffLoginRoute
   '/admin/accounts': typeof AdminLayoutAccountsRoute
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/bookings': typeof AdminLayoutBookingsRoute
@@ -153,7 +175,9 @@ export interface FileRoutesByTo {
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/staff/advertisements': typeof StaffLayoutAdvertisementsRoute
   '/admin': typeof AdminLayoutIndexRoute
+  '/staff': typeof StaffLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -164,7 +188,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin/_layout': typeof AdminLayoutRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
-  '/staff/': typeof StaffIndexRoute
+  '/staff/_layout': typeof StaffLayoutRouteWithChildren
+  '/staff/login': typeof StaffLoginRoute
   '/admin/_layout/accounts': typeof AdminLayoutAccountsRoute
   '/admin/_layout/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/_layout/bookings': typeof AdminLayoutBookingsRoute
@@ -174,7 +199,9 @@ export interface FileRoutesById {
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/staff/_layout/advertisements': typeof StaffLayoutAdvertisementsRoute
   '/admin/_layout/': typeof AdminLayoutIndexRoute
+  '/staff/_layout/': typeof StaffLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -186,7 +213,8 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin/login'
-    | '/staff/'
+    | '/staff'
+    | '/staff/login'
     | '/admin/accounts'
     | '/admin/analytics'
     | '/admin/bookings'
@@ -196,7 +224,9 @@ export interface FileRouteTypes {
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/staff/advertisements'
     | '/admin/'
+    | '/staff/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -205,7 +235,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin/login'
-    | '/staff'
+    | '/staff/login'
     | '/admin/accounts'
     | '/admin/analytics'
     | '/admin/bookings'
@@ -215,7 +245,9 @@ export interface FileRouteTypes {
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/staff/advertisements'
     | '/admin'
+    | '/staff'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -225,7 +257,8 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/_layout'
     | '/admin/login'
-    | '/staff/'
+    | '/staff/_layout'
+    | '/staff/login'
     | '/admin/_layout/accounts'
     | '/admin/_layout/analytics'
     | '/admin/_layout/bookings'
@@ -235,7 +268,9 @@ export interface FileRouteTypes {
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/staff/_layout/advertisements'
     | '/admin/_layout/'
+    | '/staff/_layout/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -246,7 +281,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminLayoutRoute: typeof AdminLayoutRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
-  StaffIndexRoute: typeof StaffIndexRoute
+  StaffLayoutRoute: typeof StaffLayoutRouteWithChildren
+  StaffLoginRoute: typeof StaffLoginRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
   DemoStartServerFuncsRoute: typeof DemoStartServerFuncsRoute
@@ -265,11 +301,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/staff/': {
-      id: '/staff/'
+    '/staff/login': {
+      id: '/staff/login'
+      path: '/staff/login'
+      fullPath: '/staff/login'
+      preLoaderRoute: typeof StaffLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/staff/_layout': {
+      id: '/staff/_layout'
       path: '/staff'
-      fullPath: '/staff/'
-      preLoaderRoute: typeof StaffIndexRouteImport
+      fullPath: '/staff'
+      preLoaderRoute: typeof StaffLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/login': {
@@ -286,12 +329,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/staff/_layout/': {
+      id: '/staff/_layout/'
+      path: '/'
+      fullPath: '/staff/'
+      preLoaderRoute: typeof StaffLayoutIndexRouteImport
+      parentRoute: typeof StaffLayoutRoute
+    }
     '/admin/_layout/': {
       id: '/admin/_layout/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminLayoutIndexRouteImport
       parentRoute: typeof AdminLayoutRoute
+    }
+    '/staff/_layout/advertisements': {
+      id: '/staff/_layout/advertisements'
+      path: '/advertisements'
+      fullPath: '/staff/advertisements'
+      preLoaderRoute: typeof StaffLayoutAdvertisementsRouteImport
+      parentRoute: typeof StaffLayoutRoute
     }
     '/demo/start/server-funcs': {
       id: '/demo/start/server-funcs'
@@ -411,11 +468,26 @@ const AdminLayoutRouteWithChildren = AdminLayoutRoute._addFileChildren(
   AdminLayoutRouteChildren,
 )
 
+interface StaffLayoutRouteChildren {
+  StaffLayoutAdvertisementsRoute: typeof StaffLayoutAdvertisementsRoute
+  StaffLayoutIndexRoute: typeof StaffLayoutIndexRoute
+}
+
+const StaffLayoutRouteChildren: StaffLayoutRouteChildren = {
+  StaffLayoutAdvertisementsRoute: StaffLayoutAdvertisementsRoute,
+  StaffLayoutIndexRoute: StaffLayoutIndexRoute,
+}
+
+const StaffLayoutRouteWithChildren = StaffLayoutRoute._addFileChildren(
+  StaffLayoutRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminLayoutRoute: AdminLayoutRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
-  StaffIndexRoute: StaffIndexRoute,
+  StaffLayoutRoute: StaffLayoutRouteWithChildren,
+  StaffLoginRoute: StaffLoginRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,
   DemoStartServerFuncsRoute: DemoStartServerFuncsRoute,

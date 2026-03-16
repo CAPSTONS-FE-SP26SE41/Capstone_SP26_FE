@@ -5,19 +5,23 @@ export const apiClient = async (
   options: RequestInit = {}
 ) => {
 
-  const token = localStorage.getItem("admin_token")
+  // lấy token của admin hoặc staff
+  const token =
+    localStorage.getItem("admin_token") ||
+    localStorage.getItem("staff_token")
 
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      Authorization: token ? `Bearer ${token}` : "",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
   })
 
   if (!res.ok) {
-    throw new Error("API Error")
+    const errorText = await res.text()
+    throw new Error(errorText || "API Error")
   }
 
   const contentType = res.headers.get("content-type")
@@ -25,7 +29,6 @@ export const apiClient = async (
   if (contentType && contentType.includes("application/json")) {
     return res.json()
   }
-
 
   return res.text()
 }
