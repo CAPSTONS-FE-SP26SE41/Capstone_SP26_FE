@@ -16,8 +16,8 @@ export const filterAccounts = (params: FilterAccountParams = {}) => {
   const query = new URLSearchParams()
   if (params.page) query.append("page", params.page.toString())
   if (params.pageSize) query.append("pageSize", params.pageSize.toString())
-  if (params.keyword) query.append("keyword", params.keyword)
-  if (params.role && params.role !== "Role") query.append("role", params.role)
+  if (params.keyword) query.append("name", params.keyword)
+  if (params.role && params.role !== "Role") query.append("roleName", params.role.trim())
   if (params.status && params.status !== "Status") query.append("status", params.status)
   
   return apiClient(`/admin/accounts/filter?${query.toString()}`)

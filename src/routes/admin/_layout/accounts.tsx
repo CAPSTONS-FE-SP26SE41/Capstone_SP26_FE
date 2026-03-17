@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import {
   Plus,
   Search,
@@ -35,9 +36,24 @@ function FilterDropdown({
   isOpen: boolean,
   onToggle: (e: React.MouseEvent) => void
 }) {
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0 })
+
+  useEffect(() => {
+    if (!isOpen || !buttonRef.current) return
+
+    const rect = buttonRef.current.getBoundingClientRect()
+    setMenuPosition({
+      top: rect.bottom + 8,
+      left: rect.left,
+      width: rect.width
+    })
+  }, [isOpen])
+
   return (
     <div className="relative inline-block">
       <button
+        ref={buttonRef}
         onClick={onToggle}
         className="flex items-center gap-1.5 bg-transparent border-none outline-none hover:text-slate-800 transition-colors text-inherit font-inherit"
       >
@@ -45,8 +61,11 @@ function FilterDropdown({
         <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
-      {isOpen && (
-        <div className="absolute left-0 top-full mt-2 w-36 bg-white border border-slate-100 rounded-xl shadow-lg z-[999] py-1.5 overflow-hidden font-normal text-sm normal-case tracking-normal">
+      {isOpen && createPortal(
+        <div
+          className="fixed z-[9999] w-36 bg-white border border-slate-100 rounded-xl shadow-lg py-1.5 overflow-hidden font-normal text-sm normal-case tracking-normal"
+          style={{ top: menuPosition.top, left: menuPosition.left }}
+        >
           {options.map((opt) => (
             <button
               key={opt}
@@ -58,7 +77,8 @@ function FilterDropdown({
               {opt}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
@@ -87,22 +107,34 @@ function AccountsPage() {
   const [roleFilter, setRoleFilter] = useState("Role")
   const [statusFilter, setStatusFilter] = useState("Status")
   const [searchKeyword, setSearchKeyword] = useState("")
-  const [appliedKeyword, setAppliedKeyword] = useState("")
+  const [debouncedKeyword, setDebouncedKeyword] = useState("")
   const itemsPerPage = 10
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedKeyword(searchKeyword)
+      setCurrentPage(1)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchKeyword])
+
+  useEffect(() => {
     const fetchAccounts = async () => {
-      setLoading(true)
+      if (accounts.length === 0) {
+        setLoading(true)
+      }
       try {
-        const trimmedKeyword = appliedKeyword.trim()
-        const isFiltering = trimmedKeyword !== "" || roleFilter !== "Role" || statusFilter !== "Status"
+        const trimmedKeyword = debouncedKeyword.trim()
+        const hasSearch = trimmedKeyword.length >= 2
+        const isFiltering = hasSearch || roleFilter !== "Role" || statusFilter !== "Status"
         let data
 
         if (isFiltering) {
           data = await filterAccounts({
             page: currentPage,
             pageSize: itemsPerPage,
-            keyword: trimmedKeyword,
+            keyword: hasSearch ? trimmedKeyword : "",
             role: roleFilter,
             status: statusFilter
           })
@@ -146,12 +178,14 @@ function AccountsPage() {
       } catch (error) {
         console.error("Failed to fetch accounts", error)
       } finally {
-        setLoading(false)
+        if (accounts.length === 0) {
+          setLoading(false)
+        }
       }
     }
 
     fetchAccounts()
-  }, [currentPage, roleFilter, statusFilter, appliedKeyword])
+  }, [currentPage, roleFilter, statusFilter, debouncedKeyword])
 
   const handleDisable = async (id: string) => {
     try {
@@ -223,12 +257,6 @@ function AccountsPage() {
               placeholder="Search by name or email..."
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  setAppliedKeyword(searchKeyword)
-                  setCurrentPage(1)
-                }
-              }}
             />
           </div>
         </div>
@@ -242,8 +270,8 @@ function AccountsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-visible">
+        <div className="overflow-x-auto overflow-y-visible">
           <table className="w-full text-left">
 
 
