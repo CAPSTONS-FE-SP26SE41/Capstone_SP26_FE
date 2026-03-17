@@ -3,10 +3,8 @@ import { useEffect, useState } from "react"
 import {
   Plus,
   Search,
-  Pencil,
   UserX,
   UserCheck,
-  MoreVertical,
   ChevronDown
 } from "lucide-react"
 
@@ -82,7 +80,6 @@ function AccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
-  const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [openFilter, setOpenFilter] = useState<string | null>(null)
   const [roleFilter, setRoleFilter] = useState("Role")
   const [statusFilter, setStatusFilter] = useState("Status")
@@ -119,8 +116,6 @@ function AccountsPage() {
           acc.id === id ? { ...acc, status: "Inactive" } : acc
         )
       )
-
-      setOpenMenu(null)
     } catch (error) {
       console.error("Disable account failed", error)
     }
@@ -135,8 +130,6 @@ function AccountsPage() {
           acc.id === id ? { ...acc, status: "Active" } : acc
         )
       )
-
-      setOpenMenu(null)
     } catch (error) {
       console.error("Activate account failed", error)
     }
@@ -170,7 +163,7 @@ function AccountsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6" onClick={() => { setOpenMenu(null); setOpenFilter(null); }}>
+    <div className="flex flex-col gap-6" onClick={() => { setOpenFilter(null); }}>
 
       {/* Filters & Control Panel */}
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -201,7 +194,7 @@ function AccountsPage() {
 
 
             <thead>
-              <tr className="bg-[#f8fafc] text-text-secondary text-xs uppercase tracking-wider font-semibold border-b border-[#e7edf4]">
+              <tr className="bg-[#F9FAFB] text-text-secondary text-xs uppercase tracking-wider font-semibold border-b border-[#e7edf4]">
                 <th className="px-6 py-4">Account</th>
                 <th className="px-6 py-4">
                   <FilterDropdown
@@ -210,7 +203,7 @@ function AccountsPage() {
                     options={["Role", "Admin", "User", "Staff", "Partner"]}
                     isOpen={openFilter === "role"}
                     onChange={(val) => { setRoleFilter(val); setOpenFilter(null); }}
-                    onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "role" ? null : "role"); setOpenMenu(null); }}
+                    onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "role" ? null : "role"); }}
                   />
                 </th>
                 <th className="px-6 py-4">
@@ -220,7 +213,7 @@ function AccountsPage() {
                     options={["Status", "Active", "Inactive"]}
                     isOpen={openFilter === "status"}
                     onChange={(val) => { setStatusFilter(val); setOpenFilter(null); }}
-                    onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "status" ? null : "status"); setOpenMenu(null); }}
+                    onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "status" ? null : "status"); }}
                   />
                 </th>
                 <th className="px-6 py-4">Created</th>
@@ -233,29 +226,18 @@ function AccountsPage() {
               {currentAccounts.length > 0 ? (
                 currentAccounts.map((account) => (
 
-                  <tr key={account.id} className="hover:bg-[#f8fafc] transition-colors">
+                  <tr key={account.id} className="hover:bg-[#F9FAFB] transition-colors">
 
                     {/* Name */}
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
+                      <div>
+                        <p className="font-medium text-text-main">
+                          {account.name}
+                        </p>
 
-                        <div
-                          className="size-10 rounded-full bg-cover bg-center border border-slate-100"
-                          style={{
-                            backgroundImage: `url("${account.avatarUrl}")`
-                          }}
-                        ></div>
-
-                        <div>
-                          <p className="font-medium text-text-main">
-                            {account.name}
-                          </p>
-
-                          <p className="text-xs text-text-secondary">
-                            {account.email}
-                          </p>
-                        </div>
-
+                        <p className="text-xs text-text-secondary">
+                          {account.email}
+                        </p>
                       </div>
                     </td>
 
@@ -293,52 +275,23 @@ function AccountsPage() {
                     {/* Actions */}
                     <td className="px-6 py-4 text-right">
 
-                      <div className="relative inline-block">
-
+                      {account.status === "Inactive" ? (
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setOpenMenu(openMenu === account.id ? null : account.id)
-                          }}
-                          className="text-text-secondary hover:text-primary p-2 transition-colors"
+                          onClick={(e) => { e.stopPropagation(); handleActivate(account.id); }}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-[#006bd6] bg-[#f0f7ff] hover:bg-[#e0f0ff] rounded-xl transition-colors"
                         >
-                          <MoreVertical size={18} />
+                          <UserCheck size={16} />
+                          Activate
                         </button>
-
-                        {openMenu === account.id && (
-
-                          <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 w-32 bg-white border border-[#e7edf4] rounded-xl shadow-lg z-[999]">
-
-                            <button
-                              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                            >
-                              <Pencil size={16} />
-                              Edit
-                            </button>
-
-                            {account.status === "Inactive" ? (
-                              <button
-                                onClick={() => handleActivate(account.id)}
-                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-50 transition-colors"
-                              >
-                                <UserCheck size={16} />
-                                Activate
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handleDisable(account.id)}
-                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors"
-                              >
-                                <UserX size={16} />
-                                Deactive
-                              </button>
-                            )}
-
-                          </div>
-
-                        )}
-
-                      </div>
+                      ) : (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDisable(account.id); }}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-[#ff0000] bg-[#ffe4e6] hover:bg-[#fecdd3] rounded-xl transition-colors"
+                        >
+                          <UserX size={16} />
+                          Deactive
+                        </button>
+                      )}
 
                     </td>
 
