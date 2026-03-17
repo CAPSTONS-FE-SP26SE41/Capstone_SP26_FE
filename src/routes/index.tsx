@@ -31,9 +31,24 @@ function LoginPortalPage() {
       const role =
         decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
 
+      const name =
+        decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] ||
+        decoded.name ||
+        decoded.unique_name ||
+        data?.name ||
+        data?.fullName ||
+        data?.username ||
+        data?.user?.name ||
+        data?.user?.fullName ||
+        data?.user?.username ||
+        decoded.email ||
+        email
+
       if (role === "Staff") {
         localStorage.setItem("staff_token", token)
         localStorage.setItem("role", role)
+        localStorage.setItem("user_name", name)
+        localStorage.setItem("user_role", role)
         navigate({ to: "/staff" })
         return
       }
@@ -41,7 +56,9 @@ function LoginPortalPage() {
       if (role === "Admin" || role === "SuperAdmin") {
         localStorage.setItem("admin_token", token)
         localStorage.setItem("role", role)
-        navigate({ to: "/admin" })
+        localStorage.setItem("user_name", name)
+        localStorage.setItem("user_role", role)
+        navigate({ to: "/admin/analytics" })
         return
       }
 
@@ -54,66 +71,75 @@ function LoginPortalPage() {
   }
 
   return (
+    <div className="login-page">
+      <div className="login-background" data-alt="Scenic mountain lake landscape with a boat">
+        <div className="login-background-overlay" />
+      </div>
 
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 via-blue-50 to-indigo-100 px-4">
-
-      <div className="w-full max-w-120 rounded-2xl bg-white shadow-2xl border border-slate-200">
-
-        <div className="flex flex-col items-center pt-10 pb-6 px-10">
-
-          <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 text-primary">
-            <PlaneTakeoff size={32} />
+      <div className="login-panel">
+        <div className="login-card">
+          <div className="login-brand">
+            <div className="login-brand-icon">
+              <PlaneTakeoff size={32} className="text-[var(--login-primary)]" />
+            </div>
+            <h1 className="login-title">Travel Planner</h1>
           </div>
 
-          <h2 className="text-3xl font-bold text-slate-900">
-            Travel Planner Portal
-          </h2>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="login-field">
+              <label className="login-label">Email</label>
+              <div className="login-input-wrapper">
+                <input
+                  className="login-input login-input-no-icon"
+                  placeholder="Enter your email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
 
-          <p className="text-slate-500 text-sm mt-2 text-center">
-            Please sign in to your dashboard
-          </p>
+            <div className="login-field">
+              <label className="login-label">Password</label>
+              <div className="login-input-wrapper">
+                <input
+                  className="login-input login-input-no-icon"
+                  placeholder="Enter your password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
 
-        </div>
-
-        <div className="px-10 pb-10">
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-
-            <input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-12 px-4 rounded-xl border border-slate-300"
-            />
-
-            <input
-              type="password"
-              placeholder="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="h-12 px-4 rounded-xl border border-slate-300"
-            />
+            <div className="login-meta">
+              <div className="login-remember">
+                <input
+                  className="w-4 h-4 rounded text-[var(--login-primary)] focus:ring-[var(--login-primary)] border-slate-300"
+                  id="remember"
+                  type="checkbox"
+                />
+                <label className="text-sm text-slate-600" htmlFor="remember">
+                  Remember me
+                </label>
+              </div>
+              <button type="button" className="login-forgot">
+                Forgot password?
+              </button>
+            </div>
 
             {errorMessage && (
-              <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-[#ff0000]">
-                {errorMessage}
+              <div className="login-error">
+                <p>{errorMessage}</p>
               </div>
             )}
 
-            <button
-              type="submit"
-              className="h-12 rounded-xl bg-[#5ab473] text-white font-semibold transition-colors hover:bg-[#4fa864] active:bg-[#44965a] active:scale-[0.99]"
-            >
+            <button className="login-button" type="submit">
               Sign In
             </button>
-
           </form>
-
         </div>
-
       </div>
-
     </div>
   )
 }

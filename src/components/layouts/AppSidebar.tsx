@@ -41,8 +41,8 @@ export default function AppSidebar({
       {/* Logo / Brand */}
       <div className="p-6">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-100 flex items-center justify-center rounded-xl h-10 w-10">
-            <BrandIcon size={24} className="text-blue-600" />
+          <div className="bg-[#e9f5ed] flex items-center justify-center rounded-xl h-10 w-10">
+            <BrandIcon size={24} className="text-[#5ab473]" />
           </div>
           <div>
             <h1 className="text-lg font-bold text-slate-800">
