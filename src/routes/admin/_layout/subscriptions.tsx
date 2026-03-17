@@ -44,7 +44,7 @@ function FilterDropdown({
     <div className="relative inline-block">
       <button
         onClick={onToggle}
-        className="flex items-center gap-1.5 bg-transparent border-none outline-none font-semibold text-text-secondary hover:text-slate-800 transition-colors uppercase tracking-wider text-xs"
+        className="flex items-center gap-1.5 bg-transparent border-none outline-none hover:text-slate-800 transition-colors text-inherit font-inherit"
       >
         {value === label ? label : value}
         <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
@@ -244,12 +244,12 @@ function SubscriptionsPage() {
           <table className="w-full text-left border-collapse">
 
             <thead>
-              <tr className="bg-[#f8fafc] text-text-secondary text-xs uppercase tracking-wider font-semibold border-b border-[#e7edf4]">
-                <th className="px-6 py-4">Package</th>
-                <th className="px-6 py-4">Price</th>
-                <th className="px-6 py-4">Duration</th>
-                <th className="px-6 py-4">Max Ads</th>
-                <th className="px-6 py-4">
+              <tr className="bg-[#f8fafc] border-b border-[#e7edf4]">
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">Package</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">Price</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">Duration</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">Max Ads</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">
                   <FilterDropdown
                     label="Status"
                     value={statusFilter}
@@ -259,7 +259,7 @@ function SubscriptionsPage() {
                     onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "status" ? null : "status"); setOpenMenu(null); }}
                   />
                 </th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-right">Actions</th>
               </tr>
             </thead>
 
@@ -294,7 +294,7 @@ function SubscriptionsPage() {
 
                       <span
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
-                        ${sub.status === "Active"
+                        ${sub.status?.toLowerCase() === "active"
                             ? "bg-emerald-100 text-emerald-700"
                             : "bg-slate-100 text-slate-600"
                           }`}
@@ -302,7 +302,7 @@ function SubscriptionsPage() {
 
                         <span className="size-1.5 rounded-full bg-current"></span>
 
-                        {sub.status === "active" ? "Active" : sub.status}
+                        {sub.status?.toLowerCase() === "active" ? "Active" : sub.status}
 
                       </span>
 

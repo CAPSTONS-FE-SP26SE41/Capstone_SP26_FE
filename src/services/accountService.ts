@@ -1,7 +1,26 @@
 import { apiClient } from "../../api/apiClient"
 
-export const getAccounts = () => {
-  return apiClient("/admin/accounts")
+export const getAccounts = (page: number = 1, pageSize: number = 10) => {
+  return apiClient(`/auth/all?page=${page}&pageSize=${pageSize}`)
+}
+
+export interface FilterAccountParams {
+  page?: number
+  pageSize?: number
+  keyword?: string
+  role?: string
+  status?: string
+}
+
+export const filterAccounts = (params: FilterAccountParams = {}) => {
+  const query = new URLSearchParams()
+  if (params.page) query.append("page", params.page.toString())
+  if (params.pageSize) query.append("pageSize", params.pageSize.toString())
+  if (params.keyword) query.append("keyword", params.keyword)
+  if (params.role && params.role !== "Role") query.append("role", params.role)
+  if (params.status && params.status !== "Status") query.append("status", params.status)
+  
+  return apiClient(`/admin/accounts/filter?${query.toString()}`)
 }
 
 export const activateAccount = (id: string) => {

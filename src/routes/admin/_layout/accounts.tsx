@@ -12,6 +12,7 @@ import {
   getAccounts,
   deactivateAccount,
   activateAccount,
+  filterAccounts
 } from "../../../services/accountService"
 
 export const Route = createFileRoute("/admin/_layout/accounts")({
@@ -38,7 +39,7 @@ function FilterDropdown({
     <div className="relative inline-block">
       <button
         onClick={onToggle}
-        className="flex items-center gap-1.5 bg-transparent border-none outline-none font-semibold text-text-secondary hover:text-slate-800 transition-colors uppercase tracking-wider text-xs"
+        className="flex items-center gap-1.5 bg-transparent border-none outline-none hover:text-slate-800 transition-colors text-inherit font-inherit"
       >
         {value === label ? label : value}
         <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
@@ -80,19 +81,64 @@ function AccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalAccounts, setTotalAccounts] = useState(0)
   const [openFilter, setOpenFilter] = useState<string | null>(null)
   const [roleFilter, setRoleFilter] = useState("Role")
   const [statusFilter, setStatusFilter] = useState("Status")
+  const [searchKeyword, setSearchKeyword] = useState("")
+  const [appliedKeyword, setAppliedKeyword] = useState("")
   const itemsPerPage = 10
 
   useEffect(() => {
     const fetchAccounts = async () => {
+      setLoading(true)
       try {
-        const data = await getAccounts()
+        const trimmedKeyword = appliedKeyword.trim()
+        const isFiltering = trimmedKeyword !== "" || roleFilter !== "Role" || statusFilter !== "Status"
+        let data
 
-        const formatted = data.map((acc: any) => ({
-          ...acc,
-          status: acc.isActive ? "Active" : "Inactive"
+        if (isFiltering) {
+          data = await filterAccounts({
+            page: currentPage,
+            pageSize: itemsPerPage,
+            keyword: trimmedKeyword,
+            role: roleFilter,
+            status: statusFilter
+          })
+        } else {
+          data = await getAccounts(currentPage, itemsPerPage)
+        }
+        
+        console.log("Raw data from API:", data)
+
+        // Phân loại data có dùng items (Backend list)
+        const listToMap = Array.isArray(data) ? data : (data?.items || data?.data || [])
+        
+        // Setup pagination numbers tu server trả ra, nếu ko có thì fallback
+        const _totalAccounts = data?.total || listToMap.length;
+        const _totalPages = data?.totalPages || Math.ceil(_totalAccounts / itemsPerPage);
+        
+        setTotalAccounts(_totalAccounts)
+        setTotalPages(_totalPages)
+
+        if (!Array.isArray(listToMap)) {
+           console.error("Data is still not an array! Check the console.")
+           setAccounts([])
+           return
+        }
+
+        const formatted = listToMap.map((acc: any) => ({
+          id: acc.id,
+          name: acc.profile?.name || acc.name || acc.fullName || "User",
+          email: acc.email,
+          avatarUrl: acc.profile?.avtUrl || acc.avatarUrl || "",
+          role: {
+            id: "",
+            name: acc.roleName || "User"
+          },
+          status: (acc.isActive ? "Active" : "Inactive") as "Active" | "Inactive",
+          createdAt: acc.createdAt
         }))
 
         setAccounts(formatted)
@@ -105,7 +151,7 @@ function AccountsPage() {
     }
 
     fetchAccounts()
-  }, [])
+  }, [currentPage, roleFilter, statusFilter, appliedKeyword])
 
   const handleDisable = async (id: string) => {
     try {
@@ -143,9 +189,9 @@ function AccountsPage() {
     )
   }
 
-  const totalPages = Math.ceil(accounts.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
-  const currentAccounts = accounts.slice(startIndex, startIndex + itemsPerPage)
+  // No slice here: Backend đã trả sẵn 1 page rồi
+  const currentAccounts = accounts
 
   const getRoleStyle = (roleName: string) => {
     switch (roleName.trim().toUpperCase()) {
@@ -175,6 +221,14 @@ function AccountsPage() {
             <input
               className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               placeholder="Search by name or email..."
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setAppliedKeyword(searchKeyword)
+                  setCurrentPage(1)
+                }
+              }}
             />
           </div>
         </div>
@@ -194,51 +248,56 @@ function AccountsPage() {
 
 
             <thead>
-              <tr className="bg-[#F9FAFB] text-text-secondary text-xs uppercase tracking-wider font-semibold border-b border-[#e7edf4]">
-                <th className="px-6 py-4">Account</th>
-                <th className="px-6 py-4">
+              <tr className="bg-[#F9FAFB] border-b border-[#e7edf4]">
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">No.</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">Email</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">Name</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">
                   <FilterDropdown
                     label="Role"
                     value={roleFilter}
                     options={["Role", "Admin", "User", "Staff", "Partner"]}
                     isOpen={openFilter === "role"}
-                    onChange={(val) => { setRoleFilter(val); setOpenFilter(null); }}
+                    onChange={(val) => { setRoleFilter(val); setOpenFilter(null); setCurrentPage(1); }}
                     onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "role" ? null : "role"); }}
                   />
                 </th>
-                <th className="px-6 py-4">
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">
                   <FilterDropdown
                     label="Status"
                     value={statusFilter}
                     options={["Status", "Active", "Inactive"]}
                     isOpen={openFilter === "status"}
-                    onChange={(val) => { setStatusFilter(val); setOpenFilter(null); }}
+                    onChange={(val) => { setStatusFilter(val); setOpenFilter(null); setCurrentPage(1); }}
                     onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "status" ? null : "status"); }}
                   />
                 </th>
-                <th className="px-6 py-4">Created</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-right">Actions</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-[#e7edf4]">
 
               {currentAccounts.length > 0 ? (
-                currentAccounts.map((account) => (
+                currentAccounts.map((account, index) => (
 
                   <tr key={account.id} className="hover:bg-[#F9FAFB] transition-colors">
 
+                    {/* STT */}
+                    <td className="px-6 py-4 text-sm text-text-secondary">
+                      {startIndex + index + 1}
+                    </td>
+
+                    {/* Email */}
+                    <td className="px-6 py-4 text-sm text-text-secondary">
+                      {account.email}
+                    </td>
+
                     {/* Name */}
                     <td className="px-6 py-4">
-                      <div>
-                        <p className="font-medium text-text-main">
-                          {account.name}
-                        </p>
-
-                        <p className="text-xs text-text-secondary">
-                          {account.email}
-                        </p>
-                      </div>
+                      <span className="font-medium text-text-main">
+                        {account.name}
+                      </span>
                     </td>
 
                     {/* Role */}
@@ -265,11 +324,6 @@ function AccountsPage() {
                         {account.status}
                       </span>
 
-                    </td>
-
-                    {/* Created */}
-                    <td className="px-6 py-4 text-sm text-text-secondary">
-                      {new Date(account.createdAt).toLocaleDateString("en-GB")}
                     </td>
 
                     {/* Actions */}
@@ -301,7 +355,7 @@ function AccountsPage() {
               ) : (
 
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-text-secondary">
+                  <td colSpan={6} className="px-6 py-12 text-center text-text-secondary">
 
                     <div className="flex flex-col items-center justify-center gap-2">
 
@@ -331,7 +385,7 @@ function AccountsPage() {
         <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-white">
 
           <span className="text-sm text-text-secondary">
-            Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, accounts.length)} of {accounts.length} accounts
+            Showing {accounts.length > 0 ? startIndex + 1 : 0} - {startIndex + accounts.length} of {totalAccounts} accounts
           </span>
 
           <div className="flex gap-2">
