@@ -1,23 +1,88 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import {
   Plus,
-  MoreVertical,
-  Eye,
-  Pencil,
+  Search,
   UserX,
   UserCheck,
+  ChevronDown
 } from "lucide-react"
 
 import {
   getAccounts,
   deactivateAccount,
   activateAccount,
+  filterAccounts
 } from "../../../services/accountService"
 
 export const Route = createFileRoute("/admin/_layout/accounts")({
   component: AccountsPage,
 })
+
+// Custom reusable Filter Dropdown component
+function FilterDropdown({ 
+  label, 
+  value, 
+  options, 
+  onChange, 
+  isOpen, 
+  onToggle 
+}: { 
+  label: string, 
+  value: string, 
+  options: string[], 
+  onChange: (val: string) => void,
+  isOpen: boolean,
+  onToggle: (e: React.MouseEvent) => void
+}) {
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0 })
+
+  useEffect(() => {
+    if (!isOpen || !buttonRef.current) return
+
+    const rect = buttonRef.current.getBoundingClientRect()
+    setMenuPosition({
+      top: rect.bottom + 8,
+      left: rect.left,
+      width: rect.width
+    })
+  }, [isOpen])
+
+  return (
+    <div className="relative inline-block">
+      <button
+        ref={buttonRef}
+        onClick={onToggle}
+        className="flex items-center gap-1.5 bg-transparent border-none outline-none hover:text-slate-800 transition-colors text-inherit font-inherit"
+      >
+        {value === label ? label : value}
+        <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+
+      {isOpen && createPortal(
+        <div
+          className="fixed z-[9999] w-36 bg-white border border-slate-100 rounded-xl shadow-lg py-1.5 overflow-hidden font-normal text-sm normal-case tracking-normal"
+          style={{ top: menuPosition.top, left: menuPosition.left }}
+        >
+          {options.map((opt) => (
+            <button
+              key={opt}
+              onClick={() => {
+                onChange(opt)
+              }}
+              className={`w-full text-left px-4 py-2 hover:bg-[#e9f5ed] hover:text-[#5ab473] transition-colors ${value === opt ? "bg-[#e9f5ed]/50 text-[#5ab473] font-medium" : "text-slate-700"}`}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>,
+        document.body
+      )}
+    </div>
+  )
+}
 
 type Account = {
   id: string
@@ -28,25 +93,84 @@ type Account = {
     id: string
     name: string
   }
-  status: "Active" | "Suspended"
+  status: "Active" | "Inactive"
   createdAt: string
 }
 
 function AccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
-  const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalAccounts, setTotalAccounts] = useState(0)
+  const [openFilter, setOpenFilter] = useState<string | null>(null)
+  const [roleFilter, setRoleFilter] = useState("Role")
+  const [statusFilter, setStatusFilter] = useState("Status")
+  const [searchKeyword, setSearchKeyword] = useState("")
+  const [debouncedKeyword, setDebouncedKeyword] = useState("")
   const itemsPerPage = 10
 
   useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const data = await getAccounts()
+    const timer = setTimeout(() => {
+      setDebouncedKeyword(searchKeyword)
+      setCurrentPage(1)
+    }, 300)
 
-        const formatted = data.map((acc: any) => ({
-          ...acc,
-          status: acc.isActive ? "Active" : "Suspended"
+    return () => clearTimeout(timer)
+  }, [searchKeyword])
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      if (accounts.length === 0) {
+        setLoading(true)
+      }
+      try {
+        const trimmedKeyword = debouncedKeyword.trim()
+        const hasSearch = trimmedKeyword.length >= 2
+        const isFiltering = hasSearch || roleFilter !== "Role" || statusFilter !== "Status"
+        let data
+
+        if (isFiltering) {
+          data = await filterAccounts({
+            page: currentPage,
+            pageSize: itemsPerPage,
+            keyword: hasSearch ? trimmedKeyword : "",
+            role: roleFilter,
+            status: statusFilter
+          })
+        } else {
+          data = await getAccounts(currentPage, itemsPerPage)
+        }
+        
+        console.log("Raw data from API:", data)
+
+        // Phân loại data có dùng items (Backend list)
+        const listToMap = Array.isArray(data) ? data : (data?.items || data?.data || [])
+        
+        // Setup pagination numbers tu server trả ra, nếu ko có thì fallback
+        const _totalAccounts = data?.total || listToMap.length;
+        const _totalPages = data?.totalPages || Math.ceil(_totalAccounts / itemsPerPage);
+        
+        setTotalAccounts(_totalAccounts)
+        setTotalPages(_totalPages)
+
+        if (!Array.isArray(listToMap)) {
+           console.error("Data is still not an array! Check the console.")
+           setAccounts([])
+           return
+        }
+
+        const formatted = listToMap.map((acc: any) => ({
+          id: acc.id,
+          name: acc.profile?.name || acc.name || acc.fullName || "User",
+          email: acc.email,
+          avatarUrl: acc.profile?.avtUrl || acc.avatarUrl || "",
+          role: {
+            id: "",
+            name: acc.roleName || "User"
+          },
+          status: (acc.isActive ? "Active" : "Inactive") as "Active" | "Inactive",
+          createdAt: acc.createdAt
         }))
 
         setAccounts(formatted)
@@ -54,12 +178,14 @@ function AccountsPage() {
       } catch (error) {
         console.error("Failed to fetch accounts", error)
       } finally {
-        setLoading(false)
+        if (accounts.length === 0) {
+          setLoading(false)
+        }
       }
     }
 
     fetchAccounts()
-  }, [])
+  }, [currentPage, roleFilter, statusFilter, debouncedKeyword])
 
   const handleDisable = async (id: string) => {
     try {
@@ -67,11 +193,9 @@ function AccountsPage() {
 
       setAccounts((prev) =>
         prev.map((acc) =>
-          acc.id === id ? { ...acc, status: "Suspended" } : acc
+          acc.id === id ? { ...acc, status: "Inactive" } : acc
         )
       )
-
-      setOpenMenu(null)
     } catch (error) {
       console.error("Disable account failed", error)
     }
@@ -86,8 +210,6 @@ function AccountsPage() {
           acc.id === id ? { ...acc, status: "Active" } : acc
         )
       )
-
-      setOpenMenu(null)
     } catch (error) {
       console.error("Activate account failed", error)
     }
@@ -101,78 +223,117 @@ function AccountsPage() {
     )
   }
 
-  const totalPages = Math.ceil(accounts.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
-  const currentAccounts = accounts.slice(startIndex, startIndex + itemsPerPage)
+  // No slice here: Backend đã trả sẵn 1 page rồi
+  const currentAccounts = accounts
+
+  const getRoleStyle = (roleName: string) => {
+    switch (roleName.trim().toUpperCase()) {
+      case "ADMIN":
+        return { backgroundColor: "#F5EEF8", color: "#8E44AD" }
+      case "USER":
+        return { backgroundColor: "#EBF5FB", color: "#3498DB" }
+      case "STAFF":
+        return { backgroundColor: "#FEF5E7", color: "#F39C12" }
+      case "PARTNER":
+        return { backgroundColor: "#EAFAF1", color: "#2ECC71" }
+      default:
+        return { backgroundColor: "#f8fafc", color: "#475569" }
+    }
+  }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6" onClick={() => { setOpenFilter(null); }}>
 
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-text-main">
-            Account Management
-          </h2>
-
-          <p className="text-text-secondary">
-            Manage administrator accounts
-          </p>
+      {/* Filters & Control Panel */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        
+        {/* Search */}
+        <div className="w-full md:max-w-md">
+          <div className="relative">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              placeholder="Search by name or email..."
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+            />
+          </div>
         </div>
 
+        {/* Action Button */}
+        <button className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors">
+          <Plus size={18} />
+          <span className="text-sm">Create New Account</span>
+        </button>
 
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm ">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+      <div className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-visible">
+        <div className="overflow-x-auto overflow-y-visible">
+          <table className="w-full text-left">
 
 
             <thead>
-              <tr className="bg-[#f8fafc] text-text-secondary text-xs uppercase tracking-wider font-semibold border-b border-[#e7edf4]">
-                <th className="px-8 py-4">Name</th>
-                <th className="px-8 py-4">Role</th>
-                <th className="px-8 py-4">Status</th>
-                <th className="px-8 py-4">Created</th>
-                <th className="px-8 py-4 text-right">Actions</th>
+              <tr className="bg-[#F9FAFB] border-b border-[#e7edf4]">
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">No.</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">Email</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">Name</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">
+                  <FilterDropdown
+                    label="Role"
+                    value={roleFilter}
+                    options={["Role", "Admin", "User", "Staff", "Partner"]}
+                    isOpen={openFilter === "role"}
+                    onChange={(val) => { setRoleFilter(val); setOpenFilter(null); setCurrentPage(1); }}
+                    onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "role" ? null : "role"); }}
+                  />
+                </th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">
+                  <FilterDropdown
+                    label="Status"
+                    value={statusFilter}
+                    options={["Status", "Active", "Inactive"]}
+                    isOpen={openFilter === "status"}
+                    onChange={(val) => { setStatusFilter(val); setOpenFilter(null); setCurrentPage(1); }}
+                    onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "status" ? null : "status"); }}
+                  />
+                </th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-right">Actions</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-[#e7edf4]">
 
-              {accounts.length > 0 ? (
-                accounts.map((account) => (
+              {currentAccounts.length > 0 ? (
+                currentAccounts.map((account, index) => (
 
-                  <tr key={account.id} className="hover:bg-[#f8fafc] transition-colors">
+                  <tr key={account.id} className="hover:bg-[#F9FAFB] transition-colors">
+
+                    {/* STT */}
+                    <td className="px-6 py-4 text-sm text-text-secondary">
+                      {startIndex + index + 1}
+                    </td>
+
+                    {/* Email */}
+                    <td className="px-6 py-4 text-sm text-text-secondary">
+                      {account.email}
+                    </td>
 
                     {/* Name */}
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-
-                        <div
-                          className="size-10 rounded-full bg-cover bg-center"
-                          style={{
-                            backgroundImage: `url("${account.avatarUrl}")`
-                          }}
-                        ></div>
-
-                        <div>
-                          <p className="font-medium text-text-main">
-                            {account.name}
-                          </p>
-
-                          <p className="text-xs text-text-secondary">
-                            {account.email}
-                          </p>
-                        </div>
-
-                      </div>
+                      <span className="font-medium text-text-main">
+                        {account.name}
+                      </span>
                     </td>
 
                     {/* Role */}
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded border border-slate-200 bg-slate-50 text-xs font-medium text-slate-600">
+                      <span 
+                        className="inline-flex items-center px-2.5 py-1 text-[10px] font-bold rounded-full uppercase"
+                        style={getRoleStyle(account.role.name)}
+                      >
                         {account.role.name}
                       </span>
                     </td>
@@ -182,65 +343,37 @@ function AccountsPage() {
 
                       <span
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
-${account.status === "Active"
+                        ${account.status === "Active"
                             ? "bg-emerald-100 text-emerald-700"
                             : "bg-rose-100 text-rose-700"
                           }`}
                       >
-
                         <span className="size-1.5 rounded-full bg-current"></span>
-
                         {account.status}
-
                       </span>
 
-                    </td>
-
-                    {/* Created */}
-                    <td className="px-6 py-4 text-sm text-text-secondary">
-                      {new Date(account.createdAt).toLocaleDateString("en-GB")}
                     </td>
 
                     {/* Actions */}
                     <td className="px-6 py-4 text-right">
 
-                      <div className="relative inline-block">
-
+                      {account.status === "Inactive" ? (
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setOpenMenu(openMenu === account.id ? null : account.id)
-                          }}
-                          className="text-text-secondary hover:text-primary p-2"
+                          onClick={(e) => { e.stopPropagation(); handleActivate(account.id); }}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-[#006bd6] bg-[#f0f7ff] hover:bg-[#e0f0ff] rounded-xl transition-colors"
                         >
-                          <MoreVertical size={18} />
+                          <UserCheck size={16} />
+                          Activate
                         </button>
-
-                        {openMenu === account.id && (
-
-                          <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 w-40 bg-white border border-[#e7edf4] rounded-xl shadow-lg z-[999]">
-
-                            <button
-                              onClick={() => handleActivate(account.id)}
-                              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-50"
-                            >
-                              <UserCheck size={16} />
-                              Activate
-                            </button>
-
-                            <button
-                              onClick={() => handleDisable(account.id)}
-                              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                            >
-                              <UserX size={16} />
-                              Disable
-                            </button>
-
-                          </div>
-
-                        )}
-
-                      </div>
+                      ) : (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDisable(account.id); }}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-[#ff0000] bg-[#ffe4e6] hover:bg-[#fecdd3] rounded-xl transition-colors"
+                        >
+                          <UserX size={16} />
+                          Deactive
+                        </button>
+                      )}
 
                     </td>
 
@@ -250,7 +383,7 @@ ${account.status === "Active"
               ) : (
 
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-text-secondary">
+                  <td colSpan={6} className="px-6 py-12 text-center text-text-secondary">
 
                     <div className="flex flex-col items-center justify-center gap-2">
 
@@ -277,10 +410,10 @@ ${account.status === "Active"
 
           </table>
         </div>
-        <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-[#f8fafc]">
+        <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-white">
 
           <span className="text-sm text-text-secondary">
-            Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, accounts.length)} of {accounts.length} accounts
+            Showing {accounts.length > 0 ? startIndex + 1 : 0} - {startIndex + accounts.length} of {totalAccounts} accounts
           </span>
 
           <div className="flex gap-2">

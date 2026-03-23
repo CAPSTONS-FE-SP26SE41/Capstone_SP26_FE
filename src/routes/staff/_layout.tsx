@@ -30,8 +30,8 @@ function StaffLayout() {
       ]}
       logoutTo="/staff/login"
       logoutTokenKey="staff_token"
-      userName="Staff Profile"
-      userRole="Staff"
+      userName={typeof window !== "undefined" ? localStorage.getItem("user_name") ?? "Staff Profile" : "Staff Profile"}
+      userRole={typeof window !== "undefined" ? localStorage.getItem("user_role") ?? "Staff" : "Staff"}
       searchPlaceholder="Search ads..."
     />
   )

@@ -60,16 +60,6 @@ function AdminAnalytics() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-2xl font-semibold text-text-main">
-          Analytics
-        </h2>
-        <p className="text-sm text-text-secondary mt-1">
-          Performance metrics and insights
-        </p>
-      </div>
-
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
