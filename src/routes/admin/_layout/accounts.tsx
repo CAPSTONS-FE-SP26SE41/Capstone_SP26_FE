@@ -4,10 +4,9 @@ import { createPortal } from "react-dom"
 import {
   Plus,
   Search,
-  UserX,
-  UserCheck,
   ChevronDown
 } from "lucide-react"
+import ToggleSwitch from "../../../components/ToggleSwitch"
 
 import {
   getAccounts,
@@ -272,15 +271,15 @@ function AccountsPage() {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-visible">
         <div className="overflow-x-auto overflow-y-visible">
-          <table className="w-full text-left">
+          <table className="w-full text-center">
 
 
             <thead>
               <tr className="bg-[#F9FAFB] border-b border-[#e7edf4]">
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">No.</th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">Email</th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">Name</th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">No.</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">Email</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">Name</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">
                   <FilterDropdown
                     label="Role"
                     value={roleFilter}
@@ -290,7 +289,7 @@ function AccountsPage() {
                     onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "role" ? null : "role"); }}
                   />
                 </th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">
                   <FilterDropdown
                     label="Status"
                     value={statusFilter}
@@ -300,7 +299,7 @@ function AccountsPage() {
                     onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "status" ? null : "status"); }}
                   />
                 </th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-right">Actions</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">Actions</th>
               </tr>
             </thead>
 
@@ -312,24 +311,24 @@ function AccountsPage() {
                   <tr key={account.id} className="hover:bg-[#F9FAFB] transition-colors">
 
                     {/* STT */}
-                    <td className="px-6 py-4 text-sm text-text-secondary">
+                    <td className="px-6 py-4 text-sm text-text-secondary text-center">
                       {startIndex + index + 1}
                     </td>
 
                     {/* Email */}
-                    <td className="px-6 py-4 text-sm text-text-secondary">
+                    <td className="px-6 py-4 text-sm text-text-secondary text-center">
                       {account.email}
                     </td>
 
                     {/* Name */}
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-center">
                       <span className="font-medium text-text-main">
                         {account.name}
                       </span>
                     </td>
 
                     {/* Role */}
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-center">
                       <span 
                         className="inline-flex items-center px-2.5 py-1 text-[10px] font-bold rounded-full uppercase"
                         style={getRoleStyle(account.role.name)}
@@ -339,7 +338,7 @@ function AccountsPage() {
                     </td>
 
                     {/* Status */}
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-center">
 
                       <span
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
@@ -355,25 +354,20 @@ function AccountsPage() {
                     </td>
 
                     {/* Actions */}
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-center">
 
-                      {account.status === "Inactive" ? (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleActivate(account.id); }}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-[#006bd6] bg-[#f0f7ff] hover:bg-[#e0f0ff] rounded-xl transition-colors"
-                        >
-                          <UserCheck size={16} />
-                          Activate
-                        </button>
-                      ) : (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDisable(account.id); }}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-[#ff0000] bg-[#ffe4e6] hover:bg-[#fecdd3] rounded-xl transition-colors"
-                        >
-                          <UserX size={16} />
-                          Deactive
-                        </button>
-                      )}
+                      <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
+                        <ToggleSwitch
+                          initialState={account.status === "Active"}
+                          onChange={(state) => {
+                            if (state) {
+                              handleActivate(account.id)
+                            } else {
+                              handleDisable(account.id)
+                            }
+                          }}
+                        />
+                      </div>
 
                     </td>
 

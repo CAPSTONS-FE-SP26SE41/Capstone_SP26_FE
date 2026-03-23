@@ -27,3 +27,15 @@ export const deleteSubscription = (id: string) => {
     method: "DELETE",
   })
 }
+
+export const activateSubscription = (id: string) => {
+  return apiClient(`/ad-subscription-packages/${id}/activate`, {
+    method: "PUT",
+  })
+}
+
+export const deactivateSubscription = (id: string) => {
+  return apiClient(`/ad-subscription-packages/${id}/deactivate`, {
+    method: "PUT",
+  })
+}
