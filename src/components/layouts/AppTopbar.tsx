@@ -1,58 +1,38 @@
-import { Bell } from 'lucide-react'
-import { useLocation } from '@tanstack/react-router'
+import { Bell, Search } from "lucide-react"
 
 type AppTopbarProps = {
   userName?: string
   userRole?: string
   userAvatarUrl?: string
   searchPlaceholder?: string
-  accent?: 'blue' | 'emerald'
+  accent?: "blue" | "emerald"
 }
 
 export default function AppTopbar({
-  userName = 'Profile',
-  userRole = 'User',
-  userAvatarUrl = 'https://i.pravatar.cc/40',
-  searchPlaceholder = 'Search...',
-  accent = 'blue',
+  userName = "Profile",
+  userRole = "User",
+  userAvatarUrl = "https://i.pravatar.cc/40",
+  searchPlaceholder = "Search...",
+  accent = "blue",
 }: AppTopbarProps) {
-<<<<<<< Updated upstream
-  const location = useLocation()
-  
-  const getPageTitle = (path: string) => {
-    if (path.includes('/accounts')) return 'Account Management'
-    if (path.includes('/analytics')) return 'Analytics'
-    if (path.includes('/subscriptions')) return 'Subscription Packages'
-    if (path.includes('/settings')) return 'System Settings'
-    return 'Dashboard'
-  }
-=======
   const accentMap = {
     blue: {
-      ring: 'ring-blue-200',
-      focusRing: 'focus:ring-blue-500',
-      notifHover: 'hover:text-blue-600',
+      ring: "ring-blue-200",
+      focusRing: "focus:ring-blue-500",
+      notifHover: "hover:text-blue-600",
     },
     emerald: {
-      ring: 'ring-emerald-200',
-      focusRing: 'focus:ring-emerald-500',
-      notifHover: 'hover:text-emerald-700',
+      ring: "ring-emerald-200",
+      focusRing: "focus:ring-emerald-500",
+      notifHover: "hover:text-emerald-700",
     },
   } as const
 
   const accentClasses = accentMap[accent]
->>>>>>> Stashed changes
 
   return (
     <header className="h-18 bg-white border-b border-slate-200 flex items-center justify-between px-8">
 
-<<<<<<< Updated upstream
-      {/* Page Title Node */}
-      <div>
-        <h2 className="text-xl font-bold text-slate-800">
-          {getPageTitle(location.pathname)}
-        </h2>
-=======
       {/* Search */}
       <div className="relative w-[320px]">
         <Search
@@ -63,18 +43,13 @@ export default function AppTopbar({
           className={`w-full h-10 pl-10 pr-4 bg-slate-100 rounded-xl text-sm outline-none focus:ring-2 ${accentClasses.focusRing} transition-all`}
           placeholder={searchPlaceholder}
         />
->>>>>>> Stashed changes
       </div>
 
       {/* Right Side */}
       <div className="flex items-center gap-6">
 
         {/* Notification */}
-<<<<<<< Updated upstream
-        <button className="relative text-slate-500 hover:text-[#5ab473] transition-colors">
-=======
         <button className={`relative text-slate-500 ${accentClasses.notifHover} transition-colors`}>
->>>>>>> Stashed changes
           <Bell size={20} />
           <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
         </button>
@@ -94,11 +69,7 @@ export default function AppTopbar({
 
           <img
             src={userAvatarUrl}
-<<<<<<< Updated upstream
-            className="h-10 w-10 rounded-full border-2 border-white shadow-sm group-hover:ring-2 ring-[#5ab473]/30 transition-all"
-=======
             className={`h-10 w-10 rounded-full border-2 border-white shadow-sm group-hover:ring-2 ${accentClasses.ring} transition-all`}
->>>>>>> Stashed changes
             alt={userName}
           />
         </div>
