@@ -6,6 +6,7 @@ type AppTopbarProps = {
   userRole?: string
   userAvatarUrl?: string
   searchPlaceholder?: string
+  themeColor?: string
 }
 
 export default function AppTopbar({
@@ -13,6 +14,7 @@ export default function AppTopbar({
   userRole = 'User',
   userAvatarUrl = 'https://i.pravatar.cc/40',
   searchPlaceholder = 'Search...',
+  themeColor = 'green',
 }: AppTopbarProps) {
   const location = useLocation()
   
@@ -21,8 +23,16 @@ export default function AppTopbar({
     if (path.includes('/analytics')) return 'Analytics'
     if (path.includes('/subscriptions')) return 'Subscription Packages'
     if (path.includes('/settings')) return 'System Settings'
+    if (path.includes('/advertisement')) return 'Advertisements'
+    if (path.includes('/stats')) return 'Analytics & Statistics'
+    if (path.includes('/profile')) return 'Partner Profile'
+    if (path.includes('/partner')) return 'My Packages'
     return 'Dashboard'
   }
+
+  const isOrange = themeColor === 'orange'
+  const hoverText = isOrange ? 'hover:text-[#e28743]' : 'hover:text-[#5ab473]'
+  const ringColor = isOrange ? 'ring-[#e28743]/30' : 'ring-[#5ab473]/30'
 
   return (
     <header className="sticky top-0 z-50 h-18 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8">
@@ -38,7 +48,7 @@ export default function AppTopbar({
       <div className="flex items-center gap-6">
 
         {/* Notification */}
-        <button className="relative text-slate-500 hover:text-[#5ab473] transition-colors">
+        <button className={`relative text-slate-500 ${hoverText} transition-colors`}>
           <Bell size={20} />
           <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
         </button>
@@ -58,7 +68,7 @@ export default function AppTopbar({
 
           <img
             src={userAvatarUrl}
-            className="h-10 w-10 rounded-full border-2 border-white shadow-sm group-hover:ring-2 ring-[#5ab473]/30 transition-all"
+            className={`h-10 w-10 rounded-full border-2 border-white shadow-sm group-hover:ring-2 ${ringColor} transition-all`}
             alt={userName}
           />
         </div>

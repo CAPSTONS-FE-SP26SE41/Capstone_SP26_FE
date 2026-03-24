@@ -12,11 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StaffLoginRouteImport } from './routes/staff/login'
 import { Route as StaffLayoutRouteImport } from './routes/staff/_layout'
+import { Route as PartnerLoginRouteImport } from './routes/partner/login'
+import { Route as PartnerLayoutRouteImport } from './routes/partner/_layout'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminLayoutRouteImport } from './routes/admin/_layout'
 import { Route as StaffLayoutIndexRouteImport } from './routes/staff/_layout/index'
+import { Route as PartnerLayoutIndexRouteImport } from './routes/partner/_layout/index'
 import { Route as AdminLayoutIndexRouteImport } from './routes/admin/_layout/index'
 import { Route as StaffLayoutAdvertisementsRouteImport } from './routes/staff/_layout/advertisements'
+import { Route as PartnerLayoutStatsRouteImport } from './routes/partner/_layout/stats'
+import { Route as PartnerLayoutProfileRouteImport } from './routes/partner/_layout/profile'
+import { Route as PartnerLayoutAdvertisementRouteImport } from './routes/partner/_layout/advertisement'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
@@ -46,6 +52,16 @@ const StaffLayoutRoute = StaffLayoutRouteImport.update({
   path: '/staff',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PartnerLoginRoute = PartnerLoginRouteImport.update({
+  id: '/partner/login',
+  path: '/partner/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnerLayoutRoute = PartnerLayoutRouteImport.update({
+  id: '/partner/_layout',
+  path: '/partner',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
@@ -61,6 +77,11 @@ const StaffLayoutIndexRoute = StaffLayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => StaffLayoutRoute,
 } as any)
+const PartnerLayoutIndexRoute = PartnerLayoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PartnerLayoutRoute,
+} as any)
 const AdminLayoutIndexRoute = AdminLayoutIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -71,6 +92,22 @@ const StaffLayoutAdvertisementsRoute =
     id: '/advertisements',
     path: '/advertisements',
     getParentRoute: () => StaffLayoutRoute,
+  } as any)
+const PartnerLayoutStatsRoute = PartnerLayoutStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => PartnerLayoutRoute,
+} as any)
+const PartnerLayoutProfileRoute = PartnerLayoutProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => PartnerLayoutRoute,
+} as any)
+const PartnerLayoutAdvertisementRoute =
+  PartnerLayoutAdvertisementRouteImport.update({
+    id: '/advertisement',
+    path: '/advertisement',
+    getParentRoute: () => PartnerLayoutRoute,
   } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
   id: '/demo/start/server-funcs',
@@ -143,6 +180,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminLayoutRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/partner': typeof PartnerLayoutRouteWithChildren
+  '/partner/login': typeof PartnerLoginRoute
   '/staff': typeof StaffLayoutRouteWithChildren
   '/staff/login': typeof StaffLoginRoute
   '/admin/accounts': typeof AdminLayoutAccountsRoute
@@ -154,8 +193,12 @@ export interface FileRoutesByFullPath {
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/partner/advertisement': typeof PartnerLayoutAdvertisementRoute
+  '/partner/profile': typeof PartnerLayoutProfileRoute
+  '/partner/stats': typeof PartnerLayoutStatsRoute
   '/staff/advertisements': typeof StaffLayoutAdvertisementsRoute
   '/admin/': typeof AdminLayoutIndexRoute
+  '/partner/': typeof PartnerLayoutIndexRoute
   '/staff/': typeof StaffLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
@@ -165,6 +208,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/login': typeof AdminLoginRoute
+  '/partner/login': typeof PartnerLoginRoute
   '/staff/login': typeof StaffLoginRoute
   '/admin/accounts': typeof AdminLayoutAccountsRoute
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
@@ -175,8 +219,12 @@ export interface FileRoutesByTo {
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/partner/advertisement': typeof PartnerLayoutAdvertisementRoute
+  '/partner/profile': typeof PartnerLayoutProfileRoute
+  '/partner/stats': typeof PartnerLayoutStatsRoute
   '/staff/advertisements': typeof StaffLayoutAdvertisementsRoute
   '/admin': typeof AdminLayoutIndexRoute
+  '/partner': typeof PartnerLayoutIndexRoute
   '/staff': typeof StaffLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
@@ -188,6 +236,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin/_layout': typeof AdminLayoutRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/partner/_layout': typeof PartnerLayoutRouteWithChildren
+  '/partner/login': typeof PartnerLoginRoute
   '/staff/_layout': typeof StaffLayoutRouteWithChildren
   '/staff/login': typeof StaffLoginRoute
   '/admin/_layout/accounts': typeof AdminLayoutAccountsRoute
@@ -199,8 +249,12 @@ export interface FileRoutesById {
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/partner/_layout/advertisement': typeof PartnerLayoutAdvertisementRoute
+  '/partner/_layout/profile': typeof PartnerLayoutProfileRoute
+  '/partner/_layout/stats': typeof PartnerLayoutStatsRoute
   '/staff/_layout/advertisements': typeof StaffLayoutAdvertisementsRoute
   '/admin/_layout/': typeof AdminLayoutIndexRoute
+  '/partner/_layout/': typeof PartnerLayoutIndexRoute
   '/staff/_layout/': typeof StaffLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
@@ -213,6 +267,8 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin/login'
+    | '/partner'
+    | '/partner/login'
     | '/staff'
     | '/staff/login'
     | '/admin/accounts'
@@ -224,8 +280,12 @@ export interface FileRouteTypes {
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/partner/advertisement'
+    | '/partner/profile'
+    | '/partner/stats'
     | '/staff/advertisements'
     | '/admin/'
+    | '/partner/'
     | '/staff/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
@@ -235,6 +295,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin/login'
+    | '/partner/login'
     | '/staff/login'
     | '/admin/accounts'
     | '/admin/analytics'
@@ -245,8 +306,12 @@ export interface FileRouteTypes {
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/partner/advertisement'
+    | '/partner/profile'
+    | '/partner/stats'
     | '/staff/advertisements'
     | '/admin'
+    | '/partner'
     | '/staff'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
@@ -257,6 +322,8 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/_layout'
     | '/admin/login'
+    | '/partner/_layout'
+    | '/partner/login'
     | '/staff/_layout'
     | '/staff/login'
     | '/admin/_layout/accounts'
@@ -268,8 +335,12 @@ export interface FileRouteTypes {
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/partner/_layout/advertisement'
+    | '/partner/_layout/profile'
+    | '/partner/_layout/stats'
     | '/staff/_layout/advertisements'
     | '/admin/_layout/'
+    | '/partner/_layout/'
     | '/staff/_layout/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
@@ -281,6 +352,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminLayoutRoute: typeof AdminLayoutRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
+  PartnerLayoutRoute: typeof PartnerLayoutRouteWithChildren
+  PartnerLoginRoute: typeof PartnerLoginRoute
   StaffLayoutRoute: typeof StaffLayoutRouteWithChildren
   StaffLoginRoute: typeof StaffLoginRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
@@ -315,6 +388,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StaffLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/partner/login': {
+      id: '/partner/login'
+      path: '/partner/login'
+      fullPath: '/partner/login'
+      preLoaderRoute: typeof PartnerLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partner/_layout': {
+      id: '/partner/_layout'
+      path: '/partner'
+      fullPath: '/partner'
+      preLoaderRoute: typeof PartnerLayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
@@ -336,6 +423,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StaffLayoutIndexRouteImport
       parentRoute: typeof StaffLayoutRoute
     }
+    '/partner/_layout/': {
+      id: '/partner/_layout/'
+      path: '/'
+      fullPath: '/partner/'
+      preLoaderRoute: typeof PartnerLayoutIndexRouteImport
+      parentRoute: typeof PartnerLayoutRoute
+    }
     '/admin/_layout/': {
       id: '/admin/_layout/'
       path: '/'
@@ -349,6 +443,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/staff/advertisements'
       preLoaderRoute: typeof StaffLayoutAdvertisementsRouteImport
       parentRoute: typeof StaffLayoutRoute
+    }
+    '/partner/_layout/stats': {
+      id: '/partner/_layout/stats'
+      path: '/stats'
+      fullPath: '/partner/stats'
+      preLoaderRoute: typeof PartnerLayoutStatsRouteImport
+      parentRoute: typeof PartnerLayoutRoute
+    }
+    '/partner/_layout/profile': {
+      id: '/partner/_layout/profile'
+      path: '/profile'
+      fullPath: '/partner/profile'
+      preLoaderRoute: typeof PartnerLayoutProfileRouteImport
+      parentRoute: typeof PartnerLayoutRoute
+    }
+    '/partner/_layout/advertisement': {
+      id: '/partner/_layout/advertisement'
+      path: '/advertisement'
+      fullPath: '/partner/advertisement'
+      preLoaderRoute: typeof PartnerLayoutAdvertisementRouteImport
+      parentRoute: typeof PartnerLayoutRoute
     }
     '/demo/start/server-funcs': {
       id: '/demo/start/server-funcs'
@@ -468,6 +583,24 @@ const AdminLayoutRouteWithChildren = AdminLayoutRoute._addFileChildren(
   AdminLayoutRouteChildren,
 )
 
+interface PartnerLayoutRouteChildren {
+  PartnerLayoutAdvertisementRoute: typeof PartnerLayoutAdvertisementRoute
+  PartnerLayoutProfileRoute: typeof PartnerLayoutProfileRoute
+  PartnerLayoutStatsRoute: typeof PartnerLayoutStatsRoute
+  PartnerLayoutIndexRoute: typeof PartnerLayoutIndexRoute
+}
+
+const PartnerLayoutRouteChildren: PartnerLayoutRouteChildren = {
+  PartnerLayoutAdvertisementRoute: PartnerLayoutAdvertisementRoute,
+  PartnerLayoutProfileRoute: PartnerLayoutProfileRoute,
+  PartnerLayoutStatsRoute: PartnerLayoutStatsRoute,
+  PartnerLayoutIndexRoute: PartnerLayoutIndexRoute,
+}
+
+const PartnerLayoutRouteWithChildren = PartnerLayoutRoute._addFileChildren(
+  PartnerLayoutRouteChildren,
+)
+
 interface StaffLayoutRouteChildren {
   StaffLayoutAdvertisementsRoute: typeof StaffLayoutAdvertisementsRoute
   StaffLayoutIndexRoute: typeof StaffLayoutIndexRoute
@@ -486,6 +619,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminLayoutRoute: AdminLayoutRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
+  PartnerLayoutRoute: PartnerLayoutRouteWithChildren,
+  PartnerLoginRoute: PartnerLoginRoute,
   StaffLayoutRoute: StaffLayoutRouteWithChildren,
   StaffLoginRoute: StaffLoginRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,

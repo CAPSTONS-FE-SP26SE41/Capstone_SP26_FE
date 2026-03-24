@@ -11,6 +11,7 @@ type DashboardLayoutProps = {
   userRole?: string
   userAvatarUrl?: string
   searchPlaceholder?: string
+  themeColor?: string
 }
 
 export default function DashboardLayout({
@@ -22,6 +23,7 @@ export default function DashboardLayout({
   userRole,
   userAvatarUrl,
   searchPlaceholder,
+  themeColor = 'green',
 }: DashboardLayoutProps) {
   return (
     <div className="flex min-h-screen bg-white">
@@ -31,6 +33,7 @@ export default function DashboardLayout({
         navItems={navItems}
         logoutTo={logoutTo}
         logoutTokenKey={logoutTokenKey}
+        themeColor={themeColor}
       />
 
       {/* Main Area */}
@@ -40,6 +43,7 @@ export default function DashboardLayout({
           userRole={userRole}
           userAvatarUrl={userAvatarUrl}
           searchPlaceholder={searchPlaceholder}
+          themeColor={themeColor}
         />
 
         <main className="flex-1 p-6 overflow-auto">

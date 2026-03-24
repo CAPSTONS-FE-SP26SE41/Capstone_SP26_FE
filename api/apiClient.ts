@@ -5,10 +5,16 @@ export const apiClient = async (
   options: RequestInit = {}
 ) => {
 
-  // lấy token của admin hoặc staff
-  const token =
-    localStorage.getItem("admin_token") ||
-    localStorage.getItem("staff_token")
+  // lấy token từ localStorage (ưu tiên theo vai trò nếu cần)
+  const partnerToken = localStorage.getItem("partner_token")
+  const adminToken = localStorage.getItem("admin_token")
+  const staffToken = localStorage.getItem("staff_token")
+  
+  const token = partnerToken || adminToken || staffToken
+
+  if (!token && endpoint !== "/auth/login") {
+     console.warn(`[apiClient] No token found for ${endpoint}`)
+  }
 
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,

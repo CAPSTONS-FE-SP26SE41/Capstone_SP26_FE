@@ -62,6 +62,15 @@ function LoginPortalPage() {
         return
       }
 
+      if (role === "Partner") {
+        localStorage.setItem("partner_token", token)
+        localStorage.setItem("role", role)
+        localStorage.setItem("user_name", name)
+        localStorage.setItem("user_role", role)
+        navigate({ to: "/partner" })
+        return
+      }
+
       setErrorMessage("Tài khoản không có quyền truy cập")
 
     } catch (error) {
