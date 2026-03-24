@@ -1,7 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import {
   LayoutDashboard,
-  Megaphone,
+  MapPin,
+  Map,
   PlaneTakeoff
 } from "lucide-react"
 
@@ -20,19 +21,27 @@ function StaffLayout() {
   return (
     <DashboardLayout
       brand={{
-        name: "TripStaff",
-        subtitle: "Staff Control Panel",
+        name: "TripNhân viên",
+        subtitle: "Bảng điều khiển nhân viên",
         icon: PlaneTakeoff,
       }}
+      accent="emerald"
       navItems={[
-        { to: "/staff", icon: LayoutDashboard, label: "Dashboard", exact: true },
-        { to: "/staff/advertisements", icon: Megaphone, label: "Advertisements" },
+        { to: "/staff", icon: LayoutDashboard, label: "Trang chủ", exact: true },
+        { to: "/staff/pois", icon: MapPin, label: "Quản lí POIs" },
+        { to: "/staff/locations", icon: Map, label: "Quản lí địa điểm" },
       ]}
       logoutTo="/staff/login"
       logoutTokenKey="staff_token"
+<<<<<<< Updated upstream
       userName={typeof window !== "undefined" ? localStorage.getItem("user_name") ?? "Staff Profile" : "Staff Profile"}
       userRole={typeof window !== "undefined" ? localStorage.getItem("user_role") ?? "Staff" : "Staff"}
       searchPlaceholder="Search ads..."
+=======
+      userName="Hồ sơ nhân viên"
+      userRole="Nhân viên"
+      searchPlaceholder="Tìm kiếm POIs..."
+>>>>>>> Stashed changes
     />
   )
 }
