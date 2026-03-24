@@ -76,7 +76,7 @@ function AdvertisementsPage() {
   if (loading) {
     return (
       <div className="py-20 text-center text-slate-500">
-        Loading advertisements...
+        Đang tải quảng cáo...
       </div>
     )
   }
@@ -89,12 +89,10 @@ function AdvertisementsPage() {
 
       <div>
 
-        <h1 className="text-3xl font-bold text-slate-800">
-          Advertisement Review
-        </h1>
+        <h1 className="text-3xl font-bold text-slate-800">Duyệt quảng cáo</h1>
 
         <p className="text-slate-500 text-sm mt-1">
-          Staff review pending advertisements
+          Staff duyệt các quảng cáo đang chờ xử lí
         </p>
 
       </div>
@@ -111,15 +109,15 @@ function AdvertisementsPage() {
 
               <tr className="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b border-slate-200">
 
-                <th className="px-6 py-4">Ad</th>
-                <th className="px-6 py-4">Account</th>
-                <th className="px-6 py-4">Package</th>
+                <th className="px-6 py-4">Quảng cáo</th>
+                <th className="px-6 py-4">Tài khoản</th>
+                <th className="px-6 py-4">Gói</th>
                 <th className="px-6 py-4">POI</th>
-                <th className="px-6 py-4">Start</th>
-                <th className="px-6 py-4">End</th>
+                <th className="px-6 py-4">Bắt đầu</th>
+                <th className="px-6 py-4">Kết thúc</th>
                 <th className="px-6 py-4">Video</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Action</th>
+                <th className="px-6 py-4">Trạng thái</th>
+                <th className="px-6 py-4 text-right">Thao tác</th>
 
               </tr>
 
@@ -158,13 +156,13 @@ function AdvertisementsPage() {
 
                   </td>
 
-                  {/* Account */}
+                  {/* Tài khoản */}
 
                   <td className="px-6 py-4 text-sm">
                     {ad.accountId}
                   </td>
 
-                  {/* Package */}
+                  {/* Gói */}
 
                   <td className="px-6 py-4 text-sm">
                     {ad.packageId}
@@ -176,13 +174,13 @@ function AdvertisementsPage() {
                     {ad.poiId}
                   </td>
 
-                  {/* Start */}
+                  {/* Bắt đầu */}
 
                   <td className="px-6 py-4 text-sm">
                     {new Date(ad.startDate).toLocaleDateString()}
                   </td>
 
-                  {/* End */}
+                  {/* Kết thúc */}
 
                   <td className="px-6 py-4 text-sm">
                     {new Date(ad.endDate).toLocaleDateString()}
@@ -195,25 +193,25 @@ function AdvertisementsPage() {
                     <a
                       href={ad.videoUrl}
                       target="_blank"
-                      className="text-blue-600 hover:underline flex items-center gap-1"
+                      className="text-emerald-700 hover:underline flex items-center gap-1"
                     >
-                      View
+                      Xem
                       <ExternalLink size={14}/>
                     </a>
 
                   </td>
 
-                  {/* Status */}
+                  {/* Trạng thái */}
 
                   <td className="px-6 py-4">
 
-                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
-                      Pending
+                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                      Đang chờ
                     </span>
 
                   </td>
 
-                  {/* Actions */}
+                  {/* Thao tác */}
 
                   <td className="px-6 py-4">
 
@@ -224,7 +222,7 @@ function AdvertisementsPage() {
                         className="flex items-center gap-1 px-3 py-1 text-sm bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200"
                       >
                         <Check size={16}/>
-                        Approve
+                        Duyệt
                       </button>
 
                       <button
@@ -232,7 +230,7 @@ function AdvertisementsPage() {
                         className="flex items-center gap-1 px-3 py-1 text-sm bg-rose-100 text-rose-700 rounded hover:bg-rose-200"
                       >
                         <X size={16}/>
-                        Reject
+                        Từ chối
                       </button>
 
                     </div>

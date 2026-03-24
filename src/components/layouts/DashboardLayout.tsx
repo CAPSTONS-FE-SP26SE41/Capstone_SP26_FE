@@ -5,6 +5,11 @@ import AppTopbar from './AppTopbar'
 type DashboardLayoutProps = {
   brand: SidebarBrand
   navItems: NavItem[]
+  /**
+   * Accent theme for staff-like UI (ex: emerald/green).
+   * Defaults to "blue" to avoid changing admin styling.
+   */
+  accent?: 'blue' | 'emerald'
   logoutTo: string
   logoutTokenKey: string
   userName?: string
@@ -16,6 +21,7 @@ type DashboardLayoutProps = {
 export default function DashboardLayout({
   brand,
   navItems,
+  accent = 'blue',
   logoutTo,
   logoutTokenKey,
   userName,
@@ -31,11 +37,14 @@ export default function DashboardLayout({
         navItems={navItems}
         logoutTo={logoutTo}
         logoutTokenKey={logoutTokenKey}
+        accent={accent}
+        logoutLabel={accent === "emerald" ? "Đăng xuất" : "Logout"}
       />
 
       {/* Main Area */}
       <div className="flex-1 flex flex-col">
         <AppTopbar
+          accent={accent}
           userName={userName}
           userRole={userRole}
           userAvatarUrl={userAvatarUrl}

@@ -19,6 +19,8 @@ type AppSidebarProps = {
   navItems: NavItem[]
   logoutTo: string
   logoutTokenKey: string
+  accent?: 'blue' | 'emerald'
+  logoutLabel?: string
 }
 
 export default function AppSidebar({
@@ -26,9 +28,29 @@ export default function AppSidebar({
   navItems,
   logoutTo,
   logoutTokenKey,
+  accent = 'blue',
+  logoutLabel = 'Logout',
 }: AppSidebarProps) {
   const navigate = useNavigate()
   const BrandIcon = brand.icon
+  const accentMap = {
+    blue: {
+      logoBg: 'bg-blue-100',
+      logoText: 'text-blue-600',
+      activeBg: 'bg-blue-50',
+      activeText: 'text-blue-600',
+      hoverText: 'group-hover:text-blue-600',
+    },
+    emerald: {
+      logoBg: 'bg-emerald-100',
+      logoText: 'text-emerald-600',
+      activeBg: 'bg-emerald-50',
+      activeText: 'text-emerald-700',
+      hoverText: 'group-hover:text-emerald-700',
+    },
+  } as const
+
+  const accentClasses = accentMap[accent]
 
   const logout = () => {
     localStorage.removeItem(logoutTokenKey)
@@ -36,13 +58,18 @@ export default function AppSidebar({
   }
 
   return (
-    <aside className="w-70 bg-white border-r border-slate-200 flex flex-col justify-between">
+    <aside className="w-72 bg-white border-r border-slate-200 flex flex-col justify-between">
 
       {/* Logo / Brand */}
       <div className="p-6">
         <div className="flex items-center gap-3">
+<<<<<<< Updated upstream
           <div className="bg-[#e9f5ed] flex items-center justify-center rounded-xl h-10 w-10">
             <BrandIcon size={24} className="text-[#5ab473]" />
+=======
+          <div className={`${accentClasses.logoBg} flex items-center justify-center rounded-xl h-10 w-10`}>
+            <BrandIcon size={24} className={accentClasses.logoText} />
+>>>>>>> Stashed changes
           </div>
           <div>
             <h1 className="text-lg font-bold text-slate-800">
@@ -67,12 +94,20 @@ export default function AppSidebar({
               className="group flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-medium transition-all hover:bg-slate-50"
               activeProps={{
                 className:
+<<<<<<< Updated upstream
                   'group flex items-center gap-3 px-4 py-3 rounded-xl bg-[#5ab473] text-white font-semibold',
+=======
+                  `flex items-center gap-3 px-4 py-3 rounded-xl ${accentClasses.activeBg} ${accentClasses.activeText} font-semibold`,
+>>>>>>> Stashed changes
               }}
             >
               <Icon
                 size={20}
+<<<<<<< Updated upstream
                 className="transition-colors group-hover:text-[#5ab473] group-[.active]:text-white"
+=======
+                className={`transition-colors ${accentClasses.hoverText}`}
+>>>>>>> Stashed changes
               />
               <span className="text-sm group-hover:text-[#5ab473] group-[.active]:text-white">
                 {item.label}
@@ -89,7 +124,7 @@ export default function AppSidebar({
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all w-full"
         >
           <LogOut size={20} />
-          <span className="text-sm font-medium">Logout</span>
+          <span className="text-sm font-medium">{logoutLabel}</span>
         </button>
       </div>
     </aside>
