@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
+import { createPortal } from "react-dom"
 import { Plus, Pencil, Trash2, X, Search, ChevronDown } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 import ToggleSwitch from "../../../components/ToggleSwitch"
 
 import {
   getSubscriptions,
+  filterSubscriptions,
   createSubscription,
   updateSubscription,
   deleteSubscription,
@@ -58,9 +60,24 @@ function FilterDropdown({
   isOpen: boolean,
   onToggle: (e: React.MouseEvent) => void
 }) {
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0 })
+
+  useEffect(() => {
+    if (!isOpen || !buttonRef.current) return
+
+    const rect = buttonRef.current.getBoundingClientRect()
+    setMenuPosition({
+      top: rect.bottom + 8,
+      left: rect.left,
+      width: rect.width
+    })
+  }, [isOpen])
+
   return (
     <div className="relative inline-block">
       <button
+        ref={buttonRef}
         onClick={onToggle}
         className="flex items-center gap-1.5 bg-transparent border-none outline-none hover:text-slate-800 transition-colors text-inherit font-inherit"
       >
@@ -68,18 +85,46 @@ function FilterDropdown({
         <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
-      {isOpen && (
-        <div className="absolute left-0 top-full mt-2 w-36 bg-white border border-slate-100 rounded-xl shadow-lg z-[999] py-1.5 overflow-hidden font-normal text-sm normal-case tracking-normal">
+      {isOpen && createPortal(
+        <div
+          className="fixed z-[9999] w-36 bg-white border border-slate-100 rounded-xl shadow-lg py-1.5 overflow-hidden font-normal text-sm normal-case tracking-normal"
+          style={{ top: menuPosition.top, left: menuPosition.left }}
+        >
           {options.map((opt) => (
             <button
               key={opt}
-              onClick={() => onChange(opt)}
+              onClick={() => {
+                onChange(opt)
+              }}
               className={`w-full text-left px-4 py-2 hover:bg-[#e9f5ed] hover:text-[#5ab473] transition-colors ${value === opt ? "bg-[#e9f5ed]/50 text-[#5ab473] font-medium" : "text-slate-700"}`}
             >
               {opt}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
+      )}
+    </div>
+  )
+}
+
+function ExpandableDescription({ text }: { text: string }) {
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  if (!text) return <span className="text-slate-400 italic text-xs">No description</span>
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-0.5 text-center max-w-full min-h-[40px]">
+      <div className={`w-full text-sm ${isExpanded ? "" : "line-clamp-1"} break-words text-center`}>
+        {text}
+      </div>
+      {text.length > 50 && (
+        <button
+          onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+          className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+        >
+          {isExpanded ? "View less" : "View all"}
+        </button>
       )}
     </div>
   )
@@ -92,6 +137,9 @@ function SubscriptionsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [openFilter, setOpenFilter] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState("Status")
+  const [priceSort, setPriceSort] = useState("Price")
+  const [searchKeyword, setSearchKeyword] = useState("")
+  const [debouncedKeyword, setDebouncedKeyword] = useState("")
   const itemsPerPage = 10
 
   const [modalOpen, setModalOpen] = useState(false)
@@ -108,31 +156,41 @@ function SubscriptionsPage() {
     currency: "VNĐ"
   })
 
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedKeyword(searchKeyword)
+      setCurrentPage(1)
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [searchKeyword])
+
   const fetchSubscriptions = async () => {
-
     try {
+      const isFiltering = debouncedKeyword.trim().length > 0 || statusFilter !== "Status" || priceSort !== "Price"
+      let data
 
-      const data = await getSubscriptions()
+      if (isFiltering) {
+        data = await filterSubscriptions({
+          title: debouncedKeyword.trim(),
+          status: statusFilter,
+          sortPrice: priceSort === "Price" ? undefined : (priceSort === "High to Low" ? "desc" : "asc")
+        })
+      } else {
+        data = await getSubscriptions()
+      }
 
       setSubscriptions(data)
-
     } catch (err) {
-
       console.error(err)
-
     } finally {
-
       setLoading(false)
-
     }
-
   }
 
   useEffect(() => {
-
     fetchSubscriptions()
-
-  }, [])
+  }, [debouncedKeyword, statusFilter, priceSort])
 
   const openCreate = () => {
 
@@ -254,185 +312,188 @@ function SubscriptionsPage() {
 
     <div className="flex flex-col gap-6" onClick={() => { setOpenFilter(null); }}>
 
-      {/* Filters & Control Panel */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        
-        {/* Search */}
-        <div className="w-full md:max-w-md">
-          <div className="relative">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              placeholder="Search packages..."
-            />
+      {/* Filters & Control Panel - STICKY */}
+      <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-sm -mx-6 px-6 py-4 mb-2 border-b border-transparent transition-all">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          
+          {/* Search */}
+          <div className="w-full md:max-w-md">
+            <div className="relative">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                placeholder="Search packages..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+              />
+            </div>
           </div>
+
+          {/* Action Button */}
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors"
+          >
+            <Plus size={18} />
+            <span className="text-sm">Add Package</span>
+          </button>
+
         </div>
-
-        {/* Action Button */}
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors"
-        >
-          <Plus size={18} />
-          <span className="text-sm">Add Package</span>
-        </button>
-
       </div>
 
-      {/* Table */}
+      {/* Table - single overflow-x:auto container so sticky right column works */}
+      <div
+        className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-x-auto"
+      >
+        <table className="w-full text-center table-fixed min-w-[900px] border-separate border-spacing-0">
 
-      <div className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-hidden">
+          <thead>
+            <tr>
+              <th className="w-[5%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">No.</th>
+              <th className="w-[15%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Package</th>
+              <th className="w-[28%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Description</th>
+              <th className="w-[10%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+                <FilterDropdown
+                  label="Price"
+                  value={priceSort}
+                  options={["Price", "Low to High", "High to Low"]}
+                  isOpen={openFilter === "price"}
+                  onChange={(val) => { setPriceSort(val); setOpenFilter(null); }}
+                  onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "price" ? null : "price"); }}
+                />
+              </th>
+              <th className="w-[10%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Duration</th>
+              <th className="w-[9%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Max Ads</th>
+              <th className="w-[10%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+                <FilterDropdown
+                  label="Status"
+                  value={statusFilter}
+                  options={["Status", "Active", "Inactive"]}
+                  isOpen={openFilter === "status"}
+                  onChange={(val) => { setStatusFilter(val); setOpenFilter(null); }}
+                  onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "status" ? null : "status"); }}
+                />
+              </th>
+              <th
+                className="w-[13%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc] sticky right-0 z-20"
+                style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
+              >Actions</th>
+            </tr>
+          </thead>
 
-        <div className="overflow-x-auto">
+          <tbody>
 
-          <table className="w-full text-center border-collapse">
+            {currentSubscriptions.length > 0 ? (
 
-            <thead>
-              <tr className="bg-[#f8fafc] border-b border-[#e7edf4]">
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">No.</th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">Package</th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">Price</th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">Duration</th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">Max Ads</th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">
-                  <FilterDropdown
-                    label="Status"
-                    value={statusFilter}
-                    options={["Status", "Active", "Inactive"]}
-                    isOpen={openFilter === "status"}
-                    onChange={(val) => { setStatusFilter(val); setOpenFilter(null); }}
-                    onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "status" ? null : "status"); }}
-                  />
-                </th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">Actions</th>
-              </tr>
-            </thead>
+              currentSubscriptions.map((sub, index) => (
 
-            <tbody className="divide-y divide-[#e7edf4]">
+                <tr
+                  key={sub.packageId}
+                  className="hover:bg-[#f8fafc] transition-colors group"
+                >
 
-              {currentSubscriptions.length > 0 ? (
+                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                    {startIndex + index + 1}
+                  </td>
 
-                currentSubscriptions.map((sub, index) => (
+                  <td className="px-4 py-3 font-medium text-text-main text-center border-b border-[#e7edf4] truncate">
+                    {sub.title}
+                  </td>
 
-                  <tr
-                    key={sub.packageId}
-                    className="hover:bg-[#f8fafc] transition-colors"
+                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                    <ExpandableDescription text={sub.description} />
+                  </td>
+
+                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                    {sub.price} {sub.currency}
+                  </td>
+
+                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                    {sub.durationDays} days
+                  </td>
+
+                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                    {sub.maxAdsPerPeriod}
+                  </td>
+
+                  <td className="px-4 py-3 text-center border-b border-[#e7edf4]">
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
+                      ${sub.status?.toLowerCase() === "active"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-red-100 text-red-600"
+                        }`}
+                    >
+                      <span className="size-1.5 rounded-full bg-current"></span>
+                      {sub.status?.toLowerCase() === "active" ? "Active" : "Inactive"}
+                    </span>
+                  </td>
+
+                  <td
+                    className="px-4 py-3 text-center border-b border-[#e7edf4] sticky right-0 bg-white group-hover:bg-[#f8fafc] z-10 transition-colors"
+                    style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
                   >
+                    <div className="inline-flex items-center gap-2">
 
-                    <td className="px-6 py-4 text-sm text-text-secondary text-center">
-                      {startIndex + index + 1}
-                    </td>
+                      {/* Edit */}
+                      <Tooltip text="Edit">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); openEdit(sub); }}
+                          className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        >
+                          <Pencil size={16} />
+                        </button>
+                      </Tooltip>
 
-                    <td className="px-6 py-4 font-medium text-text-main text-center">
-                      {sub.title}
-                    </td>
+                      {/* Delete */}
+                      <Tooltip text="Delete">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setDeleteId(sub.packageId); }}
+                          className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </Tooltip>
 
-                    <td className="px-6 py-4 text-sm text-text-secondary text-center">
-                      {sub.price} {sub.currency}
-                    </td>
-
-                    <td className="px-6 py-4 text-sm text-text-secondary text-center">
-                      {sub.durationDays} days
-                    </td>
-
-                    <td className="px-6 py-4 text-sm text-text-secondary text-center">
-                      {sub.maxAdsPerPeriod}
-                    </td>
-
-                    <td className="px-6 py-4 text-center">
-
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
-                        ${sub.status?.toLowerCase() === "active"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-red-100 text-red-600"
-                          }`}
-                      >
-
-                        <span className="size-1.5 rounded-full bg-current"></span>
-
-                        {sub.status?.toLowerCase() === "active" ? "Active" : "Inactive"}
-
-                      </span>
-
-                    </td>
-
-                    <td className="px-6 py-4 text-center">
-
-                      <div className="inline-flex items-center gap-2">
-
-                        {/* Edit */}
-                        <Tooltip text="Edit">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); openEdit(sub); }}
-                            className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          >
-                            <Pencil size={16} />
-                          </button>
-                        </Tooltip>
-
-                        {/* Delete */}
-                        <Tooltip text="Delete">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setDeleteId(sub.packageId); }}
-                            className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </Tooltip>
-
-                        {/* Activate / Deactivate */}
-                        <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
-                          <ToggleSwitch
-                            initialState={sub.status?.toLowerCase() === "active"}
-                            onChange={(state) => {
-                              if (state) {
-                                handleActivate(sub.packageId)
-                              } else {
-                                handleDeactivate(sub.packageId)
-                              }
-                            }}
-                          />
-                        </div>
-
+                      {/* Activate / Deactivate */}
+                      <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
+                        <ToggleSwitch
+                          initialState={sub.status?.toLowerCase() === "active"}
+                          onChange={(state) => {
+                            if (state) {
+                              handleActivate(sub.packageId)
+                            } else {
+                              handleDeactivate(sub.packageId)
+                            }
+                          }}
+                        />
                       </div>
 
-                    </td>
-
-                  </tr>
-
-                ))
-
-              ) : (
-
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-text-secondary">
-
-                    <div className="flex flex-col items-center gap-2">
-
-                      <span className="text-4xl text-slate-300">📦</span>
-
-                      <p className="font-medium">
-                        No subscription packages
-                      </p>
-
-                      <p className="text-xs">
-                        Create your first subscription plan
-                      </p>
-
                     </div>
-
                   </td>
+
                 </tr>
 
-              )}
+              ))
 
-            </tbody>
+            ) : (
 
-          </table>
+              <tr>
+                <td colSpan={8} className="px-6 py-12 text-center text-text-secondary">
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-4xl text-slate-300">📦</span>
+                    <p className="font-medium">No subscription packages</p>
+                    <p className="text-xs">Create your first subscription plan</p>
+                  </div>
+                </td>
+              </tr>
 
-        </div>
-        
+            )}
+
+          </tbody>
+
+        </table>
+
         <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-white">
           <span className="text-sm text-text-secondary">
             Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, subscriptions.length)} of {subscriptions.length} packages
@@ -507,12 +568,17 @@ function SubscriptionsPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-slate-700">Description</label>
-                <input
+                <div className="flex justify-between items-center">
+                  <label className="text-sm font-semibold text-slate-700">Description</label>
+                  <span className="text-xs text-slate-400 font-medium">{form.description?.length || 0}/500</span>
+                </div>
+                <textarea
                   placeholder="Describe this package's features..."
                   value={form.description}
+                  maxLength={500}
+                  rows={3}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all resize-none"
                 />
               </div>
 

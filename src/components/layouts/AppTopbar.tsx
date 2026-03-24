@@ -25,7 +25,7 @@ export default function AppTopbar({
   }
 
   return (
-    <header className="h-18 bg-white border-b border-slate-200 flex items-center justify-between px-8">
+    <header className="sticky top-0 z-50 h-18 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8">
 
       {/* Page Title Node */}
       <div>

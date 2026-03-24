@@ -244,28 +244,30 @@ function AccountsPage() {
   return (
     <div className="flex flex-col gap-6" onClick={() => { setOpenFilter(null); }}>
 
-      {/* Filters & Control Panel */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        
-        {/* Search */}
-        <div className="w-full md:max-w-md">
-          <div className="relative">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              placeholder="Search by name or email..."
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-            />
+      {/* Filters & Control Panel - STICKY */}
+      <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-sm -mx-6 px-6 py-4 mb-2 border-b border-transparent transition-all">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          
+          {/* Search */}
+          <div className="w-full md:max-w-md">
+            <div className="relative">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                placeholder="Search by name or email..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+              />
+            </div>
           </div>
+
+          {/* Action Button */}
+          <button className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors">
+            <Plus size={18} />
+            <span className="text-sm">Create New Account</span>
+          </button>
+
         </div>
-
-        {/* Action Button */}
-        <button className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors">
-          <Plus size={18} />
-          <span className="text-sm">Create New Account</span>
-        </button>
-
       </div>
 
       {/* Table */}

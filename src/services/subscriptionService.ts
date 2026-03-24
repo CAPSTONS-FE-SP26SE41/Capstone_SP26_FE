@@ -4,6 +4,14 @@ export const getSubscriptions = () => {
   return apiClient("/ad-subscription-packages")
 }
 
+export const filterSubscriptions = (params: { title?: string; status?: string; sortPrice?: string }) => {
+  const query = new URLSearchParams()
+  if (params.title) query.append("title", params.title)
+  if (params.status && params.status !== "Status") query.append("status", params.status)
+  if (params.sortPrice) query.append("sortPrice", params.sortPrice)
+  return apiClient(`/ad-subscription-packages/filter?${query.toString()}`)
+}
+
 export const getSubscriptionById = (id: string) => {
   return apiClient(`/ad-subscription-packages/${id}`)
 }
