@@ -92,7 +92,7 @@ function AdvertisementsPage() {
         <h1 className="text-3xl font-bold text-slate-800">Duyệt quảng cáo</h1>
 
         <p className="text-slate-500 text-sm mt-1">
-          Staff duyệt các quảng cáo đang chờ xử lí
+          Manager duyệt các quảng cáo đang chờ xử lí
         </p>
 
       </div>
