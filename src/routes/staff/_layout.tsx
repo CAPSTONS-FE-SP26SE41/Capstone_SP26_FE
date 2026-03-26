@@ -31,9 +31,8 @@ function StaffLayout() {
         { to: "/staff/pois", icon: MapPin, label: "Quản lí POIs" },
         { to: "/staff/locations", icon: Map, label: "Quản lí địa điểm" },
       ]}
-      logoutTo="/staff/login"
-      logoutTokenKey="staff_token"
       userName={typeof window !== "undefined" ? localStorage.getItem("user_name") ?? "Staff Profile" : "Staff Profile"}
+
       userRole={typeof window !== "undefined" ? localStorage.getItem("user_role") ?? "Staff" : "Staff"}
       searchPlaceholder="Search ads..."
     />

@@ -1,22 +1,32 @@
-// Base URL của backend API (vd: http://localhost:5131/api)
-// Nếu biến môi trường chưa được set, dùng fallback để không bị fetch ra "undefined/...".
-const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5131/api"
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export const apiClient = async (
   endpoint: string,
   options: RequestInit = {}
 ) => {
 
-  // Lấy token của admin/staff.
-  // Ưu tiên staff_token cho các endpoint /staff/... để tránh trường hợp
-  // đang còn admin_token trong localStorage nhưng lại gọi API staff.
-  const isStaffEndpoint =
-    endpoint.startsWith("/staff/") || endpoint === "/staff"
+  const currentRole = localStorage.getItem("role")?.toLowerCase();
+  let token = null;
 
-  const token = isStaffEndpoint
-    ? localStorage.getItem("staff_token") || localStorage.getItem("admin_token")
-    : localStorage.getItem("admin_token") || localStorage.getItem("staff_token")
+  if (currentRole === "admin" || currentRole === "superadmin") {
+    token = localStorage.getItem("admin_token");
+  } else if (currentRole === "partner") {
+    token = localStorage.getItem("partner_token");
+  } else if (currentRole === "staff") {
+    token = localStorage.getItem("staff_token");
+  }
+
+  // Fallback if role-based selection fails
+  if (!token) {
+    token = localStorage.getItem("admin_token") || 
+            localStorage.getItem("partner_token") || 
+            localStorage.getItem("staff_token");
+  }
+
+
+  if (!token && endpoint !== "/auth/login") {
+     console.warn(`[apiClient] No token found for ${endpoint}`)
+  }
 
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,

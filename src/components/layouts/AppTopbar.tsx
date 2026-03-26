@@ -1,37 +1,48 @@
-import { Bell, Search } from "lucide-react"
+import { Bell, LogOut } from 'lucide-react'
+import { useLocation, useNavigate } from '@tanstack/react-router'
+import { logout } from '../../services/authService'
 
 type AppTopbarProps = {
   userName?: string
   userRole?: string
   userAvatarUrl?: string
   searchPlaceholder?: string
-  accent?: "blue" | "emerald"
+  themeColor?: string
 }
 
 export default function AppTopbar({
-  userName = "Profile",
-  userRole = "User",
-  userAvatarUrl = "https://i.pravatar.cc/40",
-  searchPlaceholder = "Search...",
-  accent = "blue",
+  userName = 'Profile',
+  userRole = 'User',
+  userAvatarUrl = 'https://i.pravatar.cc/40',
+  themeColor = 'green',
 }: AppTopbarProps) {
-  const accentMap = {
-    blue: {
-      ring: "ring-blue-200",
-      focusRing: "focus:ring-blue-500",
-      notifHover: "hover:text-blue-600",
-    },
-    emerald: {
-      ring: "ring-emerald-200",
-      focusRing: "focus:ring-emerald-500",
-      notifHover: "hover:text-emerald-700",
-    },
-  } as const
+  const location = useLocation()
+  const navigate = useNavigate()
+  
+  const getPageTitle = (path: string) => {
+    if (path.includes('/accounts')) return 'Account Management'
+    if (path.includes('/analytics')) return 'Analytics'
+    if (path.includes('/subscriptions')) return 'Subscription Packages'
+    if (path.includes('/settings')) return 'System Settings'
+    if (path.includes('/advertisement')) return 'Advertisements'
+    if (path.includes('/poi')) return 'Point of Interest'
+    if (path.includes('/stats')) return 'Analytics & Statistics'
+    if (path.includes('/profile')) return 'Partner Profile'
+    if (path.includes('/partner')) return 'My Packages'
+    return 'Dashboard'
+  }
 
-  const accentClasses = accentMap[accent]
+  const handleLogout = () => {
+    logout()
+    navigate({ to: '/' })
+  }
+
+  const isOrange = themeColor === 'orange'
+  const hoverText = isOrange ? 'hover:text-[#e28743]' : 'hover:text-[#5ab473]'
+  const ringColor = isOrange ? 'ring-[#e28743]/30' : 'ring-[#5ab473]/30'
 
   return (
-    <header className="h-18 bg-white border-b border-slate-200 flex items-center justify-between px-8">
+    <header className="sticky top-0 z-50 h-18 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8">
 
       {/* Search */}
       <div className="relative w-[320px]">
@@ -49,7 +60,7 @@ export default function AppTopbar({
       <div className="flex items-center gap-6">
 
         {/* Notification */}
-        <button className={`relative text-slate-500 ${accentClasses.notifHover} transition-colors`}>
+        <button className={`relative text-slate-500 ${hoverText} transition-colors`}>
           <Bell size={20} />
           <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
         </button>
@@ -57,7 +68,7 @@ export default function AppTopbar({
         <div className="h-6 w-px bg-slate-200" />
 
         {/* Profile */}
-        <div className="flex items-center gap-3 cursor-pointer group">
+        <div className="flex items-center gap-3 group">
           <div className="text-right hidden sm:block">
             <p className="text-sm font-semibold text-slate-800">
               {userName}
@@ -69,10 +80,22 @@ export default function AppTopbar({
 
           <img
             src={userAvatarUrl}
-            className={`h-10 w-10 rounded-full border-2 border-white shadow-sm group-hover:ring-2 ${accentClasses.ring} transition-all`}
+            className={`h-10 w-10 rounded-full border-2 border-white shadow-sm group-hover:ring-2 ${ringColor} transition-all`}
             alt={userName}
           />
         </div>
+
+        <div className="h-6 w-px bg-slate-200" />
+
+        {/* Always Visible Logout */}
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-2 p-2 px-3 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-medium text-sm group"
+          title="Đăng xuất"
+        >
+          <LogOut size={18} className="transition-transform group-hover:translate-x-0.5" />
+          <span className="hidden md:inline">Đăng xuất</span>
+        </button>
       </div>
     </header>
   )

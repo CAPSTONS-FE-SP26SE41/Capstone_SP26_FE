@@ -1,5 +1,5 @@
-import { Link, useNavigate } from "@tanstack/react-router"
-import { LogOut, type LucideIcon } from "lucide-react"
+import { Link } from '@tanstack/react-router'
+import { type LucideIcon } from 'lucide-react'
 
 export type NavItem = {
   to: string
@@ -17,21 +17,14 @@ export type SidebarBrand = {
 type AppSidebarProps = {
   brand: SidebarBrand
   navItems: NavItem[]
-  logoutTo: string
-  logoutTokenKey: string
-  accent?: "blue" | "emerald"
-  logoutLabel?: string
+  themeColor?: string
 }
 
 export default function AppSidebar({
   brand,
   navItems,
-  logoutTo,
-  logoutTokenKey,
-  accent = "blue",
-  logoutLabel = "Logout",
+  themeColor = 'green',
 }: AppSidebarProps) {
-  const navigate = useNavigate()
   const BrandIcon = brand.icon
   const accentMap = {
     blue: {
@@ -52,10 +45,13 @@ export default function AppSidebar({
 
   const accentClasses = accentMap[accent]
 
-  const logout = () => {
-    localStorage.removeItem(logoutTokenKey)
-    navigate({ to: logoutTo })
-  }
+  const isOrange = themeColor === 'orange'
+  const brandBg = isOrange ? 'bg-[#faeadd]' : 'bg-[#e9f5ed]'
+  const primaryText = isOrange ? 'text-[#e28743]' : 'text-[#5ab473]'
+  const activeBg = isOrange ? 'bg-[#e28743]' : 'bg-[#5ab473]'
+  const activeHoverBg = isOrange ? 'hover:bg-[#eb9e61]' : 'hover:bg-[#68bc80]'
+  const hoverBg = isOrange ? 'hover:bg-[#e28743]' : 'hover:bg-[#5ab473]'
+  const hoverContent = isOrange ? 'hover:text-white' : 'hover:text-white'
 
   return (
     <aside className="w-72 bg-white border-r border-slate-200 flex flex-col justify-between">
@@ -63,8 +59,8 @@ export default function AppSidebar({
       {/* Logo / Brand */}
       <div className="p-6">
         <div className="flex items-center gap-3">
-          <div className={`${accentClasses.logoBg} flex items-center justify-center rounded-xl h-10 w-10`}>
-            <BrandIcon size={24} className={accentClasses.logoText} />
+          <div className={`${brandBg} flex items-center justify-center rounded-xl h-10 w-10`}>
+            <BrandIcon size={24} className={primaryText} />
           </div>
           <div>
             <h1 className="text-lg font-bold text-slate-800">
@@ -85,18 +81,21 @@ export default function AppSidebar({
             <Link
               key={item.to}
               to={item.to}
-              activeOptions={{ exact: item.exact ?? false }}
-              className="group flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-medium transition-all hover:bg-slate-50"
+              activeOptions={{ 
+                exact: item.exact ?? false,
+                includeSearch: false
+              }}
+              className={`group flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-medium transition-all ${hoverBg} ${hoverContent}`}
               activeProps={{
                 className:
-                  `flex items-center gap-3 px-4 py-3 rounded-xl ${accentClasses.activeBg} ${accentClasses.activeText} font-semibold`,
+                  `active group flex items-center gap-3 px-4 py-3 rounded-xl ${activeBg} ${activeHoverBg} text-white font-semibold`,
               }}
             >
               <Icon
                 size={20}
-                className={`transition-colors ${accentClasses.hoverText}`}
+                className={`transition-colors text-slate-500 group-hover:text-white group-[.active]:text-white`}
               />
-              <span className={`text-sm ${accentClasses.hoverText}`}>
+              <span className={`text-sm transition-colors text-slate-600 group-hover:text-white group-[.active]:text-white`}>
                 {item.label}
               </span>
             </Link>
@@ -104,16 +103,7 @@ export default function AppSidebar({
         })}
       </nav>
 
-      {/* Logout */}
-      <div className="p-4 border-t border-slate-200">
-        <button
-          onClick={logout}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all w-full"
-        >
-          <LogOut size={20} />
-          <span className="text-sm font-medium">{logoutLabel}</span>
-        </button>
-      </div>
     </aside>
   )
 }
+
