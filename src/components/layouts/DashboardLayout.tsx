@@ -34,6 +34,7 @@ export default function DashboardLayout({
       {/* Main Area */}
       <div className="flex-1 flex flex-col">
         <AppTopbar
+          accent={accent}
           userName={userName}
           userRole={userRole}
           userAvatarUrl={userAvatarUrl}

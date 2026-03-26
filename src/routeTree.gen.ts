@@ -19,6 +19,8 @@ import { Route as AdminLayoutRouteImport } from './routes/admin/_layout'
 import { Route as StaffLayoutIndexRouteImport } from './routes/staff/_layout/index'
 import { Route as PartnerLayoutIndexRouteImport } from './routes/partner/_layout/index'
 import { Route as AdminLayoutIndexRouteImport } from './routes/admin/_layout/index'
+import { Route as StaffLayoutPoisRouteImport } from './routes/staff/_layout/pois'
+import { Route as StaffLayoutLocationsRouteImport } from './routes/staff/_layout/locations'
 import { Route as StaffLayoutAdvertisementsRouteImport } from './routes/staff/_layout/advertisements'
 import { Route as PartnerLayoutStatsRouteImport } from './routes/partner/_layout/stats'
 import { Route as PartnerLayoutProfileRouteImport } from './routes/partner/_layout/profile'
@@ -34,6 +36,7 @@ import { Route as AdminLayoutBookingsRouteImport } from './routes/admin/_layout/
 import { Route as AdminLayoutAnalyticsRouteImport } from './routes/admin/_layout/analytics'
 import { Route as AdminLayoutAccountsRouteImport } from './routes/admin/_layout/accounts'
 import { Route as DemoStartSsrIndexRouteImport } from './routes/demo/start.ssr.index'
+import { Route as StaffLayoutPoisIdRouteImport } from './routes/staff/_layout/pois.$id'
 import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr.spa-mode'
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
@@ -87,6 +90,16 @@ const AdminLayoutIndexRoute = AdminLayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminLayoutRoute,
+} as any)
+const StaffLayoutPoisRoute = StaffLayoutPoisRouteImport.update({
+  id: '/pois',
+  path: '/pois',
+  getParentRoute: () => StaffLayoutRoute,
+} as any)
+const StaffLayoutLocationsRoute = StaffLayoutLocationsRouteImport.update({
+  id: '/locations',
+  path: '/locations',
+  getParentRoute: () => StaffLayoutRoute,
 } as any)
 const StaffLayoutAdvertisementsRoute =
   StaffLayoutAdvertisementsRouteImport.update({
@@ -166,6 +179,11 @@ const DemoStartSsrIndexRoute = DemoStartSsrIndexRouteImport.update({
   path: '/demo/start/ssr/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StaffLayoutPoisIdRoute = StaffLayoutPoisIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => StaffLayoutPoisRoute,
+} as any)
 const DemoStartSsrSpaModeRoute = DemoStartSsrSpaModeRouteImport.update({
   id: '/demo/start/ssr/spa-mode',
   path: '/demo/start/ssr/spa-mode',
@@ -204,12 +222,15 @@ export interface FileRoutesByFullPath {
   '/partner/profile': typeof PartnerLayoutProfileRoute
   '/partner/stats': typeof PartnerLayoutStatsRoute
   '/staff/advertisements': typeof StaffLayoutAdvertisementsRoute
+  '/staff/locations': typeof StaffLayoutLocationsRoute
+  '/staff/pois': typeof StaffLayoutPoisRouteWithChildren
   '/admin/': typeof AdminLayoutIndexRoute
   '/partner/': typeof PartnerLayoutIndexRoute
   '/staff/': typeof StaffLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
+  '/staff/pois/$id': typeof StaffLayoutPoisIdRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
 }
 export interface FileRoutesByTo {
@@ -231,12 +252,15 @@ export interface FileRoutesByTo {
   '/partner/profile': typeof PartnerLayoutProfileRoute
   '/partner/stats': typeof PartnerLayoutStatsRoute
   '/staff/advertisements': typeof StaffLayoutAdvertisementsRoute
+  '/staff/locations': typeof StaffLayoutLocationsRoute
+  '/staff/pois': typeof StaffLayoutPoisRouteWithChildren
   '/admin': typeof AdminLayoutIndexRoute
   '/partner': typeof PartnerLayoutIndexRoute
   '/staff': typeof StaffLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
+  '/staff/pois/$id': typeof StaffLayoutPoisIdRoute
   '/demo/start/ssr': typeof DemoStartSsrIndexRoute
 }
 export interface FileRoutesById {
@@ -262,12 +286,15 @@ export interface FileRoutesById {
   '/partner/_layout/profile': typeof PartnerLayoutProfileRoute
   '/partner/_layout/stats': typeof PartnerLayoutStatsRoute
   '/staff/_layout/advertisements': typeof StaffLayoutAdvertisementsRoute
+  '/staff/_layout/locations': typeof StaffLayoutLocationsRoute
+  '/staff/_layout/pois': typeof StaffLayoutPoisRouteWithChildren
   '/admin/_layout/': typeof AdminLayoutIndexRoute
   '/partner/_layout/': typeof PartnerLayoutIndexRoute
   '/staff/_layout/': typeof StaffLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
+  '/staff/_layout/pois/$id': typeof StaffLayoutPoisIdRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
 }
 export interface FileRouteTypes {
@@ -294,12 +321,15 @@ export interface FileRouteTypes {
     | '/partner/profile'
     | '/partner/stats'
     | '/staff/advertisements'
+    | '/staff/locations'
+    | '/staff/pois'
     | '/admin/'
     | '/partner/'
     | '/staff/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
+    | '/staff/pois/$id'
     | '/demo/start/ssr/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -321,12 +351,15 @@ export interface FileRouteTypes {
     | '/partner/profile'
     | '/partner/stats'
     | '/staff/advertisements'
+    | '/staff/locations'
+    | '/staff/pois'
     | '/admin'
     | '/partner'
     | '/staff'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
+    | '/staff/pois/$id'
     | '/demo/start/ssr'
   id:
     | '__root__'
@@ -351,12 +384,15 @@ export interface FileRouteTypes {
     | '/partner/_layout/profile'
     | '/partner/_layout/stats'
     | '/staff/_layout/advertisements'
+    | '/staff/_layout/locations'
+    | '/staff/_layout/pois'
     | '/admin/_layout/'
     | '/partner/_layout/'
     | '/staff/_layout/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
+    | '/staff/_layout/pois/$id'
     | '/demo/start/ssr/'
   fileRoutesById: FileRoutesById
 }
@@ -448,6 +484,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminLayoutIndexRouteImport
       parentRoute: typeof AdminLayoutRoute
+    }
+    '/staff/_layout/pois': {
+      id: '/staff/_layout/pois'
+      path: '/pois'
+      fullPath: '/staff/pois'
+      preLoaderRoute: typeof StaffLayoutPoisRouteImport
+      parentRoute: typeof StaffLayoutRoute
+    }
+    '/staff/_layout/locations': {
+      id: '/staff/_layout/locations'
+      path: '/locations'
+      fullPath: '/staff/locations'
+      preLoaderRoute: typeof StaffLayoutLocationsRouteImport
+      parentRoute: typeof StaffLayoutRoute
     }
     '/staff/_layout/advertisements': {
       id: '/staff/_layout/advertisements'
@@ -554,6 +604,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoStartSsrIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/staff/_layout/pois/$id': {
+      id: '/staff/_layout/pois/$id'
+      path: '/$id'
+      fullPath: '/staff/pois/$id'
+      preLoaderRoute: typeof StaffLayoutPoisIdRouteImport
+      parentRoute: typeof StaffLayoutPoisRoute
+    }
     '/demo/start/ssr/spa-mode': {
       id: '/demo/start/ssr/spa-mode'
       path: '/demo/start/ssr/spa-mode'
@@ -624,11 +681,15 @@ const PartnerLayoutRouteWithChildren = PartnerLayoutRoute._addFileChildren(
 
 interface StaffLayoutRouteChildren {
   StaffLayoutAdvertisementsRoute: typeof StaffLayoutAdvertisementsRoute
+  StaffLayoutLocationsRoute: typeof StaffLayoutLocationsRoute
+  StaffLayoutPoisRoute: typeof StaffLayoutPoisRouteWithChildren
   StaffLayoutIndexRoute: typeof StaffLayoutIndexRoute
 }
 
 const StaffLayoutRouteChildren: StaffLayoutRouteChildren = {
   StaffLayoutAdvertisementsRoute: StaffLayoutAdvertisementsRoute,
+  StaffLayoutLocationsRoute: StaffLayoutLocationsRoute,
+  StaffLayoutPoisRoute: StaffLayoutPoisRouteWithChildren,
   StaffLayoutIndexRoute: StaffLayoutIndexRoute,
 }
 

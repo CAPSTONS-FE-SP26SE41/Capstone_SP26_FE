@@ -44,11 +44,16 @@ export default function AppTopbar({
   return (
     <header className="sticky top-0 z-50 h-18 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8">
 
-      {/* Page Title Node */}
-      <div>
-        <h2 className="text-xl font-bold text-slate-800">
-          {getPageTitle(location.pathname)}
-        </h2>
+      {/* Search */}
+      <div className="relative w-[320px]">
+        <Search
+          size={18}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+        />
+        <input
+          className={`w-full h-10 pl-10 pr-4 bg-slate-100 rounded-xl text-sm outline-none focus:ring-2 ${accentClasses.focusRing} transition-all`}
+          placeholder={searchPlaceholder}
+        />
       </div>
 
       {/* Right Side */}

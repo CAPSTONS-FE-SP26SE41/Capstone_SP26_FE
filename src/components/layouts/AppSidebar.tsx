@@ -26,6 +26,24 @@ export default function AppSidebar({
   themeColor = 'green',
 }: AppSidebarProps) {
   const BrandIcon = brand.icon
+  const accentMap = {
+    blue: {
+      logoBg: "bg-blue-100",
+      logoText: "text-blue-600",
+      activeBg: "bg-blue-50",
+      activeText: "text-blue-600",
+      hoverText: "group-hover:text-blue-600",
+    },
+    emerald: {
+      logoBg: "bg-emerald-100",
+      logoText: "text-emerald-600",
+      activeBg: "bg-emerald-50",
+      activeText: "text-emerald-700",
+      hoverText: "group-hover:text-emerald-700",
+    },
+  } as const
+
+  const accentClasses = accentMap[accent]
 
   const isOrange = themeColor === 'orange'
   const brandBg = isOrange ? 'bg-[#faeadd]' : 'bg-[#e9f5ed]'
@@ -36,7 +54,7 @@ export default function AppSidebar({
   const hoverContent = isOrange ? 'hover:text-white' : 'hover:text-white'
 
   return (
-    <aside className="w-70 bg-white border-r border-slate-200 flex flex-col justify-between">
+    <aside className="w-72 bg-white border-r border-slate-200 flex flex-col justify-between">
 
       {/* Logo / Brand */}
       <div className="p-6">

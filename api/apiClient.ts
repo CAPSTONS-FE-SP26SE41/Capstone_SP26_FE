@@ -39,7 +39,9 @@ export const apiClient = async (
 
   if (!res.ok) {
     const errorText = await res.text()
-    throw new Error(errorText || "API Error")
+    const err = new Error(errorText || "API Error")
+    ;(err as any).status = res.status
+    throw err
   }
 
   const contentType = res.headers.get("content-type")
