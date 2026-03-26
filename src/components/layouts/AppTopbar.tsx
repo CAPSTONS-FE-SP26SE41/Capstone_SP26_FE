@@ -1,5 +1,6 @@
-import { Bell } from 'lucide-react'
-import { useLocation } from '@tanstack/react-router'
+import { Bell, LogOut } from 'lucide-react'
+import { useLocation, useNavigate } from '@tanstack/react-router'
+import { logout } from '../../services/authService'
 
 type AppTopbarProps = {
   userName?: string
@@ -13,10 +14,10 @@ export default function AppTopbar({
   userName = 'Profile',
   userRole = 'User',
   userAvatarUrl = 'https://i.pravatar.cc/40',
-  searchPlaceholder = 'Search...',
   themeColor = 'green',
 }: AppTopbarProps) {
   const location = useLocation()
+  const navigate = useNavigate()
   
   const getPageTitle = (path: string) => {
     if (path.includes('/accounts')) return 'Account Management'
@@ -24,10 +25,16 @@ export default function AppTopbar({
     if (path.includes('/subscriptions')) return 'Subscription Packages'
     if (path.includes('/settings')) return 'System Settings'
     if (path.includes('/advertisement')) return 'Advertisements'
+    if (path.includes('/poi')) return 'Point of Interest'
     if (path.includes('/stats')) return 'Analytics & Statistics'
     if (path.includes('/profile')) return 'Partner Profile'
     if (path.includes('/partner')) return 'My Packages'
     return 'Dashboard'
+  }
+
+  const handleLogout = () => {
+    logout()
+    navigate({ to: '/' })
   }
 
   const isOrange = themeColor === 'orange'
@@ -56,7 +63,7 @@ export default function AppTopbar({
         <div className="h-6 w-px bg-slate-200" />
 
         {/* Profile */}
-        <div className="flex items-center gap-3 cursor-pointer group">
+        <div className="flex items-center gap-3 group">
           <div className="text-right hidden sm:block">
             <p className="text-sm font-semibold text-slate-800">
               {userName}
@@ -72,6 +79,18 @@ export default function AppTopbar({
             alt={userName}
           />
         </div>
+
+        <div className="h-6 w-px bg-slate-200" />
+
+        {/* Always Visible Logout */}
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-2 p-2 px-3 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-medium text-sm group"
+          title="Đăng xuất"
+        >
+          <LogOut size={18} className="transition-transform group-hover:translate-x-0.5" />
+          <span className="hidden md:inline">Đăng xuất</span>
+        </button>
       </div>
     </header>
   )

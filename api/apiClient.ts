@@ -5,12 +5,24 @@ export const apiClient = async (
   options: RequestInit = {}
 ) => {
 
-  // lấy token từ localStorage (ưu tiên theo vai trò nếu cần)
-  const partnerToken = localStorage.getItem("partner_token")
-  const adminToken = localStorage.getItem("admin_token")
-  const staffToken = localStorage.getItem("staff_token")
-  
-  const token = partnerToken || adminToken || staffToken
+  const currentRole = localStorage.getItem("role")?.toLowerCase();
+  let token = null;
+
+  if (currentRole === "admin" || currentRole === "superadmin") {
+    token = localStorage.getItem("admin_token");
+  } else if (currentRole === "partner") {
+    token = localStorage.getItem("partner_token");
+  } else if (currentRole === "staff") {
+    token = localStorage.getItem("staff_token");
+  }
+
+  // Fallback if role-based selection fails
+  if (!token) {
+    token = localStorage.getItem("admin_token") || 
+            localStorage.getItem("partner_token") || 
+            localStorage.getItem("staff_token");
+  }
+
 
   if (!token && endpoint !== "/auth/login") {
      console.warn(`[apiClient] No token found for ${endpoint}`)

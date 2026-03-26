@@ -22,6 +22,7 @@ import { Route as AdminLayoutIndexRouteImport } from './routes/admin/_layout/ind
 import { Route as StaffLayoutAdvertisementsRouteImport } from './routes/staff/_layout/advertisements'
 import { Route as PartnerLayoutStatsRouteImport } from './routes/partner/_layout/stats'
 import { Route as PartnerLayoutProfileRouteImport } from './routes/partner/_layout/profile'
+import { Route as PartnerLayoutPoiRouteImport } from './routes/partner/_layout/poi'
 import { Route as PartnerLayoutAdvertisementRouteImport } from './routes/partner/_layout/advertisement'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
@@ -101,6 +102,11 @@ const PartnerLayoutStatsRoute = PartnerLayoutStatsRouteImport.update({
 const PartnerLayoutProfileRoute = PartnerLayoutProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => PartnerLayoutRoute,
+} as any)
+const PartnerLayoutPoiRoute = PartnerLayoutPoiRouteImport.update({
+  id: '/poi',
+  path: '/poi',
   getParentRoute: () => PartnerLayoutRoute,
 } as any)
 const PartnerLayoutAdvertisementRoute =
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/partner/advertisement': typeof PartnerLayoutAdvertisementRoute
+  '/partner/poi': typeof PartnerLayoutPoiRoute
   '/partner/profile': typeof PartnerLayoutProfileRoute
   '/partner/stats': typeof PartnerLayoutStatsRoute
   '/staff/advertisements': typeof StaffLayoutAdvertisementsRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByTo {
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/partner/advertisement': typeof PartnerLayoutAdvertisementRoute
+  '/partner/poi': typeof PartnerLayoutPoiRoute
   '/partner/profile': typeof PartnerLayoutProfileRoute
   '/partner/stats': typeof PartnerLayoutStatsRoute
   '/staff/advertisements': typeof StaffLayoutAdvertisementsRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/partner/_layout/advertisement': typeof PartnerLayoutAdvertisementRoute
+  '/partner/_layout/poi': typeof PartnerLayoutPoiRoute
   '/partner/_layout/profile': typeof PartnerLayoutProfileRoute
   '/partner/_layout/stats': typeof PartnerLayoutStatsRoute
   '/staff/_layout/advertisements': typeof StaffLayoutAdvertisementsRoute
@@ -281,6 +290,7 @@ export interface FileRouteTypes {
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
     | '/partner/advertisement'
+    | '/partner/poi'
     | '/partner/profile'
     | '/partner/stats'
     | '/staff/advertisements'
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
     | '/partner/advertisement'
+    | '/partner/poi'
     | '/partner/profile'
     | '/partner/stats'
     | '/staff/advertisements'
@@ -336,6 +347,7 @@ export interface FileRouteTypes {
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
     | '/partner/_layout/advertisement'
+    | '/partner/_layout/poi'
     | '/partner/_layout/profile'
     | '/partner/_layout/stats'
     | '/staff/_layout/advertisements'
@@ -456,6 +468,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/partner/profile'
       preLoaderRoute: typeof PartnerLayoutProfileRouteImport
+      parentRoute: typeof PartnerLayoutRoute
+    }
+    '/partner/_layout/poi': {
+      id: '/partner/_layout/poi'
+      path: '/poi'
+      fullPath: '/partner/poi'
+      preLoaderRoute: typeof PartnerLayoutPoiRouteImport
       parentRoute: typeof PartnerLayoutRoute
     }
     '/partner/_layout/advertisement': {
@@ -585,6 +604,7 @@ const AdminLayoutRouteWithChildren = AdminLayoutRoute._addFileChildren(
 
 interface PartnerLayoutRouteChildren {
   PartnerLayoutAdvertisementRoute: typeof PartnerLayoutAdvertisementRoute
+  PartnerLayoutPoiRoute: typeof PartnerLayoutPoiRoute
   PartnerLayoutProfileRoute: typeof PartnerLayoutProfileRoute
   PartnerLayoutStatsRoute: typeof PartnerLayoutStatsRoute
   PartnerLayoutIndexRoute: typeof PartnerLayoutIndexRoute
@@ -592,6 +612,7 @@ interface PartnerLayoutRouteChildren {
 
 const PartnerLayoutRouteChildren: PartnerLayoutRouteChildren = {
   PartnerLayoutAdvertisementRoute: PartnerLayoutAdvertisementRoute,
+  PartnerLayoutPoiRoute: PartnerLayoutPoiRoute,
   PartnerLayoutProfileRoute: PartnerLayoutProfileRoute,
   PartnerLayoutStatsRoute: PartnerLayoutStatsRoute,
   PartnerLayoutIndexRoute: PartnerLayoutIndexRoute,

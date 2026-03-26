@@ -5,8 +5,6 @@ import AppTopbar from './AppTopbar'
 type DashboardLayoutProps = {
   brand: SidebarBrand
   navItems: NavItem[]
-  logoutTo: string
-  logoutTokenKey: string
   userName?: string
   userRole?: string
   userAvatarUrl?: string
@@ -17,8 +15,6 @@ type DashboardLayoutProps = {
 export default function DashboardLayout({
   brand,
   navItems,
-  logoutTo,
-  logoutTokenKey,
   userName,
   userRole,
   userAvatarUrl,
@@ -31,10 +27,9 @@ export default function DashboardLayout({
       <AppSidebar
         brand={brand}
         navItems={navItems}
-        logoutTo={logoutTo}
-        logoutTokenKey={logoutTokenKey}
         themeColor={themeColor}
       />
+
 
       {/* Main Area */}
       <div className="flex-1 flex flex-col">

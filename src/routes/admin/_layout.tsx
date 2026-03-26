@@ -46,11 +46,10 @@ function AdminLayout() {
         { to: '/admin/analytics', icon: BarChart2, label: 'Analytics' },
         { to: '/admin/accounts', icon: UserCog, label: 'Account', exact: true },
         { to: '/admin/subscriptions', icon: CreditCard, label: 'Subscription' },
-        { to: '/admin/settings', icon: Settings, label: 'System' },
+        { to: "/admin/settings", icon: Settings, label: "System" },
       ]}
-      logoutTo="/admin/login"
-      logoutTokenKey="admin_token"
       userName={userName}
+
       userRole={userRole}
       searchPlaceholder="Search users, bookings..."
     />

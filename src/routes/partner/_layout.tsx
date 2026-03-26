@@ -4,7 +4,8 @@ import {
   Megaphone,
   ChartBar,
   User,
-  Store
+  Store,
+  MapPin
 } from "lucide-react"
 
 import DashboardLayout from "../../components/layouts/DashboardLayout"
@@ -39,13 +40,13 @@ function PartnerLayout() {
         icon: Store,
       }}
       navItems={[
-        { to: "/partner", icon: Package, label: "Package", exact: true },
+        { to: "/partner/", icon: Package, label: "Package", exact: true },
         { to: "/partner/advertisement", icon: Megaphone, label: "Advertisement" },
+        { to: "/partner/poi", icon: MapPin, label: "POI" },
         { to: "/partner/stats", icon: ChartBar, label: "Stats" },
         { to: "/partner/profile", icon: User, label: "Profile" },
       ]}
-      logoutTo="/partner/login"
-      logoutTokenKey="partner_token"
+
       userName={userName}
       userRole={userRole}
       searchPlaceholder="Search packages, ads..."
