@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
+const BASE_URL = import.meta.env.VITE_API_BASE_URL 
 
 export const apiClient = async (
   endpoint: string,
@@ -12,15 +12,15 @@ export const apiClient = async (
     token = localStorage.getItem("admin_token");
   } else if (currentRole === "partner") {
     token = localStorage.getItem("partner_token");
-  } else if (currentRole === "staff") {
-    token = localStorage.getItem("staff_token");
+  } else if (currentRole === "manager") {
+    token = localStorage.getItem("manager_token");
   }
 
   // Fallback if role-based selection fails
   if (!token) {
     token = localStorage.getItem("admin_token") || 
             localStorage.getItem("partner_token") || 
-            localStorage.getItem("staff_token");
+            localStorage.getItem("manager_token");
   }
 
 

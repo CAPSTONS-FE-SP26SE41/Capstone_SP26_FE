@@ -13,12 +13,25 @@ import {
   type StaffLocationOption,
   type StaffPOI,
   updateStaffPOI,
-  uploadStaffPOIImage,
 } from "../../../services/poiService"
 
 export const Route = createFileRoute("/staff/_layout/pois")({
   component: StaffPOIsPage,
 })
+
+const POI_PREFERENCES_OPTIONS: Array<{ id: string; name: string }> = [
+  { id: "4b16bf5c-c699-4a61-880f-98460a2d4daa", name: "Adventure" },
+  { id: "4eb0fdb5-105d-40bd-9f5e-2df53b8ad9db", name: "Budget" },
+  { id: "37e3b490-ad00-432d-8e35-c3dbc019630f", name: "Culture" },
+  { id: "2c109efa-8ceb-4c56-b5b9-a1a2c82c91a1", name: "Food" },
+  { id: "b43e3fc0-234a-45f3-8e27-10124cee0ee8", name: "Indoor" },
+  { id: "9b9159e1-1b60-4a12-9607-1bcf02da3e50", name: "Luxury" },
+  { id: "ce454660-2991-42ea-800c-b6853da8ba2c", name: "Nature" },
+  { id: "b41066e4-7857-4a3d-b92d-b7c2aa113334", name: "Nightlife" },
+  { id: "7bb12f2c-567d-4bc2-a715-037b7a195dc1", name: "Outdoor" },
+  { id: "2cc0a43b-4d97-4d3d-8a3d-02af16d8999d", name: "Relax" },
+  { id: "ab4509fd-4b2c-4705-bed3-afed9f51af78", name: "Shopping" },
+]
 
 function StaffPOIsPage() {
   const navigate = useNavigate()
@@ -32,7 +45,7 @@ function StaffPOIsPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState(false)
-  const [uploadingEditImage, setUploadingEditImage] = useState(false)
+  const [editImageFile, setEditImageFile] = useState<File | null>(null)
   const [importing, setImporting] = useState(false)
   const [loadingLocations, setLoadingLocations] = useState(false)
   const [locationOptions, setLocationOptions] = useState<StaffLocationOption[]>([])
@@ -48,7 +61,9 @@ function StaffPOIsPage() {
     OpenHour: "",
     CloseHour: "",
     GoogleMapLink: "",
+    VisitRecommendation: "",
     IsIndoor: false,
+    PoiPreferences: [] as Array<{ id: string; name: string }>,
     POIImgUrl: "",
     LocationId: "",
   })
@@ -65,6 +80,8 @@ function StaffPOIsPage() {
     IsIndoor: false,
     POIImgUrl: "",
     LocationId: "",
+    Status: "",
+    PartnerId: "",
   })
 
   const showToast = (type: "success" | "error", message: string) => {
@@ -80,7 +97,9 @@ function StaffPOIsPage() {
       OpenHour: "",
       CloseHour: "",
       GoogleMapLink: "",
+      VisitRecommendation: "",
       IsIndoor: false,
+      PoiPreferences: [],
       POIImgUrl: "",
       LocationId: "",
     })
@@ -98,7 +117,7 @@ function StaffPOIsPage() {
 
         if (status === 401) {
           // Token hết hạn/không hợp lệ -> ép đăng nhập lại.
-          localStorage.removeItem("staff_token")
+          localStorage.removeItem("manager_token")
           localStorage.removeItem("admin_token")
           navigate({ to: "/staff/login" })
           return
@@ -248,7 +267,7 @@ function StaffPOIsPage() {
       console.error("Failed to fetch POI detail", e)
       const status = (e as any)?.status
       if (status === 401) {
-        localStorage.removeItem("staff_token")
+        localStorage.removeItem("manager_token")
         localStorage.removeItem("admin_token")
         navigate({ to: "/staff/login" })
         return
@@ -276,13 +295,16 @@ function StaffPOIsPage() {
         IsIndoor: Boolean(detail.IsIndoor),
         POIImgUrl: detail.POIImgUrl ?? "",
         LocationId: detail.LocationId ?? "",
+        Status: detail.Status !== undefined ? String(detail.Status) : "",
+        PartnerId: detail.PartnerId ?? "",
       })
+      setEditImageFile(null)
       setShowEditModal(true)
     } catch (e) {
       console.error("Failed to load POI for edit", e)
       const status = (e as any)?.status
       if (status === 401) {
-        localStorage.removeItem("staff_token")
+        localStorage.removeItem("manager_token")
         localStorage.removeItem("admin_token")
         navigate({ to: "/staff/login" })
         return
@@ -326,7 +348,11 @@ function StaffPOIsPage() {
         OpenHour: createForm.OpenHour.trim(),
         CloseHour: createForm.CloseHour.trim(),
         GoogleMapLink: createForm.GoogleMapLink.trim(),
+        VisitRecommendation: createForm.VisitRecommendation.trim(),
         IsIndoor: createForm.IsIndoor,
+        PoiPreferences: createForm.PoiPreferences.length
+          ? createForm.PoiPreferences
+          : undefined,
         LocationId: createForm.LocationId.trim(),
       }, createImageFile)
 
@@ -398,12 +424,31 @@ function StaffPOIsPage() {
         IsIndoor: editForm.IsIndoor,
         POIImgUrl: editForm.POIImgUrl.trim(),
         LocationId: editForm.LocationId.trim(),
-      })
+        Status: editForm.Status || undefined,
+        PartnerId: editForm.PartnerId || undefined,
+      }, editImageFile)
 
       const refreshedData = await getStaffPOIs()
-      setPois(refreshedData)
+      // Nếu backend lưu ảnh tại cùng 1 URL, browser có thể cache -> thêm query để luôn thấy ảnh mới
+      const cacheBust = Date.now()
+      const withCacheBust = (url: string) => {
+        if (!url) return url
+        const hasQuery = url.includes("?")
+        return `${url}${hasQuery ? "&" : "?"}v=${cacheBust}`
+      }
+
+      setPois(
+        editImageFile
+          ? refreshedData.map((p) =>
+              p.Id === editingPoiId && p.POIImgUrl
+                ? { ...p, POIImgUrl: withCacheBust(p.POIImgUrl) }
+                : p
+            )
+          : refreshedData
+      )
       setShowEditModal(false)
       setEditingPoiId("")
+      setEditImageFile(null)
       showToast("success", "Cập nhật POI thành công")
     } catch (e) {
       console.error("Failed to update POI", e)
@@ -413,19 +458,10 @@ function StaffPOIsPage() {
     }
   }
 
-  const handleUploadEditImage = async (file: File | null) => {
+  const handleSelectEditImage = (file: File | null) => {
     if (!file) return
-    try {
-      setUploadingEditImage(true)
-      const imageUrl = await uploadStaffPOIImage(file)
-      setEditForm((prev) => ({ ...prev, POIImgUrl: imageUrl }))
-      showToast("success", "Upload ảnh thành công")
-    } catch (e) {
-      console.error("Failed to upload edit image", e)
-      showToast("error", "Upload ảnh thất bại")
-    } finally {
-      setUploadingEditImage(false)
-    }
+    setEditImageFile(file)
+    showToast("success", `Đã chọn ảnh: ${file.name}`)
   }
 
   return (
@@ -731,6 +767,14 @@ function StaffPOIsPage() {
                   <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.LocationId || "—"}</dd>
                 </div>
                 <div className="border-b border-slate-100 pb-2">
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Status</dt>
+                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.Status ?? "—"}</dd>
+                </div>
+                <div className="border-b border-slate-100 pb-2">
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">PartnerId</dt>
+                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.PartnerId ?? "—"}</dd>
+                </div>
+                <div className="border-b border-slate-100 pb-2">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Latitude / Longitude</dt>
                   <dd className="mt-1 text-sm text-slate-800">
                     {Number.isFinite(selectedPoi.Latitude) ? selectedPoi.Latitude.toFixed(6) : "—"}
@@ -865,6 +909,61 @@ function StaffPOIsPage() {
                     placeholder="GoogleMapLink"
                   />
                 </label>
+
+                <label className="text-sm text-slate-700">
+                  VisitRecommendation
+                  <input
+                    value={createForm.VisitRecommendation}
+                    onChange={(e) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        VisitRecommendation: e.target.value,
+                      }))
+                    }
+                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+                    placeholder="VisitRecommendation"
+                  />
+                </label>
+
+                <div className="text-sm text-slate-700">
+                  <div>PoiPreferences</div>
+                  <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {POI_PREFERENCES_OPTIONS.map((opt) => (
+                      <label
+                        key={opt.id}
+                        className="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={createForm.PoiPreferences.some(
+                            (x) => x.id === opt.id,
+                          )}
+                          onChange={(e) => {
+                            setCreateForm((prev) => {
+                              const exists = prev.PoiPreferences.some(
+                                (x) => x.id === opt.id,
+                              )
+                              const next = e.target.checked
+                                ? exists
+                                  ? prev.PoiPreferences
+                                  : [
+                                      ...prev.PoiPreferences,
+                                      { id: opt.id, name: opt.name },
+                                    ]
+                                : prev.PoiPreferences.filter(
+                                    (x) => x.id !== opt.id,
+                                  )
+
+                              return { ...prev, PoiPreferences: next }
+                            })
+                          }}
+                          className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
+                        />
+                        {opt.name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
 
                 <label className="text-sm text-slate-700">
                   LocationId
@@ -1108,7 +1207,7 @@ function StaffPOIsPage() {
               <label className="text-sm text-slate-700 block">
                 POIImgUrl
                 <input
-                  value={editForm.POIImgUrl}
+                  value={editImageFile?.name ?? editForm.POIImgUrl}
                   onChange={(e) =>
                     setEditForm((prev) => ({ ...prev, POIImgUrl: e.target.value }))
                   }
@@ -1119,14 +1218,13 @@ function StaffPOIsPage() {
 
               <label className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 cursor-pointer hover:bg-slate-100">
                 <Upload size={16} />
-                {uploadingEditImage ? "Đang upload..." : "Import ảnh"}
+                Chọn ảnh mới
                 <input
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  disabled={uploadingEditImage}
                   onChange={(e) => {
-                    void handleUploadEditImage(e.target.files?.[0] ?? null)
+                    handleSelectEditImage(e.target.files?.[0] ?? null)
                     e.currentTarget.value = ""
                   }}
                 />

@@ -37,6 +37,8 @@ function StaffPOIDetailPage() {
     IsIndoor: false,
     POIImgUrl: "",
     LocationId: "",
+    Status: "",
+    PartnerId: "",
   })
 
   const showToast = (type: "success" | "error", message: string) => {
@@ -70,6 +72,8 @@ function StaffPOIDetailPage() {
           IsIndoor: Boolean(poi.IsIndoor),
           POIImgUrl: poi.POIImgUrl ?? "",
           LocationId: poi.LocationId ?? "",
+          Status: poi.Status !== undefined ? String(poi.Status) : "",
+          PartnerId: poi.PartnerId ?? "",
         })
       } catch (e) {
         console.error("Failed to fetch POI detail", e)
@@ -145,6 +149,8 @@ function StaffPOIDetailPage() {
         IsIndoor: form.IsIndoor,
         POIImgUrl: form.POIImgUrl.trim(),
         LocationId: form.LocationId.trim(),
+        Status: form.Status || undefined,
+        PartnerId: form.PartnerId || undefined,
       })
 
       sessionStorage.setItem("staff_poi_success_message", "Cập nhật POI thành công")
@@ -277,6 +283,26 @@ function StaffPOIDetailPage() {
                     </option>
                   ))}
                 </select>
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <label className="text-sm text-slate-700">
+                Status
+                <input
+                  value={form.Status}
+                  onChange={(e) => setForm((prev) => ({ ...prev, Status: e.target.value }))}
+                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+                />
+              </label>
+
+              <label className="text-sm text-slate-700">
+                PartnerId
+                <input
+                  value={form.PartnerId}
+                  onChange={(e) => setForm((prev) => ({ ...prev, PartnerId: e.target.value }))}
+                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+                />
               </label>
             </div>
 

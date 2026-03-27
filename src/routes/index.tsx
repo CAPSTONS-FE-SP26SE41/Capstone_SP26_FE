@@ -44,11 +44,12 @@ function LoginPortalPage() {
         decoded.email ||
         email
 
-      if (role === "Staff") {
-        localStorage.setItem("staff_token", token)
-        localStorage.setItem("role", role)
+      // Staff -> Manager (chuyển quyền truy cập)
+      if (role === "Manager" || role === "Staff") {
+        localStorage.setItem("manager_token", token)
+        localStorage.setItem("role", "Manager")
         localStorage.setItem("user_name", name)
-        localStorage.setItem("user_role", role)
+        localStorage.setItem("user_role", "Manager")
         navigate({ to: "/staff" })
         return
       }
@@ -67,7 +68,7 @@ function LoginPortalPage() {
         localStorage.setItem("role", role)
         localStorage.setItem("user_name", name)
         localStorage.setItem("user_role", role)
-        navigate({ to: "/partner" })
+        navigate({ to: "/partner", search: { tab: "my-packages" } })
         return
       }
 

@@ -1,5 +1,7 @@
 import { Link } from '@tanstack/react-router'
-import { type LucideIcon } from 'lucide-react'
+import { type LucideIcon,LogOut } from 'lucide-react'
+import { logout } from '../../services/authService'
+import { useNavigate } from '@tanstack/react-router'
 
 export type NavItem = {
   to: string
@@ -26,24 +28,11 @@ export default function AppSidebar({
   themeColor = 'green',
 }: AppSidebarProps) {
   const BrandIcon = brand.icon
-  const accentMap = {
-    blue: {
-      logoBg: "bg-blue-100",
-      logoText: "text-blue-600",
-      activeBg: "bg-blue-50",
-      activeText: "text-blue-600",
-      hoverText: "group-hover:text-blue-600",
-    },
-    emerald: {
-      logoBg: "bg-emerald-100",
-      logoText: "text-emerald-600",
-      activeBg: "bg-emerald-50",
-      activeText: "text-emerald-700",
-      hoverText: "group-hover:text-emerald-700",
-    },
-  } as const
-
-  const accentClasses = accentMap[accent]
+  const navigate = useNavigate()
+ const handleLogout = () => {
+    logout()
+    navigate({ to: '/' })
+  }
 
   const isOrange = themeColor === 'orange'
   const brandBg = isOrange ? 'bg-[#faeadd]' : 'bg-[#e9f5ed]'
@@ -100,9 +89,23 @@ export default function AppSidebar({
               </span>
             </Link>
           )
+          
         })}
       </nav>
 
+      <div className="mt-auto p-4">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-2 p-2 px-3 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-medium text-sm group"
+          title="Đăng xuất"
+        >
+          <LogOut
+            size={18}
+            className="transition-transform group-hover:translate-x-0.5"
+          />
+          <span className="hidden md:inline">Đăng xuất</span>
+        </button>
+      </div>
     </aside>
   )
 }

@@ -679,6 +679,18 @@ const PartnerLayoutRouteWithChildren = PartnerLayoutRoute._addFileChildren(
   PartnerLayoutRouteChildren,
 )
 
+interface StaffLayoutPoisRouteChildren {
+  StaffLayoutPoisIdRoute: typeof StaffLayoutPoisIdRoute
+}
+
+const StaffLayoutPoisRouteChildren: StaffLayoutPoisRouteChildren = {
+  StaffLayoutPoisIdRoute: StaffLayoutPoisIdRoute,
+}
+
+const StaffLayoutPoisRouteWithChildren = StaffLayoutPoisRoute._addFileChildren(
+  StaffLayoutPoisRouteChildren,
+)
+
 interface StaffLayoutRouteChildren {
   StaffLayoutAdvertisementsRoute: typeof StaffLayoutAdvertisementsRoute
   StaffLayoutLocationsRoute: typeof StaffLayoutLocationsRoute

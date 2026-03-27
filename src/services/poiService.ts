@@ -26,6 +26,11 @@ export type StaffPOI = {
   Longitude: number
   LocationId: string
 
+  // Các trường mới từ backend
+  Status?: string | number
+  PartnerId?: string
+  PoiPreferences?: string[]
+
   // Một số backend có thể trả thêm, nhưng không bắt buộc
   LocationName?: string
 
@@ -59,6 +64,38 @@ function normalizeStaffPOI(p: any): StaffPOI {
     : openHour && closeHour
       ? `${openHour} - ${closeHour}`
       : openHour || closeHour || ""
+
+  const statusRaw = p?.Status ?? p?.POIStatus ?? p?.status
+  const partnerIdRaw = p?.PartnerId ?? p?.partnerId ?? p?.PartnerID ?? p?.partner_id
+
+  const poiPreferencesRaw = p?.PoiPreferences ?? p?.poiPreferences ?? p?.POIPreferences
+  const poiPreferencesNormalized =
+    Array.isArray(poiPreferencesRaw)
+      ? poiPreferencesRaw.map((x) => {
+          if (x === null || x === undefined) return ""
+          if (typeof x === "string") return x
+          if (typeof x === "number") return String(x)
+          if (typeof x === "object") {
+            const maybeId = (x as any)?.id ?? (x as any)?.Id
+            const maybeName = (x as any)?.name ?? (x as any)?.Name
+            return String(maybeId ?? maybeName ?? x)
+          }
+          return String(x)
+        })
+        .filter(Boolean)
+      : typeof poiPreferencesRaw === "string"
+        ? poiPreferencesRaw
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : undefined
+
+  const statusNormalized =
+    statusRaw === null || statusRaw === undefined ? undefined : (typeof statusRaw === "number" ? statusRaw : String(statusRaw))
+  const partnerIdNormalized =
+    partnerIdRaw === null || partnerIdRaw === undefined || partnerIdRaw === ""
+      ? undefined
+      : String(partnerIdRaw)
 
   return {
     Id: String(p?.Id ?? p?.id ?? ""),
@@ -94,20 +131,23 @@ function normalizeStaffPOI(p: any): StaffPOI {
     Latitude: Number(p?.Latitude ?? p?.latitude ?? 0),
     Longitude: Number(p?.Longitude ?? p?.longitude ?? 0),
     LocationId: String(p?.LocationId ?? p?.locationId ?? ""),
+    Status: statusNormalized,
+    PartnerId: partnerIdNormalized,
+    PoiPreferences: poiPreferencesNormalized,
     LocationName: p?.LocationName ?? p?.locationName,
     OpeningHours: String(p?.OpeningHours ?? openingHours ?? ""),
   }
 }
 
 export const getStaffPOIs = async (): Promise<StaffPOI[]> => {
-  const data = await apiClient("/staff/pois")
+  const data = await apiClient("/manager/pois")
   if (!Array.isArray(data)) return []
   return data.map(normalizeStaffPOI)
 }
 
 export const getStaffPOIById = async (id: string): Promise<StaffPOI | null> => {
   try {
-    const data = await apiClient(`/staff/pois/${id}`)
+    const data = await apiClient(`/manager/pois/${id}`)
     if (!data) return null
     return normalizeStaffPOI(data)
   } catch {
@@ -164,7 +204,7 @@ function normalizeStaffLocation(l: any): StaffLocation {
 }
 
 export const getStaffLocationsList = async (): Promise<StaffLocation[]> => {
-  const data = await apiClient("/staff/locations")
+  const data = await apiClient("/manager/locations")
   if (!Array.isArray(data)) return []
   return data.map(normalizeStaffLocation)
 }
@@ -172,7 +212,7 @@ export const getStaffLocationsList = async (): Promise<StaffLocation[]> => {
 export const getStaffLocationById = async (
   id: string
 ): Promise<StaffLocation | null> => {
-  const data = await apiClient(`/staff/locations/${id}`)
+  const data = await apiClient(`/manager/locations/${id}`)
   if (!data) return null
   return normalizeStaffLocation(data)
 }
@@ -180,7 +220,7 @@ export const getStaffLocationById = async (
 export const createStaffLocation = async (
   payload: CreateStaffLocationPayload
 ): Promise<StaffLocation> => {
-  const data = await apiClient("/staff/locations", {
+  const data = await apiClient("/manager/locations", {
     method: "POST",
     body: JSON.stringify(payload),
   })
@@ -191,7 +231,7 @@ export const updateStaffLocation = async (
   id: string,
   payload: UpdateStaffLocationPayload
 ): Promise<StaffLocation> => {
-  const data = await apiClient(`/staff/locations/${id}`, {
+  const data = await apiClient(`/manager/locations/${id}`, {
     method: "PUT",
     body: JSON.stringify(payload),
   })
@@ -199,14 +239,14 @@ export const updateStaffLocation = async (
 }
 
 export const deleteStaffLocation = async (id: string): Promise<void> => {
-  await apiClient(`/staff/locations/${id}`, {
+  await apiClient(`/manager/locations/${id}`, {
     method: "DELETE",
   })
 }
 
 export const getStaffLocations = async (): Promise<StaffLocationOption[]> => {
   try {
-    const data = await apiClient("/staff/locations")
+    const data = await apiClient("/manager/locations")
     if (!Array.isArray(data)) return []
     return data.map(normalizeLocationOption).filter((x) => x.Id)
   } catch {
@@ -227,28 +267,63 @@ export type CreateStaffPOIPayload = {
   GoogleMapLink: string
   IsIndoor: boolean
   LocationId: string
+  Status?: string | number
+  PartnerId?: string
+  VisitRecommendation?: string
+  // Backend đang map sang Dictionary/Map, nên có thể truyền array object {id,name}
+  PoiPreferences?: Array<string | { id: string; name: string }>
 }
 
 export const createStaffPOI = async (
   payload: CreateStaffPOIPayload,
   imageFile?: File | null
 ): Promise<StaffPOI> => {
+  const normalizeTimeOnly = (t: string) => {
+    const s = String(t ?? "").trim()
+    // Input time thường là "HH:mm" => backend TimeOnly cần "HH:mm:ss"
+    if (/^\d{2}:\d{2}$/.test(s)) return `${s}:00`
+    return s
+  }
+
   const formData = new FormData()
   formData.append("Name", payload.Name)
   formData.append("Address", payload.Address)
   formData.append("City", payload.City)
   formData.append("ApproxCost", payload.ApproxCost)
-  formData.append("OpenHour", payload.OpenHour)
-  formData.append("CloseHour", payload.CloseHour)
+  formData.append("OpenHour", normalizeTimeOnly(payload.OpenHour))
+  formData.append("CloseHour", normalizeTimeOnly(payload.CloseHour))
   formData.append("LocationId", payload.LocationId)
   formData.append("GoogleMapLink", payload.GoogleMapLink)
   formData.append("IsIndoor", String(payload.IsIndoor))
+  if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
+    formData.append("VisitRecommendation", payload.VisitRecommendation.trim())
+  }
+  if (payload.PoiPreferences?.length) {
+    // Khi backend map sang Dictionary/Map, gửi kiểu key-value giúp binding ổn định hơn.
+    // - Nếu là string: gửi nhiều field cùng key
+    // - Nếu là object {id,name}: gửi PoiPreferences[id]=name
+    payload.PoiPreferences.forEach((pref) => {
+      if (pref && typeof pref === "object") {
+        const id = (pref as any).id ?? (pref as any).Id
+        const name = (pref as any).name ?? (pref as any).Name
+        if (id) formData.append(`PoiPreferences[${id}]`, String(name ?? ""))
+        return
+      }
+      formData.append("PoiPreferences", String(pref))
+    })
+  }
+  if (payload.Status !== undefined) {
+    formData.append("Status", String(payload.Status))
+  }
+  if (payload.PartnerId) {
+    formData.append("PartnerId", payload.PartnerId)
+  }
   if (imageFile) {
     formData.append("POIImgUrl", imageFile)
   }
 
   const token = getStaffToken()
-  const res = await fetch(`${API_BASE_URL}/staff/pois`, {
+  const res = await fetch(`${API_BASE_URL}/manager/pois`, {
     method: "POST",
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -281,27 +356,123 @@ export type UpdateStaffPOIPayload = {
   IsIndoor: boolean
   POIImgUrl: string
   LocationId: string
+  Status?: string | number
+  PartnerId?: string
+  VisitRecommendation?: string
+  PoiPreferences?: Array<string | { id: string; name: string }>
 }
 
 export const updateStaffPOI = async (
   id: string,
-  payload: UpdateStaffPOIPayload
+  payload: UpdateStaffPOIPayload,
+  imageFile?: File | null
 ): Promise<StaffPOI> => {
-  const params = new URLSearchParams({
+  const normalizeTimeOnly = (t: string) => {
+    const s = String(t ?? "").trim()
+    if (/^\d{2}:\d{2}$/.test(s)) return `${s}:00`
+    return s
+  }
+
+  // Nếu có file ảnh mới -> gửi multipart/form-data để backend nhận POIImgUrl ($binary)
+  if (imageFile) {
+    const formData = new FormData()
+    formData.append("Name", payload.Name ?? "")
+    formData.append("Address", payload.Address ?? "")
+    formData.append("City", payload.City ?? "")
+    formData.append("ApproxCost", payload.ApproxCost ?? "")
+    formData.append("OpenHour", normalizeTimeOnly(payload.OpenHour ?? ""))
+    formData.append("CloseHour", normalizeTimeOnly(payload.CloseHour ?? ""))
+    formData.append("LocationId", payload.LocationId ?? "")
+    formData.append("GoogleMapLink", payload.GoogleMapLink ?? "")
+    formData.append("IsIndoor", String(Boolean(payload.IsIndoor)))
+
+    if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
+      formData.append("VisitRecommendation", payload.VisitRecommendation.trim())
+    }
+    if (payload.Status !== undefined) {
+      formData.append("Status", String(payload.Status))
+    }
+    if (payload.PartnerId) {
+      formData.append("PartnerId", payload.PartnerId)
+    }
+
+    if (payload.PoiPreferences?.length) {
+      payload.PoiPreferences.forEach((pref) => {
+        if (pref && typeof pref === "object") {
+          const pid = (pref as any).id ?? (pref as any).Id
+          const name = (pref as any).name ?? (pref as any).Name
+          if (pid) formData.append(`PoiPreferences[${pid}]`, String(name ?? ""))
+          return
+        }
+        formData.append("PoiPreferences", String(pref))
+      })
+    }
+
+    formData.append("POIImgUrl", imageFile)
+
+    const token = getStaffToken()
+    const res = await fetch(`${API_BASE_URL}/manager/pois/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      const err = new Error(errorText || "Update POI failed")
+      ;(err as any).status = res.status
+      throw err
+    }
+
+    const contentType = res.headers.get("content-type") ?? ""
+    const data = contentType.includes("application/json")
+      ? await res.json()
+      : await res.text()
+
+    return normalizeStaffPOI(data ?? payload)
+  }
+
+  const paramsObj: Record<string, string> = {
     Name: payload.Name ?? "",
     Address: payload.Address ?? "",
     City: payload.City ?? "",
     ApproxCost: payload.ApproxCost ?? "",
-    OpenHour: payload.OpenHour ?? "",
-    CloseHour: payload.CloseHour ?? "",
+    OpenHour: normalizeTimeOnly(payload.OpenHour ?? ""),
+    CloseHour: normalizeTimeOnly(payload.CloseHour ?? ""),
     LocationId: payload.LocationId ?? "",
     GoogleMapLink: payload.GoogleMapLink ?? "",
     IsIndoor: String(Boolean(payload.IsIndoor)),
     POIImgUrl: payload.POIImgUrl ?? "",
-  })
+  }
+
+  if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
+    paramsObj.VisitRecommendation = payload.VisitRecommendation.trim()
+  }
+
+  if (payload.Status !== undefined) {
+    paramsObj.Status = String(payload.Status)
+  }
+  if (payload.PartnerId) {
+    paramsObj.PartnerId = payload.PartnerId
+  }
+
+  const params = new URLSearchParams(paramsObj)
+  if (payload.PoiPreferences?.length) {
+    payload.PoiPreferences.forEach((pref) => {
+      if (pref && typeof pref === "object") {
+        const pid = (pref as any).id ?? (pref as any).Id
+        const name = (pref as any).name ?? (pref as any).Name
+        if (pid) params.append(`PoiPreferences[${pid}]`, String(name ?? ""))
+        return
+      }
+      params.append("PoiPreferences", String(pref))
+    })
+  }
 
   const data = await apiClient(
-    `/staff/pois/${encodeURIComponent(id)}?${params.toString()}`,
+    `/manager/pois/${encodeURIComponent(id)}?${params.toString()}`,
     {
     method: "PUT",
     }
@@ -310,7 +481,7 @@ export const updateStaffPOI = async (
 }
 
 export const deleteStaffPOI = async (id: string): Promise<void> => {
-  await apiClient(`/staff/pois/${id}`, {
+  await apiClient(`/manager/pois/${id}`, {
     method: "DELETE",
   })
 }
@@ -319,14 +490,14 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5131/api"
 
 const getStaffToken = () =>
-  localStorage.getItem("staff_token") || localStorage.getItem("admin_token")
+  localStorage.getItem("manager_token") || localStorage.getItem("admin_token")
 
 export const uploadStaffPOIImage = async (file: File): Promise<string> => {
   const formData = new FormData()
   formData.append("file", file)
 
   const token = getStaffToken()
-  const res = await fetch(`${API_BASE_URL}/staff/pois/upload-image`, {
+  const res = await fetch(`${API_BASE_URL}/manager/pois/upload-image`, {
     method: "POST",
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -398,9 +569,9 @@ const importStaffExcelFile = async (
 }
 
 export const importStaffPOIsExcel = async (file: File): Promise<string> => {
-  return importStaffExcelFile("/staff/pois/import", file)
+  return importStaffExcelFile("/manager/pois/import", file)
 }
 
 export const importStaffLocationsExcel = async (file: File): Promise<string> => {
-  return importStaffExcelFile("/staff/locations/import", file)
+  return importStaffExcelFile("/manager/locations/import", file)
 }

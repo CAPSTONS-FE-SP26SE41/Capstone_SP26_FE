@@ -23,24 +23,20 @@ export default function DashboardLayout({
 }: DashboardLayoutProps) {
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Sidebar */}
       <AppSidebar
         brand={brand}
         navItems={navItems}
         themeColor={themeColor}
       />
 
-
-      {/* Main Area */}
       <div className="flex-1 flex flex-col">
-        <AppTopbar
-          accent={accent}
-          userName={userName}
-          userRole={userRole}
-          userAvatarUrl={userAvatarUrl}
-          searchPlaceholder={searchPlaceholder}
-          themeColor={themeColor}
-        />
+      <AppTopbar
+  userName={userName}
+  userRole={userRole}
+  userAvatarUrl={userAvatarUrl}
+  searchPlaceholder={searchPlaceholder}
+  themeColor={themeColor}
+/>
 
         <main className="flex-1 p-6 overflow-auto">
           <Outlet />
