@@ -97,6 +97,70 @@ function normalizeStaffPOI(p: any): StaffPOI {
       ? undefined
       : String(partnerIdRaw)
 
+  const extractImgString = (value: any): string => {
+    if (value === null || value === undefined) return ""
+    if (typeof value === "string") return value
+    if (typeof value === "number") return String(value)
+    if (typeof value === "object") {
+      // Some APIs return { url: "..." } or { Url: "..." }
+      const maybeUrl =
+        (value as any)?.url ??
+        (value as any)?.Url ??
+        (value as any)?.imageUrl ??
+        (value as any)?.ImageUrl ??
+        (value as any)?.POIImgUrl ??
+        (value as any)?.poiImgUrl
+      if (typeof maybeUrl === "string") return maybeUrl
+    }
+    return String(value)
+  }
+
+  const rawImg = String(
+    extractImgString(
+      p?.POIImgUrl ??
+        p?.POIImgeUrl ??
+        p?.poiImgUrl ??
+        p?.poiImgeUrl ??
+        p?.POIImageUrl ??
+        p?.poi_image_url ??
+        // common alternates
+        p?.imageUrl ??
+        p?.ImageUrl ??
+        p?.url ??
+        p?.Url ??
+        p?.image?.url ??
+        p?.Image?.Url ??
+        ""
+    )
+  ).trim()
+
+  const resolvePoiImgUrl = (value: string) => {
+    if (!value) return ""
+    const v = value.trim()
+    // Một số backend có thể trả placeholder kiểu .NET type name
+    if (v.includes("Microsoft.AspNetCore.Http.FormFile")) return ""
+    if (v === "null" || v === "undefined") return ""
+
+    // data URL
+    if (v.startsWith("data:")) return v
+
+    // absolute URL
+    if (/^https?:\/\//i.test(v)) return v
+
+    // relative path -> prefix origin từ VITE_API_BASE_URL (vd http://localhost:5131/api -> http://localhost:5131)
+    const origin = (() => {
+      try {
+        return new URL(API_BASE_URL).origin
+      } catch {
+        return ""
+      }
+    })()
+
+    if (!origin) return v
+    if (v.startsWith("/")) return `${origin}${v}`
+    return `${origin}/${v}`
+  }
+
   return {
     Id: String(p?.Id ?? p?.id ?? ""),
     Name: String(p?.Name ?? p?.name ?? ""),
@@ -117,15 +181,7 @@ function normalizeStaffPOI(p: any): StaffPOI {
     GoogleMapLink: String(
       p?.GoogleMapLink ?? p?.googleMapLink ?? p?.google_map_link ?? ""
     ),
-    POIImgUrl: String(
-      p?.POIImgUrl ??
-        p?.POIImgeUrl ??
-        p?.poiImgUrl ??
-        p?.poiImgeUrl ??
-        p?.POIImageUrl ??
-        p?.poi_image_url ??
-        ""
-    ),
+    POIImgUrl: resolvePoiImgUrl(rawImg),
 
     IsIndoor: Boolean(p?.IsIndoor ?? p?.isIndoor ?? false),
     Latitude: Number(p?.Latitude ?? p?.latitude ?? 0),
@@ -373,65 +429,12 @@ export const updateStaffPOI = async (
     return s
   }
 
-  // Nếu có file ảnh mới -> gửi multipart/form-data để backend nhận POIImgUrl ($binary)
+  // Backend của bạn có endpoint upload ảnh riêng:
+  // POST /api/manager/pois/upload-image -> trả về URL ảnh
+  // Sau đó update POI bằng POIImgUrl (string) sẽ giúp GET chi tiết trả ảnh đúng.
+  let poiImgUrlForUpdate = payload.POIImgUrl ?? ""
   if (imageFile) {
-    const formData = new FormData()
-    formData.append("Name", payload.Name ?? "")
-    formData.append("Address", payload.Address ?? "")
-    formData.append("City", payload.City ?? "")
-    formData.append("ApproxCost", payload.ApproxCost ?? "")
-    formData.append("OpenHour", normalizeTimeOnly(payload.OpenHour ?? ""))
-    formData.append("CloseHour", normalizeTimeOnly(payload.CloseHour ?? ""))
-    formData.append("LocationId", payload.LocationId ?? "")
-    formData.append("GoogleMapLink", payload.GoogleMapLink ?? "")
-    formData.append("IsIndoor", String(Boolean(payload.IsIndoor)))
-
-    if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
-      formData.append("VisitRecommendation", payload.VisitRecommendation.trim())
-    }
-    if (payload.Status !== undefined) {
-      formData.append("Status", String(payload.Status))
-    }
-    if (payload.PartnerId) {
-      formData.append("PartnerId", payload.PartnerId)
-    }
-
-    if (payload.PoiPreferences?.length) {
-      payload.PoiPreferences.forEach((pref) => {
-        if (pref && typeof pref === "object") {
-          const pid = (pref as any).id ?? (pref as any).Id
-          const name = (pref as any).name ?? (pref as any).Name
-          if (pid) formData.append(`PoiPreferences[${pid}]`, String(name ?? ""))
-          return
-        }
-        formData.append("PoiPreferences", String(pref))
-      })
-    }
-
-    formData.append("POIImgUrl", imageFile)
-
-    const token = getStaffToken()
-    const res = await fetch(`${API_BASE_URL}/manager/pois/${encodeURIComponent(id)}`, {
-      method: "PUT",
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: formData,
-    })
-
-    if (!res.ok) {
-      const errorText = await res.text()
-      const err = new Error(errorText || "Update POI failed")
-      ;(err as any).status = res.status
-      throw err
-    }
-
-    const contentType = res.headers.get("content-type") ?? ""
-    const data = contentType.includes("application/json")
-      ? await res.json()
-      : await res.text()
-
-    return normalizeStaffPOI(data ?? payload)
+    poiImgUrlForUpdate = await uploadStaffPOIImage(imageFile)
   }
 
   const paramsObj: Record<string, string> = {
@@ -444,7 +447,7 @@ export const updateStaffPOI = async (
     LocationId: payload.LocationId ?? "",
     GoogleMapLink: payload.GoogleMapLink ?? "",
     IsIndoor: String(Boolean(payload.IsIndoor)),
-    POIImgUrl: payload.POIImgUrl ?? "",
+    POIImgUrl: poiImgUrlForUpdate ?? "",
   }
 
   if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {

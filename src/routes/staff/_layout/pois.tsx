@@ -46,6 +46,7 @@ function StaffPOIsPage() {
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editImageFile, setEditImageFile] = useState<File | null>(null)
+  const [editImagePreviewUrl, setEditImagePreviewUrl] = useState<string>("")
   const [importing, setImporting] = useState(false)
   const [loadingLocations, setLoadingLocations] = useState(false)
   const [locationOptions, setLocationOptions] = useState<StaffLocationOption[]>([])
@@ -77,7 +78,9 @@ function StaffPOIsPage() {
     OpenHour: "",
     CloseHour: "",
     GoogleMapLink: "",
+    VisitRecommendation: "",
     IsIndoor: false,
+    PoiPreferences: [] as Array<{ id: string; name: string }>,
     POIImgUrl: "",
     LocationId: "",
     Status: "",
@@ -163,6 +166,21 @@ function StaffPOIsPage() {
       return haystack.includes(q)
     })
   }, [pois, query])
+
+  useEffect(() => {
+    if (!showEditModal) {
+      setEditImagePreviewUrl("")
+      return
+    }
+
+    if (editImageFile) {
+      const url = URL.createObjectURL(editImageFile)
+      setEditImagePreviewUrl(url)
+      return () => URL.revokeObjectURL(url)
+    }
+
+    setEditImagePreviewUrl(editForm.POIImgUrl ?? "")
+  }, [showEditModal, editImageFile, editForm.POIImgUrl])
 
   const fallbackLocationOptions = useMemo(() => {
     const seen = new Set<string>()
@@ -283,6 +301,25 @@ function StaffPOIsPage() {
         showToast("error", "Không tìm thấy POI")
         return
       }
+
+      const normalizedEditPrefs: Array<{ id: string; name: string }> = (() => {
+        const raw = detail.PoiPreferences ?? []
+        if (!Array.isArray(raw) || raw.length === 0) return []
+        return raw
+          .map((v) => String(v ?? "").trim())
+          .filter(Boolean)
+          .map((v) => {
+            const byId = POI_PREFERENCES_OPTIONS.find((o) => o.id === v)
+            if (byId) return byId
+            const byName = POI_PREFERENCES_OPTIONS.find(
+              (o) => o.name.toLowerCase() === v.toLowerCase()
+            )
+            if (byName) return byName
+            // fallback: keep something visible/selectable
+            return { id: v, name: v }
+          })
+      })()
+
       setEditingPoiId(detail.Id)
       setEditForm({
         Name: detail.Name ?? "",
@@ -292,7 +329,9 @@ function StaffPOIsPage() {
         OpenHour: detail.OpenHour ?? "",
         CloseHour: detail.CloseHour ?? "",
         GoogleMapLink: detail.GoogleMapLink ?? "",
+        VisitRecommendation: detail.VisitRecommendation ?? "",
         IsIndoor: Boolean(detail.IsIndoor),
+        PoiPreferences: normalizedEditPrefs,
         POIImgUrl: detail.POIImgUrl ?? "",
         LocationId: detail.LocationId ?? "",
         Status: detail.Status !== undefined ? String(detail.Status) : "",
@@ -421,7 +460,9 @@ function StaffPOIsPage() {
         OpenHour: editForm.OpenHour.trim(),
         CloseHour: editForm.CloseHour.trim(),
         GoogleMapLink: editForm.GoogleMapLink.trim(),
+        VisitRecommendation: editForm.VisitRecommendation.trim(),
         IsIndoor: editForm.IsIndoor,
+        PoiPreferences: editForm.PoiPreferences,
         POIImgUrl: editForm.POIImgUrl.trim(),
         LocationId: editForm.LocationId.trim(),
         Status: editForm.Status || undefined,
@@ -1164,6 +1205,21 @@ function StaffPOIsPage() {
                   />
                 </label>
 
+                <label className="text-sm text-slate-700 sm:col-span-2">
+                  Gợi ý tham quan (VisitRecommendation)
+                  <input
+                    value={editForm.VisitRecommendation}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        VisitRecommendation: e.target.value,
+                      }))
+                    }
+                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+                    placeholder="VD: Nên đi buổi sáng / mùa khô..."
+                  />
+                </label>
+
                 <label className="text-sm text-slate-700">
                   LocationId
                   <select
@@ -1192,6 +1248,37 @@ function StaffPOIsPage() {
                 </label>
               </div>
 
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-slate-700">PoiPreferences</div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {POI_PREFERENCES_OPTIONS.map((opt) => {
+                    const checked = editForm.PoiPreferences.some((p) => p.id === opt.id)
+                    return (
+                      <label
+                        key={opt.id}
+                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 cursor-pointer hover:bg-slate-50"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(e) => {
+                            const nextChecked = e.target.checked
+                            setEditForm((prev) => {
+                              const next = nextChecked
+                                ? [...prev.PoiPreferences, opt]
+                                : prev.PoiPreferences.filter((p) => p.id !== opt.id)
+                              return { ...prev, PoiPreferences: next }
+                            })
+                          }}
+                          className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
+                        />
+                        <span className="truncate">{opt.name}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+
               <label className="inline-flex items-center gap-2 text-sm text-slate-700">
                 <input
                   type="checkbox"
@@ -1203,6 +1290,20 @@ function StaffPOIsPage() {
                 />
                 IsIndoor
               </label>
+
+              <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50">
+                {editImagePreviewUrl ? (
+                  <img
+                    src={editImagePreviewUrl}
+                    alt={editForm.Name || "POI"}
+                    className="w-full h-[220px] object-cover"
+                  />
+                ) : (
+                  <div className="h-[220px] flex items-center justify-center text-slate-400 text-sm">
+                    Không có ảnh
+                  </div>
+                )}
+              </div>
 
               <label className="text-sm text-slate-700 block">
                 POIImgUrl
