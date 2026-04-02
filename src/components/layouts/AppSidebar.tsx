@@ -29,9 +29,25 @@ export default function AppSidebar({
 }: AppSidebarProps) {
   const BrandIcon = brand.icon
   const navigate = useNavigate()
- const handleLogout = () => {
-    logout()
-    navigate({ to: '/' })
+
+  const handleLogout = async () => {
+    const role = localStorage.getItem("role")?.toLowerCase()
+    const loginPath =
+      role === "admin" || role === "superadmin"
+        ? "/admin/login"
+        : role === "partner"
+          ? "/partner/login"
+          : role === "manager"
+            ? "/staff/login"
+            : "/"
+
+    try {
+      await logout()
+      navigate({ to: loginPath })
+    } catch (error) {
+      console.error("Logout failed", error)
+      navigate({ to: loginPath })
+    }
   }
 
   const isOrange = themeColor === 'orange'
