@@ -13,6 +13,7 @@ import {
   type StaffLocationOption,
   type StaffPOI,
   updateStaffPOI,
+  exportStaffPOIsExcel,
 } from "../../../services/poiService"
 
 export const Route = createFileRoute("/staff/_layout/pois")({
@@ -49,6 +50,7 @@ function StaffPOIsPage() {
   const [editImagePreviewUrl, setEditImagePreviewUrl] = useState<string>("")
   const [importing, setImporting] = useState(false)
   const [loadingLocations, setLoadingLocations] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [locationOptions, setLocationOptions] = useState<StaffLocationOption[]>([])
   const [toast, setToast] = useState<{
     type: "success" | "error"
@@ -481,10 +483,10 @@ function StaffPOIsPage() {
       setPois(
         editImageFile
           ? refreshedData.map((p) =>
-              p.Id === editingPoiId && p.POIImgUrl
-                ? { ...p, POIImgUrl: withCacheBust(p.POIImgUrl) }
-                : p
-            )
+            p.Id === editingPoiId && p.POIImgUrl
+              ? { ...p, POIImgUrl: withCacheBust(p.POIImgUrl) }
+              : p
+          )
           : refreshedData
       )
       setShowEditModal(false)
@@ -513,7 +515,7 @@ function StaffPOIsPage() {
           <h2 className="text-2xl font-semibold text-slate-900">
             Quản lí POIs
           </h2>
-         
+
         </div>
 
         <div className="w-full sm:w-auto flex items-center gap-2">
@@ -533,11 +535,10 @@ function StaffPOIsPage() {
             <Plus size={16} />
             Tạo mới
           </button>
-          <label className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${
-            importing
-              ? "bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
-              : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
-          }`}>
+          <label className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${importing
+            ? "bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
+            : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
+            }`}>
             <Upload size={16} />
             {importing ? "Đang import..." : "Import Excel"}
             <input
@@ -552,6 +553,27 @@ function StaffPOIsPage() {
               }}
             />
           </label>
+          <button
+            disabled={exporting}
+            onClick={async () => {
+              try {
+                setExporting(true)
+                await exportStaffPOIsExcel() // 👈 nhớ dùng đúng API POI
+                showToast("success", "Export POIs thành công")
+              } catch (e) {
+                console.error(e)
+                showToast("error", "Export POIs thất bại")
+              } finally {
+                setExporting(false)
+              }
+            }}
+            className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap ${exporting
+                ? "bg-slate-100 text-slate-400 border border-slate-200"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
+          >
+            ⬇ {exporting ? "Đang export..." : "Export Excel"}
+          </button>
         </div>
       </div>
 
@@ -624,11 +646,10 @@ function StaffPOIsPage() {
 
                         <td className="px-6 py-4">
                           <span
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
-                              p.IsIndoor
-                                ? "bg-emerald-100 text-emerald-800 border-emerald-200"
-                                : "bg-slate-100 text-slate-700 border-slate-200"
-                            }`}
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${p.IsIndoor
+                              ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                              : "bg-slate-100 text-slate-700 border-slate-200"
+                              }`}
                           >
                             {p.IsIndoor ? "Trong nhà" : "Ngoài trời"}
                           </span>
@@ -648,14 +669,14 @@ function StaffPOIsPage() {
                               className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors text-sm font-semibold"
                             >
                               <Edit2 size={16} />
-                              
+
                             </button>
                             <button
                               onClick={() => handleDelete(p)}
                               className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors text-sm font-semibold"
                             >
                               <Trash2 size={16} />
-                              
+
                             </button>
                           </div>
                         </td>
@@ -706,11 +727,10 @@ function StaffPOIsPage() {
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`h-10 w-10 rounded-xl border text-sm font-semibold transition-colors ${
-                      p === page
-                        ? "bg-emerald-600 border-emerald-600 text-white"
-                        : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
+                    className={`h-10 w-10 rounded-xl border text-sm font-semibold transition-colors ${p === page
+                      ? "bg-emerald-600 border-emerald-600 text-white"
+                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                      }`}
                   >
                     {p}
                   </button>
@@ -988,12 +1008,12 @@ function StaffPOIsPage() {
                                 ? exists
                                   ? prev.PoiPreferences
                                   : [
-                                      ...prev.PoiPreferences,
-                                      { id: opt.id, name: opt.name },
-                                    ]
+                                    ...prev.PoiPreferences,
+                                    { id: opt.id, name: opt.name },
+                                  ]
                                 : prev.PoiPreferences.filter(
-                                    (x) => x.id !== opt.id,
-                                  )
+                                  (x) => x.id !== opt.id,
+                                )
 
                               return { ...prev, PoiPreferences: next }
                             })
@@ -1357,11 +1377,10 @@ function StaffPOIsPage() {
 
       {toast ? (
         <div
-          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${
-            toast.type === "success"
-              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-              : "bg-rose-50 text-rose-700 border-rose-200"
-          }`}
+          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${toast.type === "success"
+            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+            : "bg-rose-50 text-rose-700 border-rose-200"
+            }`}
         >
           {toast.message}
         </div>

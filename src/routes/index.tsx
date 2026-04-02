@@ -24,12 +24,24 @@ function LoginPortalPage() {
     try {
       const data = await login(email, password)
 
-      const token = data.token.replace("Bearer ", "")
+      let rawToken = data?.token || data?.data?.token
+      if (!rawToken) {
+        throw new Error("Không tìm thấy token trong phản hồi")
+      }
+      const token = rawToken.replace("Bearer ", "")
 
       const decoded: any = jwtDecode(token)
 
-      const role =
-        decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
+      let roleRaw =
+        decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
+        decoded.role ||
+        decoded["role"]
+        
+      if (Array.isArray(roleRaw)) {
+        roleRaw = roleRaw[0]
+      }
+      
+      const roleLower = String(roleRaw || "").toLowerCase()
 
       const name =
         decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] ||
@@ -45,7 +57,7 @@ function LoginPortalPage() {
         email
 
       // Staff -> Manager (chuyển quyền truy cập)
-      if (role === "Manager" || role === "Staff") {
+      if (roleLower === "manager" || roleLower === "staff") {
         localStorage.setItem("manager_token", token)
         localStorage.setItem("role", "Manager")
         localStorage.setItem("user_name", name)
@@ -54,20 +66,20 @@ function LoginPortalPage() {
         return
       }
 
-      if (role === "Admin" || role === "SuperAdmin") {
+      if (roleLower === "admin" || roleLower === "superadmin") {
         localStorage.setItem("admin_token", token)
-        localStorage.setItem("role", role)
+        localStorage.setItem("role", "Admin")
         localStorage.setItem("user_name", name)
-        localStorage.setItem("user_role", role)
+        localStorage.setItem("user_role", "Admin")
         navigate({ to: "/admin/analytics" })
         return
       }
 
-      if (role === "Partner") {
+      if (roleLower === "partner") {
         localStorage.setItem("partner_token", token)
-        localStorage.setItem("role", role)
+        localStorage.setItem("role", "Partner")
         localStorage.setItem("user_name", name)
-        localStorage.setItem("user_role", role)
+        localStorage.setItem("user_role", "Partner")
         navigate({ to: "/partner", search: { tab: "my-packages" } })
         return
       }

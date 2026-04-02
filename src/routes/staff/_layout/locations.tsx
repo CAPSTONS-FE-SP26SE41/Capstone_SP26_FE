@@ -2,11 +2,14 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useMemo, useState, type FormEvent } from "react"
 import { Edit2, Eye, Plus, Search, Trash2, Upload } from "lucide-react"
 
+
+
 import {
   createStaffLocation,
   deleteStaffLocation,
   getStaffLocationById,
   getStaffLocationsList,
+  exportStaffLocationsExcel,
   importStaffLocationsExcel,
   type StaffLocation,
   updateStaffLocation,
@@ -32,6 +35,7 @@ function StaffLocationsPage() {
   const [selectedLocation, setSelectedLocation] = useState<StaffLocation | null>(null)
   const [saving, setSaving] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [form, setForm] = useState({
     LocationName: "",
     Latitude: "",
@@ -260,6 +264,7 @@ function StaffLocationsPage() {
         </div>
 
         <div className="w-full sm:w-auto flex items-center gap-2">
+          {/* Search */}
           <div className="relative w-full sm:w-[360px]">
             <Search
               size={16}
@@ -272,6 +277,11 @@ function StaffLocationsPage() {
               placeholder="Tim theo id, tên, tọa độ..."
             />
           </div>
+
+          {/* ✅ EXPORT */}
+          
+
+          {/* Create */}
           <button
             onClick={() => {
               resetForm()
@@ -282,16 +292,19 @@ function StaffLocationsPage() {
             <Plus size={16} />
             Tạo mới
           </button>
-          <label className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${
-            importing
-              ? "bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
-              : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
-          }`}>
+
+          {/* Import */}
+          <label
+            className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${importing
+                ? "bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
+                : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
+              }`}
+          >
             <Upload size={16} />
             {importing ? "Đang import..." : "Import Excel"}
             <input
               type="file"
-              accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+              accept=".xlsx,.xls"
               className="hidden"
               disabled={importing}
               onChange={(e) => {
@@ -301,6 +314,28 @@ function StaffLocationsPage() {
               }}
             />
           </label>
+          
+          <button
+            disabled={exporting}
+            onClick={async () => {
+              try {
+                setExporting(true)
+                await exportStaffLocationsExcel()
+                showToast("success", "Export thành công")
+              } catch (e) {
+                console.error(e)
+                showToast("error", "Export thất bại")
+              } finally {
+                setExporting(false)
+              }
+            }}
+            className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap ${exporting
+                ? "bg-slate-100 text-slate-400 border border-slate-200"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
+          >
+            ⬇ {exporting ? "Đang export..." : "Export Excel"}
+          </button>
         </div>
       </div>
 
@@ -316,7 +351,7 @@ function StaffLocationsPage() {
           <div className="py-16 text-center text-slate-500">Dang tai dia diem...</div>
         ) : filteredLocations.length === 0 ? (
           <div className="py-16 text-center text-slate-500">
-          Không có Location phù hợp với bộ lọc
+            Không có Location phù hợp với bộ lọc
           </div>
         ) : (
           <>
@@ -423,11 +458,10 @@ function StaffLocationsPage() {
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`h-10 w-10 rounded-xl border text-sm font-semibold transition-colors ${
-                      p === page
-                        ? "bg-emerald-600 border-emerald-600 text-white"
-                        : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
+                    className={`h-10 w-10 rounded-xl border text-sm font-semibold transition-colors ${p === page
+                      ? "bg-emerald-600 border-emerald-600 text-white"
+                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                      }`}
                   >
                     {p}
                   </button>
@@ -669,11 +703,10 @@ function StaffLocationsPage() {
 
       {toast ? (
         <div
-          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${
-            toast.type === "success"
-              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-              : "bg-rose-50 text-rose-700 border-rose-200"
-          }`}
+          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${toast.type === "success"
+            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+            : "bg-rose-50 text-rose-700 border-rose-200"
+            }`}
         >
           {toast.message}
         </div>

@@ -575,6 +575,67 @@ export const importStaffPOIsExcel = async (file: File): Promise<string> => {
   return importStaffExcelFile("/manager/pois/import", file)
 }
 
+export const exportStaffPOIsExcel = async (): Promise<void> => {
+  const token =
+    localStorage.getItem("manager_token") ||
+    localStorage.getItem("admin_token")
+
+  const res = await fetch(`${API_BASE_URL}/manager/pois/export`, {
+    method: "GET",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || "Export POIs thất bại")
+  }
+
+  const blob = await res.blob()
+
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = "Pois.xlsx" // đổi tên file tại đây
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+
+  window.URL.revokeObjectURL(url)
+}
+
 export const importStaffLocationsExcel = async (file: File): Promise<string> => {
   return importStaffExcelFile("/manager/locations/import", file)
+
+}
+
+export const exportStaffLocationsExcel = async (): Promise<void> => {
+  const token =
+    localStorage.getItem("manager_token") ||
+    localStorage.getItem("admin_token")
+
+  const res = await fetch(`${API_BASE_URL}/manager/locations/export`, {
+    method: "GET",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || "Export thất bại")
+  }
+
+  const blob = await res.blob()
+
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = "Locations.xlsx" // tên file tải về
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+
+  window.URL.revokeObjectURL(url)
 }
