@@ -10,19 +10,19 @@ import DashboardLayout from "../../components/layouts/DashboardLayout"
 
 export const Route = createFileRoute("/staff/_layout")({
   beforeLoad: () => {
-    if (typeof window !== "undefined" && !localStorage.getItem("staff_token")) {
+    if (typeof window !== "undefined" && !localStorage.getItem("manager_token")) {
       throw redirect({ to: "/staff/login" })
     }
   },
-  component: StaffLayout,
+  component: ManagerLayout,
 })
 
-function StaffLayout() {
+function ManagerLayout() {
   return (
     <DashboardLayout
       brand={{
-        name: "TripNhân viên",
-        subtitle: "Bảng điều khiển nhân viên",
+        name: "Trip Manager",
+        subtitle: "Bảng điều khiển quản lý",
         icon: PlaneTakeoff,
       }}
       accent="emerald"
@@ -31,10 +31,10 @@ function StaffLayout() {
         { to: "/staff/pois", icon: MapPin, label: "Quản lí POIs" },
         { to: "/staff/locations", icon: Map, label: "Quản lí địa điểm" },
       ]}
-      userName={typeof window !== "undefined" ? localStorage.getItem("user_name") ?? "Staff Profile" : "Staff Profile"}
+      userName={typeof window !== "undefined" ? localStorage.getItem("user_name") ?? "Manager" : "Manager"}
 
-      userRole={typeof window !== "undefined" ? localStorage.getItem("user_role") ?? "Staff" : "Staff"}
-      searchPlaceholder="Search ads..."
+      userRole={typeof window !== "undefined" ? localStorage.getItem("user_role") ?? "Manager" : "Manager"}
+      searchPlaceholder="Search..."
     />
   )
-}
+}

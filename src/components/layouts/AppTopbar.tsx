@@ -1,4 +1,4 @@
-import { Bell, LogOut } from 'lucide-react'
+import { Bell, LogOut, Search } from 'lucide-react'
 import { useLocation, useNavigate } from '@tanstack/react-router'
 import { logout } from '../../services/authService'
 
@@ -15,10 +15,35 @@ export default function AppTopbar({
   userRole = 'User',
   userAvatarUrl = 'https://i.pravatar.cc/40',
   themeColor = 'green',
+  searchPlaceholder = 'Sreach ...',
 }: AppTopbarProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  
+
+  const accentMap = {
+    blue: {
+      text: "text-blue-600",
+      hoverText: "hover:text-blue-600",
+      ring: "ring-blue-600/30",
+      focusRing: "focus:ring-blue-500/20",
+    },
+    emerald: {
+      text: "text-[#5ab473]",
+      hoverText: "hover:text-[#5ab473]",
+      ring: "ring-[#5ab473]/30",
+      focusRing: "focus:ring-emerald-500/20",
+    },
+    orange: {
+      text: "text-[#e28743]",
+      hoverText: "hover:text-[#e28743]",
+      ring: "ring-[#e28743]/30",
+      focusRing: "focus:ring-orange-500/20",
+    },
+  } as const
+
+  const accent = (themeColor === 'green' ? 'emerald' : themeColor) as keyof typeof accentMap
+  const accentClasses = accentMap[accent] || accentMap.emerald
+
   const getPageTitle = (path: string) => {
     if (path.includes('/accounts')) return 'Account Management'
     if (path.includes('/analytics')) return 'Analytics'
@@ -37,9 +62,8 @@ export default function AppTopbar({
     navigate({ to: '/' })
   }
 
-  const isOrange = themeColor === 'orange'
-  const hoverText = isOrange ? 'hover:text-[#e28743]' : 'hover:text-[#5ab473]'
-  const ringColor = isOrange ? 'ring-[#e28743]/30' : 'ring-[#5ab473]/30'
+  const hoverText = accentClasses.hoverText
+  const ringColor = accentClasses.ring
 
   return (
     <header className="sticky top-0 z-50 h-18 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8">

@@ -44,8 +44,12 @@ function LoginPortalPage() {
         decoded.email ||
         email
 
-      if (role === "Staff") {
-        localStorage.setItem("staff_token", token)
+      console.log("[Login] JWT decoded role:", JSON.stringify(role), "| All claims:", decoded)
+
+      const normalizedRole = role?.toString().trim().toLowerCase()
+
+      if (normalizedRole === "manager") {
+        localStorage.setItem("manager_token", token)
         localStorage.setItem("role", role)
         localStorage.setItem("user_name", name)
         localStorage.setItem("user_role", role)
@@ -53,7 +57,7 @@ function LoginPortalPage() {
         return
       }
 
-      if (role === "Admin" || role === "SuperAdmin") {
+      if (normalizedRole === "admin" || normalizedRole === "superadmin") {
         localStorage.setItem("admin_token", token)
         localStorage.setItem("role", role)
         localStorage.setItem("user_name", name)
@@ -62,7 +66,7 @@ function LoginPortalPage() {
         return
       }
 
-      if (role === "Partner") {
+      if (normalizedRole === "partner") {
         localStorage.setItem("partner_token", token)
         localStorage.setItem("role", role)
         localStorage.setItem("user_name", name)
@@ -71,7 +75,8 @@ function LoginPortalPage() {
         return
       }
 
-      setErrorMessage("Tài khoản không có quyền truy cập")
+      console.warn("[Login] Role không hợp lệ hoặc không được hỗ trợ:", JSON.stringify(role))
+      setErrorMessage(`Tài khoản không có quyền truy cập (role: ${role || "không xác định"})`)
 
     } catch (error) {
       console.log(error)

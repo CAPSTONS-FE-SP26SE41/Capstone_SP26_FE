@@ -15,6 +15,8 @@ import {
   updateStaffPOI,
   uploadStaffPOIImage,
 } from "../../../services/poiService"
+import { getDistrictsByLocationId, type District } from "../../../services/partnerPoiService"
+import { CustomSelect } from "../../../components/ui/CustomSelect"
 
 export const Route = createFileRoute("/staff/_layout/pois")({
   component: StaffPOIsPage,
@@ -51,6 +53,7 @@ function StaffPOIsPage() {
     IsIndoor: false,
     POIImgUrl: "",
     LocationId: "",
+    DistrictId: "",
   })
   const [createImageFile, setCreateImageFile] = useState<File | null>(null)
   const [editingPoiId, setEditingPoiId] = useState("")
@@ -65,7 +68,12 @@ function StaffPOIsPage() {
     IsIndoor: false,
     POIImgUrl: "",
     LocationId: "",
+    DistrictId: "",
   })
+  
+  const [districts, setDistricts] = useState<District[]>([])
+  const [loadingDistricts, setLoadingDistricts] = useState(false)
+  const [formErrors, setFormErrors] = useState<{districtId?: string}>({})
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message })
@@ -83,7 +91,10 @@ function StaffPOIsPage() {
       IsIndoor: false,
       POIImgUrl: "",
       LocationId: "",
+      DistrictId: "",
     })
+    setDistricts([])
+    setFormErrors({})
     setCreateImageFile(null)
   }
 
@@ -98,7 +109,7 @@ function StaffPOIsPage() {
 
         if (status === 401) {
           // Token hết hạn/không hợp lệ -> ép đăng nhập lại.
-          localStorage.removeItem("staff_token")
+          localStorage.removeItem("manager_token")
           localStorage.removeItem("admin_token")
           navigate({ to: "/staff/login" })
           return
@@ -221,7 +232,33 @@ function StaffPOIsPage() {
     }
 
     fetchLocations()
-  }, [showCreateModal, locationOptions.length, loadingLocations])
+  }, [showCreateModal, showEditModal, locationOptions.length, loadingLocations])
+
+  useEffect(() => {
+    const locId = showCreateModal ? createForm.LocationId : (showEditModal ? editForm.LocationId : null)
+    if (!locId) {
+      setDistricts([])
+      return
+    }
+    const fetchDistricts = async () => {
+      setLoadingDistricts(true)
+      try {
+        const data = await getDistrictsByLocationId(locId)
+        setDistricts(data)
+        if (showCreateModal && createForm.DistrictId && !data.some(d => d.id === createForm.DistrictId)) {
+          setCreateForm(prev => ({ ...prev, DistrictId: "" }))
+        }
+        if (showEditModal && editForm.DistrictId && !data.some(d => d.id === editForm.DistrictId)) {
+          setEditForm(prev => ({ ...prev, DistrictId: "" }))
+        }
+      } catch(e) {
+        console.error("Failed to fetch districts", e)
+      } finally {
+        setLoadingDistricts(false)
+      }
+    }
+    fetchDistricts()
+  }, [showCreateModal, showEditModal, createForm.LocationId, editForm.LocationId])
 
   const handleDelete = async (poi: StaffPOI) => {
     const ok = window.confirm(`Bạn có chắc muốn xóa POI "${poi.Name}"?`)
@@ -248,7 +285,7 @@ function StaffPOIsPage() {
       console.error("Failed to fetch POI detail", e)
       const status = (e as any)?.status
       if (status === 401) {
-        localStorage.removeItem("staff_token")
+        localStorage.removeItem("manager_token")
         localStorage.removeItem("admin_token")
         navigate({ to: "/staff/login" })
         return
@@ -276,13 +313,14 @@ function StaffPOIsPage() {
         IsIndoor: Boolean(detail.IsIndoor),
         POIImgUrl: detail.POIImgUrl ?? "",
         LocationId: detail.LocationId ?? "",
+        DistrictId: detail.DistrictId ?? "",
       })
       setShowEditModal(true)
     } catch (e) {
       console.error("Failed to load POI for edit", e)
       const status = (e as any)?.status
       if (status === 401) {
-        localStorage.removeItem("staff_token")
+        localStorage.removeItem("manager_token")
         localStorage.removeItem("admin_token")
         navigate({ to: "/staff/login" })
         return
@@ -299,6 +337,7 @@ function StaffPOIsPage() {
 
   const handleCreateSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setFormErrors({})
 
     if (!createForm.Name.trim()) {
       showToast("error", "Tên POI không được để trống")
@@ -312,7 +351,11 @@ function StaffPOIsPage() {
       (loc) => loc.Id === createForm.LocationId.trim()
     )
     if (!isValidLocationId) {
-      showToast("error", "Vui lòng chọn LocationId hợp lệ từ danh sách")
+      showToast("error", "Vui lòng chọn Location hợp lệ từ danh sách")
+      return
+    }
+    if (!createForm.DistrictId.trim()) {
+      showToast("error", "Vui lòng chọn District")
       return
     }
 
@@ -328,6 +371,7 @@ function StaffPOIsPage() {
         GoogleMapLink: createForm.GoogleMapLink.trim(),
         IsIndoor: createForm.IsIndoor,
         LocationId: createForm.LocationId.trim(),
+        DistrictId: createForm.DistrictId.trim(),
       }, createImageFile)
 
       const refreshedData = await getStaffPOIs()
@@ -338,7 +382,9 @@ function StaffPOIsPage() {
     } catch (e) {
       console.error("Failed to create POI", e)
       const message = e instanceof Error ? e.message : String(e)
-      if (message.includes("FK_pois_locations_LocationId")) {
+      if (message.toLowerCase().includes("district") || message.toLowerCase().includes("không thuộc")) {
+        setFormErrors({ districtId: "District không thuộc City đã chọn" })
+      } else if (message.includes("FK_pois_locations_LocationId")) {
         showToast("error", "LocationId không tồn tại trong hệ thống")
       } else {
         showToast("error", "Tạo POI thất bại")
@@ -374,6 +420,7 @@ function StaffPOIsPage() {
 
   const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setFormErrors({})
     if (!editingPoiId) return
 
     if (!editForm.Name.trim()) {
@@ -382,6 +429,10 @@ function StaffPOIsPage() {
     }
     if (!editForm.LocationId.trim()) {
       showToast("error", "LocationId không được để trống")
+      return
+    }
+    if (!editForm.DistrictId.trim()) {
+      showToast("error", "DistrictId không được để trống")
       return
     }
 
@@ -398,6 +449,7 @@ function StaffPOIsPage() {
         IsIndoor: editForm.IsIndoor,
         POIImgUrl: editForm.POIImgUrl.trim(),
         LocationId: editForm.LocationId.trim(),
+        DistrictId: editForm.DistrictId.trim(),
       })
 
       const refreshedData = await getStaffPOIs()
@@ -407,7 +459,12 @@ function StaffPOIsPage() {
       showToast("success", "Cập nhật POI thành công")
     } catch (e) {
       console.error("Failed to update POI", e)
-      showToast("error", "Cập nhật POI thất bại")
+      const message = e instanceof Error ? e.message : String(e)
+      if (message.toLowerCase().includes("district") || message.toLowerCase().includes("không thuộc")) {
+        setFormErrors({ districtId: "District không thuộc City đã chọn" })
+      } else {
+        showToast("error", "Cập nhật POI thất bại")
+      }
     } finally {
       setEditing(false)
     }
@@ -792,17 +849,7 @@ function StaffPOIsPage() {
                   />
                 </label>
 
-                <label className="text-sm text-slate-700">
-                  Thành phố
-                  <input
-                    value={createForm.City}
-                    onChange={(e) =>
-                      setCreateForm((prev) => ({ ...prev, City: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    placeholder="City"
-                  />
-                </label>
+
 
                 <label className="text-sm text-slate-700">
                   Chi phí gần đúng
@@ -867,30 +914,40 @@ function StaffPOIsPage() {
                 </label>
 
                 <label className="text-sm text-slate-700">
-                  LocationId
-                  <select
+                  Thành phố (City)
+                  <CustomSelect
                     value={createForm.LocationId}
-                    onChange={(e) =>
+                    onChange={(val: string) => {
+                      const selName = mergedLocationOptions.find(l => l.Id === val)?.Name || "";
                       setCreateForm((prev) => ({
                         ...prev,
-                        LocationId: e.target.value,
+                        LocationId: val,
+                        City: selName,
+                        DistrictId: ""
                       }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    required
-                    disabled={loadingLocations}
-                  >
-                    <option value="">
-                      {loadingLocations
-                        ? "Đang tải location..."
-                        : "Chọn LocationId"}
-                    </option>
-                    {mergedLocationOptions.map((loc) => (
-                      <option key={loc.Id} value={loc.Id}>
-                        {loc.Name ? `${loc.Name} (${loc.Id})` : loc.Id}
-                      </option>
-                    ))}
-                  </select>
+                    }}
+                    options={mergedLocationOptions.map(l => ({ value: l.Id, label: l.Name || l.Id }))}
+                    placeholder={loadingLocations ? "Đang tải..." : "-- Chọn Thành phố --"}
+                  />
+                </label>
+
+                <label className="text-sm text-slate-700">
+                  Quận huyện (District)
+                  <CustomSelect
+                    value={createForm.DistrictId}
+                    onChange={(val: string) => {
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        DistrictId: val,
+                      }))
+                      setFormErrors({})
+                    }}
+                    options={districts.map(d => ({ value: d.id, label: d.name }))}
+                    placeholder={loadingDistricts ? "Đang tải..." : (!createForm.LocationId ? "-- Chọn City trước --" : (districts.length === 0 ? "City này chưa có district" : "-- Chọn District --"))}
+                    disabled={!createForm.LocationId || loadingDistricts}
+                    error={!!formErrors.districtId}
+                  />
+                  {formErrors.districtId && <p className="text-red-500 text-xs mt-1">{formErrors.districtId}</p>}
                 </label>
               </div>
 
@@ -1002,16 +1059,7 @@ function StaffPOIsPage() {
                   />
                 </label>
 
-                <label className="text-sm text-slate-700">
-                  Thành phố
-                  <input
-                    value={editForm.City}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, City: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                  />
-                </label>
+
 
                 <label className="text-sm text-slate-700">
                   Chi phí gần đúng
@@ -1066,30 +1114,40 @@ function StaffPOIsPage() {
                 </label>
 
                 <label className="text-sm text-slate-700">
-                  LocationId
-                  <select
+                  Thành phố (City)
+                  <CustomSelect
                     value={editForm.LocationId}
-                    onChange={(e) =>
+                    onChange={(val: string) => {
+                      const selName = mergedLocationOptions.find(l => l.Id === val)?.Name || "";
                       setEditForm((prev) => ({
                         ...prev,
-                        LocationId: e.target.value,
+                        LocationId: val,
+                        City: selName,
+                        DistrictId: ""
                       }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    required
-                    disabled={loadingLocations}
-                  >
-                    <option value="">
-                      {loadingLocations
-                        ? "Đang tải location..."
-                        : "Chọn LocationId"}
-                    </option>
-                    {mergedLocationOptions.map((loc) => (
-                      <option key={loc.Id} value={loc.Id}>
-                        {loc.Name ? `${loc.Name} (${loc.Id})` : loc.Id}
-                      </option>
-                    ))}
-                  </select>
+                    }}
+                    options={mergedLocationOptions.map(l => ({ value: l.Id, label: l.Name || l.Id }))}
+                    placeholder={loadingLocations ? "Đang tải..." : "-- Chọn Thành phố --"}
+                  />
+                </label>
+
+                <label className="text-sm text-slate-700">
+                  Quận huyện (District)
+                  <CustomSelect
+                    value={editForm.DistrictId}
+                    onChange={(val: string) => {
+                      setEditForm((prev) => ({
+                        ...prev,
+                        DistrictId: val,
+                      }))
+                      setFormErrors({})
+                    }}
+                    options={districts.map(d => ({ value: d.id, label: d.name }))}
+                    placeholder={loadingDistricts ? "Đang tải..." : (!editForm.LocationId ? "-- Chọn City trước --" : (districts.length === 0 ? "City này chưa có district" : "-- Chọn District --"))}
+                    disabled={!editForm.LocationId || loadingDistricts}
+                    error={!!formErrors.districtId}
+                  />
+                  {formErrors.districtId && <p className="text-red-500 text-xs mt-1">{formErrors.districtId}</p>}
                 </label>
               </div>
 

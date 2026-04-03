@@ -25,7 +25,7 @@ export const login = async (email: string, password: string) => {
 export const logout = () => {
   localStorage.removeItem("admin_token")
   localStorage.removeItem("partner_token")
-  localStorage.removeItem("staff_token")
+  localStorage.removeItem("manager_token")
   localStorage.removeItem("role")
   localStorage.removeItem("user_name")
   localStorage.removeItem("user_role")

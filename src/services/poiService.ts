@@ -25,6 +25,7 @@ export type StaffPOI = {
   Latitude: number
   Longitude: number
   LocationId: string
+  DistrictId?: string
 
   // Một số backend có thể trả thêm, nhưng không bắt buộc
   LocationName?: string
@@ -94,20 +95,21 @@ function normalizeStaffPOI(p: any): StaffPOI {
     Latitude: Number(p?.Latitude ?? p?.latitude ?? 0),
     Longitude: Number(p?.Longitude ?? p?.longitude ?? 0),
     LocationId: String(p?.LocationId ?? p?.locationId ?? ""),
+    DistrictId: String(p?.DistrictId ?? p?.districtId ?? ""),
     LocationName: p?.LocationName ?? p?.locationName,
     OpeningHours: String(p?.OpeningHours ?? openingHours ?? ""),
   }
 }
 
 export const getStaffPOIs = async (): Promise<StaffPOI[]> => {
-  const data = await apiClient("/staff/pois")
+  const data = await apiClient("/manager/pois")
   if (!Array.isArray(data)) return []
   return data.map(normalizeStaffPOI)
 }
 
 export const getStaffPOIById = async (id: string): Promise<StaffPOI | null> => {
   try {
-    const data = await apiClient(`/staff/pois/${id}`)
+    const data = await apiClient(`/manager/pois/${id}`)
     if (!data) return null
     return normalizeStaffPOI(data)
   } catch {
@@ -164,7 +166,7 @@ function normalizeStaffLocation(l: any): StaffLocation {
 }
 
 export const getStaffLocationsList = async (): Promise<StaffLocation[]> => {
-  const data = await apiClient("/staff/locations")
+  const data = await apiClient("/manager/locations")
   if (!Array.isArray(data)) return []
   return data.map(normalizeStaffLocation)
 }
@@ -172,7 +174,7 @@ export const getStaffLocationsList = async (): Promise<StaffLocation[]> => {
 export const getStaffLocationById = async (
   id: string
 ): Promise<StaffLocation | null> => {
-  const data = await apiClient(`/staff/locations/${id}`)
+  const data = await apiClient(`/manager/locations/${id}`)
   if (!data) return null
   return normalizeStaffLocation(data)
 }
@@ -180,7 +182,7 @@ export const getStaffLocationById = async (
 export const createStaffLocation = async (
   payload: CreateStaffLocationPayload
 ): Promise<StaffLocation> => {
-  const data = await apiClient("/staff/locations", {
+  const data = await apiClient("/manager/locations", {
     method: "POST",
     body: JSON.stringify(payload),
   })
@@ -191,7 +193,7 @@ export const updateStaffLocation = async (
   id: string,
   payload: UpdateStaffLocationPayload
 ): Promise<StaffLocation> => {
-  const data = await apiClient(`/staff/locations/${id}`, {
+  const data = await apiClient(`/manager/locations/${id}`, {
     method: "PUT",
     body: JSON.stringify(payload),
   })
@@ -199,14 +201,14 @@ export const updateStaffLocation = async (
 }
 
 export const deleteStaffLocation = async (id: string): Promise<void> => {
-  await apiClient(`/staff/locations/${id}`, {
+  await apiClient(`/manager/locations/${id}`, {
     method: "DELETE",
   })
 }
 
 export const getStaffLocations = async (): Promise<StaffLocationOption[]> => {
   try {
-    const data = await apiClient("/staff/locations")
+    const data = await apiClient("/manager/locations")
     if (!Array.isArray(data)) return []
     return data.map(normalizeLocationOption).filter((x) => x.Id)
   } catch {
@@ -227,6 +229,7 @@ export type CreateStaffPOIPayload = {
   GoogleMapLink: string
   IsIndoor: boolean
   LocationId: string
+  DistrictId: string
 }
 
 export const createStaffPOI = async (
@@ -241,6 +244,7 @@ export const createStaffPOI = async (
   formData.append("OpenHour", payload.OpenHour)
   formData.append("CloseHour", payload.CloseHour)
   formData.append("LocationId", payload.LocationId)
+  formData.append("DistrictId", payload.DistrictId)
   formData.append("GoogleMapLink", payload.GoogleMapLink)
   formData.append("IsIndoor", String(payload.IsIndoor))
   if (imageFile) {
@@ -248,7 +252,7 @@ export const createStaffPOI = async (
   }
 
   const token = getStaffToken()
-  const res = await fetch(`${API_BASE_URL}/staff/pois`, {
+  const res = await fetch(`${API_BASE_URL}/manager/pois`, {
     method: "POST",
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -281,6 +285,7 @@ export type UpdateStaffPOIPayload = {
   IsIndoor: boolean
   POIImgUrl: string
   LocationId: string
+  DistrictId: string
 }
 
 export const updateStaffPOI = async (
@@ -295,13 +300,14 @@ export const updateStaffPOI = async (
     OpenHour: payload.OpenHour ?? "",
     CloseHour: payload.CloseHour ?? "",
     LocationId: payload.LocationId ?? "",
+    DistrictId: payload.DistrictId ?? "",
     GoogleMapLink: payload.GoogleMapLink ?? "",
     IsIndoor: String(Boolean(payload.IsIndoor)),
     POIImgUrl: payload.POIImgUrl ?? "",
   })
 
   const data = await apiClient(
-    `/staff/pois/${encodeURIComponent(id)}?${params.toString()}`,
+    `/manager/pois/${encodeURIComponent(id)}?${params.toString()}`,
     {
     method: "PUT",
     }
@@ -310,7 +316,7 @@ export const updateStaffPOI = async (
 }
 
 export const deleteStaffPOI = async (id: string): Promise<void> => {
-  await apiClient(`/staff/pois/${id}`, {
+  await apiClient(`/manager/pois/${id}`, {
     method: "DELETE",
   })
 }
@@ -319,14 +325,14 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5131/api"
 
 const getStaffToken = () =>
-  localStorage.getItem("staff_token") || localStorage.getItem("admin_token")
+  localStorage.getItem("manager_token") || localStorage.getItem("admin_token")
 
 export const uploadStaffPOIImage = async (file: File): Promise<string> => {
   const formData = new FormData()
   formData.append("file", file)
 
   const token = getStaffToken()
-  const res = await fetch(`${API_BASE_URL}/staff/pois/upload-image`, {
+  const res = await fetch(`${API_BASE_URL}/manager/pois/upload-image`, {
     method: "POST",
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -398,9 +404,9 @@ const importStaffExcelFile = async (
 }
 
 export const importStaffPOIsExcel = async (file: File): Promise<string> => {
-  return importStaffExcelFile("/staff/pois/import", file)
+  return importStaffExcelFile("/manager/pois/import", file)
 }
 
 export const importStaffLocationsExcel = async (file: File): Promise<string> => {
-  return importStaffExcelFile("/staff/locations/import", file)
+  return importStaffExcelFile("/manager/locations/import", file)
 }
