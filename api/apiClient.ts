@@ -1,9 +1,15 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
+
+export type ApiClientOptions = RequestInit & {
+  /** Override automatic JSON/text parsing (e.g. file downloads). */
+  parseAs?: "json" | "text" | "blob"
+}
 
 export const apiClient = async (
   endpoint: string,
-  options: RequestInit = {}
+  options: ApiClientOptions = {}
 ) => {
+  const { parseAs, ...fetchOptions } = options
 
   const currentRole = localStorage.getItem("role")?.toLowerCase();
   let token = null;
@@ -28,12 +34,19 @@ export const apiClient = async (
      console.warn(`[apiClient] No token found for ${endpoint}`)
   }
 
+  const hasBody =
+    fetchOptions.body !== undefined &&
+    fetchOptions.body !== null &&
+    fetchOptions.body !== ""
+  const isFormData =
+    typeof FormData !== "undefined" && fetchOptions.body instanceof FormData
+
   const res = await fetch(`${BASE_URL}${endpoint}`, {
-    ...options,
+    ...fetchOptions,
     headers: {
-      "Content-Type": "application/json",
+      ...(hasBody && !isFormData ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
+      ...fetchOptions.headers,
     },
   })
 
@@ -42,6 +55,16 @@ export const apiClient = async (
     const err = new Error(errorText || "API Error")
     ;(err as any).status = res.status
     throw err
+  }
+
+  if (parseAs === "blob") {
+    return res.blob()
+  }
+  if (parseAs === "text") {
+    return res.text()
+  }
+  if (parseAs === "json") {
+    return res.json()
   }
 
   const contentType = res.headers.get("content-type")

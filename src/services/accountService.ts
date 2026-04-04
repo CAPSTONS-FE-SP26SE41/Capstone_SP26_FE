@@ -42,5 +42,5 @@ export const importAccounts = (file: File) => {
 }
 
 export const exportAccounts = () => {
-  return apiClient(`/admin/accounts/export`)
+  return apiClient(`/admin/accounts/export`, { parseAs: "blob" })
 }
