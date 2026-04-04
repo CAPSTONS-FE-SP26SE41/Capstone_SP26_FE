@@ -277,13 +277,7 @@ function AccountsPage() {
             >
               Import
             </label>
-            <button
-              onClick={handleImport}
-              disabled={!fileImport}
-              className="flex items-center gap-1 px-4 py-2 rounded-xl bg-blue-500 text-white disabled:opacity-50"
-            >
-              Upload
-            </button>
+            
             <button
               onClick={handleExport}
               className="flex items-center gap-1 px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50"
