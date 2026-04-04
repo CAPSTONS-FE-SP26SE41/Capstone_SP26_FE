@@ -329,15 +329,16 @@ function StaffLocationsPage() {
                 setExporting(false)
               }
             }}
-            className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap ${exporting
-                ? "bg-slate-100 text-slate-400 border border-slate-200"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
-              }`}
-          >
-            ⬇ {exporting ? "Đang export..." : "Export Excel"}
-          </button>
-        </div>
-      </div>
+            className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap ${
+      exporting
+        ? "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
+        : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
+    }`}
+  >
+    <span className="text-lg">⬇</span>
+    {exporting ? "Đang export..." : "Export Excel"}
+  </button>
+</div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-200">
