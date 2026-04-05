@@ -31,8 +31,38 @@ export const deactivateAccount = (id: string) => {
   return apiClient(`/admin/accounts/${id}/deactivate`, { method: "PUT" })
 }
 
-export const createAccount = (data: any) => {
-  return apiClient(`/admin/accounts`, { method: "POST", body: data })
+export type CreateAccountPayload = {
+  email: string
+  password: string
+  fullName: string
+  roleName: string
+}
+
+export type UpdateAccountPayload = {
+  email?: string
+  fullName?: string
+  roleName?: string
+  password?: string
+}
+
+export const createAccount = (data: CreateAccountPayload) => {
+  return apiClient(`/admin/accounts`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  })
+}
+
+export const updateAccount = (id: string, data: UpdateAccountPayload) => {
+  return apiClient(`/admin/accounts/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  })
+}
+
+export const deleteAccount = (id: string) => {
+  return apiClient(`/admin/accounts/${id}`, {
+    method: "DELETE",
+  })
 }
 
 export const importAccounts = (file: File) => {

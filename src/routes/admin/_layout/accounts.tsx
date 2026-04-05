@@ -1,100 +1,102 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { Plus, Search, ChevronDown } from "lucide-react";
-import ToggleSwitch from "../../../components/ToggleSwitch";
-import { useForm } from "react-hook-form";
+import { createFileRoute } from "@tanstack/react-router"
+import { useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
+import {
+  Plus,
+  Search,
+  ChevronDown,
+  Pencil,
+  Trash2,
+  X,
+  Upload,
+  Download,
+} from "lucide-react"
+import { motion, AnimatePresence } from "motion/react"
+import ToggleSwitch from "../../../components/ToggleSwitch"
 
 import {
   getAccounts,
-  filterAccounts,
-  activateAccount,
   deactivateAccount,
+  activateAccount,
+  filterAccounts,
   createAccount,
+  updateAccount,
+  deleteAccount,
   importAccounts,
   exportAccounts,
-} from "../../../services/accountService";
+} from "../../../services/accountService"
 
 export const Route = createFileRoute("/admin/_layout/accounts")({
   component: AccountsPage,
-});
+})
 
-type Account = {
-  id: string;
-  name: string;
-  email: string;
-  avatarUrl: string;
-  role: string;
-  status: "Active" | "Inactive";
-  createdAt: string;
-};
-
-type CreateAccountForm = {
-  name: string;
-  email: string;
-  password: string;
-  role: string;
-};
-
-const roleColors: Record<string, { bg: string; text: string }> = {
-  ADMIN: { bg: "#F5EEF8", text: "#8E44AD" },
-  USER: { bg: "#EBF5FB", text: "#3498DB" },
-  STAFF: { bg: "#FEF5E7", text: "#F39C12" },
-  PARTNER: { bg: "#EAFAF1", text: "#2ECC71" },
-};
+function Tooltip({ text, children }: { text: string; children: React.ReactNode }) {
+  return (
+    <div className="relative group/tooltip">
+      {children}
+      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover/tooltip:opacity-100 transition-all duration-200 scale-90 group-hover/tooltip:scale-100 z-50">
+        <div className="bg-[#1e293b] text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap">
+          {text}
+        </div>
+        <div className="w-2 h-2 bg-[#1e293b] rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1"></div>
+      </div>
+    </div>
+  )
+}
 
 function FilterDropdown({
   label,
   value,
   options,
   onChange,
+  isOpen,
+  onToggle,
 }: {
-  label: string;
-  value: string;
-  options: string[];
-  onChange: (val: string) => void;
+  label: string
+  value: string
+  options: string[]
+  onChange: (val: string) => void
+  isOpen: boolean
+  onToggle: (e: React.MouseEvent) => void
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0 });
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0 })
 
   useEffect(() => {
-    if (!isOpen || !buttonRef.current) return;
-    const rect = buttonRef.current.getBoundingClientRect();
-    setMenuPosition({ top: rect.bottom + 8, left: rect.left, width: rect.width });
-  }, [isOpen]);
+    if (!isOpen || !buttonRef.current) return
 
-  // click outside to close
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) setIsOpen(false);
-    };
-    window.addEventListener("click", handleClickOutside);
-    return () => window.removeEventListener("click", handleClickOutside);
-  }, []);
+    const rect = buttonRef.current.getBoundingClientRect()
+    setMenuPosition({
+      top: rect.bottom + 8,
+      left: rect.left,
+      width: rect.width,
+    })
+  }, [isOpen])
 
   return (
     <div className="relative inline-block">
       <button
         ref={buttonRef}
-        onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
+        onClick={onToggle}
         className="flex items-center gap-1.5 bg-transparent border-none outline-none hover:text-slate-800 transition-colors text-inherit font-inherit"
       >
         {value === label ? label : value}
         <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
       </button>
+
       {isOpen &&
         createPortal(
           <div
-            className="fixed z-[9999] w-36 bg-white border border-slate-100 rounded-xl shadow-lg py-1.5 overflow-hidden font-normal text-sm"
+            className="fixed z-[9999] w-36 bg-white border border-slate-100 rounded-xl shadow-lg py-1.5 overflow-hidden font-normal text-sm normal-case tracking-normal"
             style={{ top: menuPosition.top, left: menuPosition.left }}
           >
             {options.map((opt) => (
               <button
                 key={opt}
-                onClick={() => { onChange(opt); setIsOpen(false); }}
-                className={`w-full text-left px-4 py-2 hover:bg-[#e9f5ed] hover:text-[#5ab473] transition-colors ${value === opt ? "bg-[#e9f5ed]/50 text-[#5ab473] font-medium" : "text-slate-700"
-                  }`}
+                onClick={() => {
+                  onChange(opt)
+                }}
+                className={`w-full text-left px-4 py-2 hover:bg-[#e9f5ed] hover:text-[#5ab473] transition-colors ${value === opt ? "bg-[#e9f5ed]/50 text-[#5ab473] font-medium" : "text-slate-700"}`}
               >
                 {opt}
               </button>
@@ -103,280 +105,656 @@ function FilterDropdown({
           document.body
         )}
     </div>
-  );
+  )
 }
 
+type Account = {
+  id: string
+  name: string
+  email: string
+  avatarUrl: string
+  role: {
+    id: string
+    name: string
+  }
+  status: "Active" | "Inactive"
+  createdAt: string
+}
+
+const ROLE_OPTIONS = ["Admin", "User", "Staff", "Partner"] as const
+
 function AccountsPage() {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalAccounts, setTotalAccounts] = useState(0);
-  const [roleFilter, setRoleFilter] = useState("Role");
-  const [statusFilter, setStatusFilter] = useState("Status");
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [debouncedKeyword, setDebouncedKeyword] = useState("");
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [fileImport, setFileImport] = useState<File | null>(null);
+  const [accounts, setAccounts] = useState<Account[]>([])
+  const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalAccounts, setTotalAccounts] = useState(0)
+  const [openFilter, setOpenFilter] = useState<string | null>(null)
+  const [roleFilter, setRoleFilter] = useState("Role")
+  const [statusFilter, setStatusFilter] = useState("Status")
+  const [searchKeyword, setSearchKeyword] = useState("")
+  const [debouncedKeyword, setDebouncedKeyword] = useState("")
+  const itemsPerPage = 10
 
-  const itemsPerPage = 10;
-  const { register, handleSubmit, reset } = useForm<CreateAccountForm>();
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editing, setEditing] = useState<Account | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // debounce search
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    fullName: "",
+    roleName: "User",
+  })
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedKeyword(searchKeyword.trim());
-      setCurrentPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchKeyword]);
+      setDebouncedKeyword(searchKeyword)
+      setCurrentPage(1)
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [searchKeyword])
 
-  // fetch accounts
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      setLoading(true);
-      try {
-        const isFiltering =
-          debouncedKeyword.length >= 2 || roleFilter !== "Role" || statusFilter !== "Status";
-        const data = isFiltering
-          ? await filterAccounts({
-            page: currentPage,
-            pageSize: itemsPerPage,
-            keyword: debouncedKeyword.length >= 2 ? debouncedKeyword : "",
-            role: roleFilter,
-            status: statusFilter,
-          })
-          : await getAccounts(currentPage, itemsPerPage);
+  const fetchAccounts = async () => {
+    setLoading(true)
+    try {
+      const trimmed = debouncedKeyword.trim()
+      const isFiltering =
+        trimmed.length > 0 || roleFilter !== "Role" || statusFilter !== "Status"
+      let data
 
-        const list = Array.isArray(data) ? data : data?.items || data?.data || [];
-        setTotalAccounts(data?.total || list.length);
-        setTotalPages(data?.totalPages || Math.ceil((data?.total || list.length) / itemsPerPage));
-
-        const formatted: Account[] = list.map((acc: any) => ({
-          id: acc.id,
-          name: acc.profile?.name || acc.name || acc.fullName || "User",
-          email: acc.email,
-          avatarUrl: acc.profile?.avtUrl || acc.avatarUrl || "",
-          role: acc.roleName || "User",
-          status: acc.isActive ? "Active" : "Inactive",
-          createdAt: acc.createdAt,
-        }));
-        setAccounts(formatted);
-      } catch (error) {
-        console.error("Failed to fetch accounts", error);
-      } finally {
-        setLoading(false);
+      if (isFiltering) {
+        data = await filterAccounts({
+          page: currentPage,
+          pageSize: itemsPerPage,
+          keyword: trimmed || undefined,
+          role: roleFilter,
+          status: statusFilter,
+        })
+      } else {
+        data = await getAccounts(currentPage, itemsPerPage)
       }
-    };
-    fetchAccounts();
-  }, [currentPage, roleFilter, statusFilter, debouncedKeyword]);
 
-  const handleToggleStatus = async (id: string, activate: boolean) => {
+      const listToMap = Array.isArray(data) ? data : (data?.items ?? data?.data ?? [])
+      const _totalAccounts = data?.total ?? listToMap.length
+      const _totalPages =
+        data?.totalPages ?? Math.max(1, Math.ceil(_totalAccounts / itemsPerPage))
+
+      setTotalAccounts(_totalAccounts)
+      setTotalPages(_totalPages)
+
+      if (!Array.isArray(listToMap)) {
+        setAccounts([])
+        return
+      }
+
+      const formatted: Account[] = listToMap.map((acc: Record<string, unknown>) => {
+        const roleRaw = acc.roleName ?? acc.role
+        let roleName = "User"
+        if (typeof roleRaw === "string") roleName = roleRaw
+        else if (roleRaw && typeof roleRaw === "object" && "name" in roleRaw) {
+          roleName = String((roleRaw as { name?: string }).name ?? "User")
+        }
+
+        const id = String(acc.id ?? acc.userId ?? acc.accountId ?? "")
+        const active =
+          acc.isActive === true ||
+          acc.isActive === "true" ||
+          String(acc.status ?? "").toLowerCase() === "active"
+
+        return {
+          id,
+          name:
+            String(
+              (acc.profile as { name?: string } | undefined)?.name ??
+                acc.name ??
+                acc.fullName ??
+                "User"
+            ),
+          email: String(acc.email ?? ""),
+          avatarUrl: String(
+            (acc.profile as { avtUrl?: string } | undefined)?.avtUrl ??
+              acc.avatarUrl ??
+              ""
+          ),
+          role: { id: String(acc.roleId ?? ""), name: roleName },
+          status: active ? "Active" : "Inactive",
+          createdAt: String(acc.createdAt ?? ""),
+        }
+      })
+
+      setAccounts(formatted)
+    } catch (error) {
+      console.error("Failed to fetch accounts", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchAccounts()
+  }, [currentPage, roleFilter, statusFilter, debouncedKeyword])
+
+  const openCreate = () => {
+    setEditing(null)
+    setForm({
+      email: "",
+      password: "",
+      fullName: "",
+      roleName: "User",
+    })
+    setModalOpen(true)
+  }
+
+  const openEdit = (acc: Account) => {
+    setEditing(acc)
+    setForm({
+      email: acc.email,
+      password: "",
+      fullName: acc.name,
+      roleName: acc.role.name,
+    })
+    setModalOpen(true)
+  }
+
+  const handleSubmit = async () => {
     try {
-      if (activate) await activateAccount(id);
-      else await deactivateAccount(id);
+      if (editing) {
+        const payload: {
+          email: string
+          fullName: string
+          roleName: string
+          password?: string
+        } = {
+          email: form.email.trim(),
+          fullName: form.fullName.trim(),
+          roleName: form.roleName,
+        }
+        if (form.password.trim()) payload.password = form.password.trim()
+        await updateAccount(editing.id, payload)
+      } else {
+        if (!form.password.trim()) return
+        await createAccount({
+          email: form.email.trim(),
+          password: form.password.trim(),
+          fullName: form.fullName.trim(),
+          roleName: form.roleName,
+        })
+      }
+      setModalOpen(false)
+      await fetchAccounts()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteAccount(id)
+      setDeleteId(null)
+      if (accounts.length <= 1 && currentPage > 1) {
+        setCurrentPage((p) => Math.max(1, p - 1))
+      } else {
+        await fetchAccounts()
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleDisable = async (id: string) => {
+    try {
+      await deactivateAccount(id)
       setAccounts((prev) =>
-        prev.map((acc) => (acc.id === id ? { ...acc, status: activate ? "Active" : "Inactive" } : acc))
-      );
+        prev.map((acc) => (acc.id === id ? { ...acc, status: "Inactive" } : acc))
+      )
     } catch (error) {
-      console.error("Toggle status failed", error);
+      console.error("Disable account failed", error)
     }
-  };
+  }
 
-  const onCreateAccount = async (data: CreateAccountForm) => {
+  const handleActivate = async (id: string) => {
     try {
-      await createAccount(data);
-      reset();
-      setShowCreateForm(false);
-      setCurrentPage(1);
+      await activateAccount(id)
+      setAccounts((prev) =>
+        prev.map((acc) => (acc.id === id ? { ...acc, status: "Active" } : acc))
+      )
     } catch (error) {
-      console.error("Create account failed", error);
+      console.error("Activate account failed", error)
     }
-  };
+  }
 
-  const handleImport = async () => {
-    if (!fileImport) return;
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file) return
     try {
-      await importAccounts(fileImport);
-      setFileImport(null);
-      setCurrentPage(1);
-    } catch (error) {
-      console.error("Import failed", error);
+      await importAccounts(file)
+      await fetchAccounts()
+    } catch (err) {
+      console.error(err)
     }
-  };
+  }
 
   const handleExport = async () => {
     try {
-      const blob = await exportAccounts();
-      const mime = blob.type || "";
-      const ext =
-        mime.includes("csv") || mime === "text/csv"
-          ? ".csv"
-          : mime.includes("spreadsheet") || mime.includes("excel") || mime === "application/vnd.ms-excel"
-            ? ".xlsx"
-            : ".xlsx";
-      const stamp = new Date().toISOString().slice(0, 10);
-      const filename = `accounts-export-${stamp}${ext}`;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.rel = "noopener";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Export failed", error);
+      const blob = await exportAccounts()
+      const url = URL.createObjectURL(blob as Blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `accounts-export-${Date.now()}.xlsx`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error(err)
     }
-  };
+  }
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
+  if (loading) {
+    return (
+      <div className="flex justify-center py-20 text-sm text-slate-500">
+        Loading accounts...
+      </div>
+    )
+  }
 
-  if (loading) return <div className="flex justify-center py-20 text-sm text-slate-500">Loading accounts...</div>;
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const currentAccounts = accounts
+
+  const getRoleStyle = (roleName: string) => {
+    switch (roleName.trim().toUpperCase()) {
+      case "ADMIN":
+        return { backgroundColor: "#F5EEF8", color: "#8E44AD" }
+      case "USER":
+        return { backgroundColor: "#EBF5FB", color: "#3498DB" }
+      case "STAFF":
+        return { backgroundColor: "#FEF5E7", color: "#F39C12" }
+      case "PARTNER":
+        return { backgroundColor: "#EAFAF1", color: "#2ECC71" }
+      default:
+        return { backgroundColor: "#f8fafc", color: "#475569" }
+    }
+  }
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Filters & Control Panel */}
+    <div className="flex flex-col gap-6" onClick={() => setOpenFilter(null)}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv,.xlsx,.xls"
+        className="hidden"
+        onChange={handleImportFile}
+      />
+
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-sm -mx-6 px-6 py-4 mb-2 border-b border-transparent transition-all">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="w-full md:max-w-md relative">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              placeholder="Search by name or email..."
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-            />
+          <div className="w-full md:max-w-md">
+            <div className="relative">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                placeholder="Search by name or email..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+              />
+            </div>
           </div>
-          <div className="flex gap-2 flex-wrap items-center">
-            {/* Create Account */}
+
+          <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => setShowCreateForm(!showCreateForm)}
-              className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-4 py-2 rounded-xl shadow text-sm"
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 border border-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-sm"
             >
-              <Plus size={18} />
-              {showCreateForm ? "Close" : "Create New Account"}
-            </button>
-
-            {/* Import file */}
-            <input
-              type="file"
-              accept=".xlsx,.csv"
-              onChange={(e) => setFileImport(e.target.files?.[0] || null)}
-              className="hidden"
-              id="importFile"
-            />
-            <label
-              htmlFor="importFile"
-              className="flex items-center gap-1 px-4 py-2 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 text-sm font-medium"
-            >
+              <Upload size={18} />
               Import
-            </label>
-
-            {/* Export button chắc chắn click được */}
+            </button>
             <button
               type="button"
               onClick={handleExport}
-              className="flex items-center gap-1 px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-sm font-medium relative z-10"
+              className="flex items-center gap-2 border border-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-sm"
             >
+              <Download size={18} />
               Export
+            </button>
+            <button
+              type="button"
+              onClick={openCreate}
+              className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors"
+            >
+              <Plus size={18} />
+              <span className="text-sm">Create New Account</span>
             </button>
           </div>
         </div>
-
-        {/* Inline Create Form */}
-        {showCreateForm && (
-          <div className="bg-white border rounded-xl p-4 mt-4 shadow-md">
-            <form onSubmit={handleSubmit(onCreateAccount)} className="flex flex-col gap-3">
-              <input {...register("name")} placeholder="Full Name" required className="px-3 py-2 border rounded" />
-              <input {...register("email")} placeholder="Email" type="email" required className="px-3 py-2 border rounded" />
-              <input {...register("password")} placeholder="Password" type="password" required className="px-3 py-2 border rounded" />
-              <select {...register("role")} className="px-3 py-2 border rounded">
-                <option value="User">User</option>
-                <option value="Admin">Admin</option>
-                <option value="Staff">Staff</option>
-                <option value="Partner">Partner</option>
-              </select>
-              <button type="submit" className="bg-[#5ab473] text-white px-4 py-2 rounded mt-2">Create Account</button>
-            </form>
-          </div>
-        )}
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-visible">
-        <div className="overflow-x-auto overflow-y-visible">
-          <table className="w-full text-center">
-            <thead>
-              <tr className="bg-[#F9FAFB] border-b border-[#e7edf4]">
-                <th className="px-6 py-4 text-text-secondary text-sm font-semibold">No.</th>
-                <th className="px-6 py-4 text-text-secondary text-sm font-semibold">Email</th>
-                <th className="px-6 py-4 text-text-secondary text-sm font-semibold">Name</th>
-                <th className="px-6 py-4 text-text-secondary text-sm font-semibold">
-                  <FilterDropdown label="Role" value={roleFilter} options={["Role", "Admin", "User", "Staff", "Partner"]} onChange={(val) => { setRoleFilter(val); setCurrentPage(1); }} />
-                </th>
-                <th className="px-6 py-4 text-text-secondary text-sm font-semibold">
-                  <FilterDropdown label="Status" value={statusFilter} options={["Status", "Active", "Inactive"]} onChange={(val) => { setStatusFilter(val); setCurrentPage(1); }} />
-                </th>
-                <th className="px-6 py-4 text-text-secondary text-sm font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#e7edf4]">
-              {accounts.length > 0 ? accounts.map((account, index) => {
-                const roleStyle = roleColors[account.role.toUpperCase()] || { bg: "#f8fafc", text: "#475569" };
-                return (
-                  <tr key={account.id} className="hover:bg-[#F9FAFB] transition-colors">
-                    <td className="px-6 py-4 text-sm">{startIndex + index + 1}</td>
-                    <td className="px-6 py-4 text-sm">{account.email}</td>
-                    <td className="px-6 py-4 text-center font-medium">{account.name}</td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="inline-flex items-center px-2.5 py-1 text-[10px] font-bold rounded-full uppercase" style={{ backgroundColor: roleStyle.bg, color: roleStyle.text }}>
-                        {account.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${account.status === "Active" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>
-                        <span className="size-1.5 rounded-full bg-current"></span>
-                        {account.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
+      <div className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-x-auto">
+        <table className="w-full text-center table-fixed min-w-[880px] border-separate border-spacing-0">
+          <thead>
+            <tr>
+              <th className="w-[6%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+                No.
+              </th>
+              <th className="w-[24%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+                Email
+              </th>
+              <th className="w-[18%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+                Name
+              </th>
+              <th className="w-[14%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+                <FilterDropdown
+                  label="Role"
+                  value={roleFilter}
+                  options={["Role", "Admin", "User", "Staff", "Partner"]}
+                  isOpen={openFilter === "role"}
+                  onChange={(val) => {
+                    setRoleFilter(val)
+                    setOpenFilter(null)
+                    setCurrentPage(1)
+                  }}
+                  onToggle={(e) => {
+                    e.stopPropagation()
+                    setOpenFilter(openFilter === "role" ? null : "role")
+                  }}
+                />
+              </th>
+              <th className="w-[12%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+                <FilterDropdown
+                  label="Status"
+                  value={statusFilter}
+                  options={["Status", "Active", "Inactive"]}
+                  isOpen={openFilter === "status"}
+                  onChange={(val) => {
+                    setStatusFilter(val)
+                    setOpenFilter(null)
+                    setCurrentPage(1)
+                  }}
+                  onToggle={(e) => {
+                    e.stopPropagation()
+                    setOpenFilter(openFilter === "status" ? null : "status")
+                  }}
+                />
+              </th>
+              <th
+                className="w-[26%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc] sticky right-0 z-20"
+                style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {currentAccounts.length > 0 ? (
+              currentAccounts.map((account, index) => (
+                <tr key={account.id} className="hover:bg-[#f8fafc] transition-colors group">
+                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                    {startIndex + index + 1}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4] truncate">
+                    {account.email}
+                  </td>
+                  <td className="px-4 py-3 font-medium text-text-main text-center border-b border-[#e7edf4] truncate">
+                    {account.name}
+                  </td>
+                  <td className="px-4 py-3 text-center border-b border-[#e7edf4]">
+                    <span
+                      className="inline-flex items-center px-2.5 py-1 text-[10px] font-bold rounded-full uppercase"
+                      style={getRoleStyle(account.role.name)}
+                    >
+                      {account.role.name}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center border-b border-[#e7edf4]">
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
+                        ${
+                          account.status === "Active"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-rose-100 text-rose-700"
+                        }`}
+                    >
+                      <span className="size-1.5 rounded-full bg-current"></span>
+                      {account.status}
+                    </span>
+                  </td>
+                  <td
+                    className="px-4 py-3 text-center border-b border-[#e7edf4] sticky right-0 bg-white group-hover:bg-[#f8fafc] z-10 transition-colors"
+                    style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
+                  >
+                    <div className="inline-flex items-center justify-center gap-2 flex-wrap">
+                      <Tooltip text="Edit">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            openEdit(account)
+                          }}
+                          className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        >
+                          <Pencil size={16} />
+                        </button>
+                      </Tooltip>
+                      <Tooltip text="Delete">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setDeleteId(account.id)
+                          }}
+                          className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </Tooltip>
                       <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
-                        <ToggleSwitch initialState={account.status === "Active"} onChange={(state) => handleToggleStatus(account.id, state)} />
+                        <ToggleSwitch
+                          initialState={account.status === "Active"}
+                          onChange={(state) => {
+                            if (state) handleActivate(account.id)
+                            else handleDisable(account.id)
+                          }}
+                        />
                       </div>
-                    </td>
-                  </tr>
-                );
-              }) : (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <span className="material-symbols-outlined text-4xl text-slate-300">group_off</span>
-                      <p className="font-medium">No accounts found</p>
-                      <p className="text-xs">Add a new account to get started</p>
                     </div>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="px-6 py-12 text-center text-text-secondary">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <span className="material-symbols-outlined text-4xl text-slate-300">group_off</span>
+                    <p className="font-medium">No accounts found</p>
+                    <p className="text-xs">Create a new account or adjust filters</p>
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
 
-        {/* Pagination */}
         <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-white">
           <span className="text-sm text-text-secondary">
-            Showing {accounts.length > 0 ? startIndex + 1 : 0} - {startIndex + accounts.length} of {totalAccounts} accounts
+            Showing {accounts.length > 0 ? startIndex + 1 : 0} - {startIndex + accounts.length} of{" "}
+            {totalAccounts} accounts
           </span>
           <div className="flex gap-2">
-            <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1} className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}>Previous</button>
-            <span className="px-3 py-1 text-sm">Page {currentPage} / {totalPages || 1}</span>
-            <button onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50 ${currentPage === totalPages || totalPages === 0 ? "opacity-50 cursor-not-allowed" : ""}`}>Next</button>
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50
+              ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              Previous
+            </button>
+            <span className="px-3 py-1 text-sm">
+              Page {currentPage} / {totalPages || 1}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50
+              ${currentPage === totalPages || totalPages === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
 
-export default AccountsPage;
+      <AnimatePresence>
+        {modalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="bg-white w-full max-w-md rounded-2xl p-6 flex flex-col gap-6 shadow-2xl border border-slate-100"
+            >
+              <div className="flex justify-between items-center">
+                <h3 className="font-bold text-xl text-slate-800">
+                  {editing ? "Edit Account" : "Create Account"}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-slate-700">Email</label>
+                  <input
+                    type="email"
+                    placeholder="user@example.com"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-slate-700">Full name</label>
+                  <input
+                    placeholder="Display name"
+                    value={form.fullName}
+                    onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-slate-700">Role</label>
+                  <select
+                    value={form.roleName}
+                    onChange={(e) => setForm({ ...form, roleName: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                  >
+                    {ROLE_OPTIONS.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-slate-700">
+                    Password {editing ? "(leave blank to keep)" : ""}
+                  </label>
+                  <input
+                    type="password"
+                    placeholder={editing ? "••••••••" : "Minimum 6 characters"}
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={
+                    !form.email.trim() ||
+                    !form.fullName.trim() ||
+                    (!editing && !form.password.trim())
+                  }
+                  className="px-5 py-2.5 text-sm font-semibold text-white bg-[#5ab473] hover:bg-[#499A60] rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  {editing ? "Save Changes" : "Create Account"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {deleteId && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="bg-white w-full max-w-sm rounded-2xl p-6 flex flex-col gap-6 shadow-2xl border border-slate-100 items-center text-center"
+            >
+              <div className="w-14 h-14 bg-red-100/80 text-red-600 rounded-full flex items-center justify-center mb-1">
+                <Trash2 size={26} strokeWidth={2.5} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <h3 className="font-bold text-xl text-slate-800">Delete account?</h3>
+                <p className="text-sm text-slate-500 font-medium">
+                  This action cannot be undone. The user will lose access immediately.
+                </p>
+              </div>
+              <div className="flex justify-center gap-3 w-full mt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeleteId(null)}
+                  className="flex-1 px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => deleteId && handleDelete(deleteId)}
+                  className="flex-1 px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl shadow-sm transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
