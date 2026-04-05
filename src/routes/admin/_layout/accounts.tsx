@@ -139,7 +139,7 @@ function AccountsPage() {
   const [statusFilter, setStatusFilter] = useState("Status")
   const [searchKeyword, setSearchKeyword] = useState("")
   const [debouncedKeyword, setDebouncedKeyword] = useState("")
-  const itemsPerPage = 10
+  const itemsPerPage = 6
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Account | null>(null)
@@ -365,7 +365,10 @@ function AccountsPage() {
   }
 
   const startIndex = (currentPage - 1) * itemsPerPage
-  const currentAccounts = accounts
+  const currentAccounts = accounts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
 
   const getRoleStyle = (roleName: string) => {
     switch (roleName.trim().toUpperCase()) {
@@ -407,6 +410,15 @@ function AccountsPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+
+            <button
+              type="button"
+              onClick={openCreate}
+              className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors"
+            >
+              <Plus size={18} />
+              <span className="text-sm">Create New Account</span>
+            </button>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -423,342 +435,343 @@ function AccountsPage() {
               <Download size={18} />
               Export
             </button>
-            <button
-              type="button"
-              onClick={openCreate}
-              className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors"
-            >
-              <Plus size={18} />
-              <span className="text-sm">Create New Account</span>
-            </button>
+
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-x-auto">
-        <table className="w-full text-center table-fixed min-w-[880px] border-separate border-spacing-0">
-          <thead>
-            <tr>
-              <th className="w-[6%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
-                No.
-              </th>
-              <th className="w-[24%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
-                Email
-              </th>
-              <th className="w-[18%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
-                Name
-              </th>
-              <th className="w-[14%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
-                <FilterDropdown
-                  label="Role"
-                  value={roleFilter}
-                  options={["Role", "Admin", "User", "Staff", "Partner"]}
-                  isOpen={openFilter === "role"}
-                  onChange={(val) => {
-                    setRoleFilter(val)
-                    setOpenFilter(null)
-                    setCurrentPage(1)
-                  }}
-                  onToggle={(e) => {
-                    e.stopPropagation()
-                    setOpenFilter(openFilter === "role" ? null : "role")
-                  }}
-                />
-              </th>
-              <th className="w-[12%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
-                <FilterDropdown
-                  label="Status"
-                  value={statusFilter}
-                  options={["Status", "Active", "Inactive"]}
-                  isOpen={openFilter === "status"}
-                  onChange={(val) => {
-                    setStatusFilter(val)
-                    setOpenFilter(null)
-                    setCurrentPage(1)
-                  }}
-                  onToggle={(e) => {
-                    e.stopPropagation()
-                    setOpenFilter(openFilter === "status" ? null : "status")
-                  }}
-                />
-              </th>
-              <th
-                className="w-[26%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc] sticky right-0 z-20"
-                style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
+      <div className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm">
 
-          <tbody>
-            {currentAccounts.length > 0 ? (
-              currentAccounts.map((account, index) => (
-                <tr key={account.id} className="hover:bg-[#f8fafc] transition-colors group">
-                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
-                    {startIndex + index + 1}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4] truncate">
-                    {account.email}
-                  </td>
-                  <td className="px-4 py-3 font-medium text-text-main text-center border-b border-[#e7edf4] truncate">
-                    {account.name}
-                  </td>
-                  <td className="px-4 py-3 text-center border-b border-[#e7edf4]">
-                    <span
-                      className="inline-flex items-center px-2.5 py-1 text-[10px] font-bold rounded-full uppercase"
-                      style={getRoleStyle(account.role.name)}
-                    >
-                      {account.role.name}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-center border-b border-[#e7edf4]">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
+        {/* 👇 SCROLL CONTAINER */}
+        <div className="max-h-[420px] overflow-y-auto overflow-x-auto">
+
+          <table className="w-full text-center table-fixed min-w-[880px] border-separate border-spacing-0">
+            <thead>
+              <tr>
+                <th className="w-[6%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+                  No.
+                </th>
+                <th className="w-[24%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+                  Email
+                </th>
+                <th className="w-[18%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+                  Name
+                </th>
+                <th className="w-[14%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+                  <FilterDropdown
+                    label="Role"
+                    value={roleFilter}
+                    options={["Role", "Admin", "User", "Staff", "Partner"]}
+                    isOpen={openFilter === "role"}
+                    onChange={(val) => {
+                      setRoleFilter(val)
+                      setOpenFilter(null)
+                      setCurrentPage(1)
+                    }}
+                    onToggle={(e) => {
+                      e.stopPropagation()
+                      setOpenFilter(openFilter === "role" ? null : "role")
+                    }}
+                  />
+                </th>
+                <th className="w-[12%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+                  <FilterDropdown
+                    label="Status"
+                    value={statusFilter}
+                    options={["Status", "Active", "Inactive"]}
+                    isOpen={openFilter === "status"}
+                    onChange={(val) => {
+                      setStatusFilter(val)
+                      setOpenFilter(null)
+                      setCurrentPage(1)
+                    }}
+                    onToggle={(e) => {
+                      e.stopPropagation()
+                      setOpenFilter(openFilter === "status" ? null : "status")
+                    }}
+                  />
+                </th>
+                <th
+                  className="w-[26%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc] sticky right-0 z-20"
+                  style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {currentAccounts.length > 0 ? (
+                currentAccounts.map((account, index) => (
+                  <tr key={account.id} className="hover:bg-[#f8fafc] transition-colors group">
+                    <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                      {startIndex + index + 1}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4] truncate">
+                      {account.email}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-text-main text-center border-b border-[#e7edf4] truncate">
+                      {account.name}
+                    </td>
+                    <td className="px-4 py-3 text-center border-b border-[#e7edf4]">
+                      <span
+                        className="inline-flex items-center px-2.5 py-1 text-[10px] font-bold rounded-full uppercase"
+                        style={getRoleStyle(account.role.name)}
+                      >
+                        {account.role.name}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center border-b border-[#e7edf4]">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
                         ${account.status === "Active"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-rose-100 text-rose-700"
-                        }`}
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-rose-100 text-rose-700"
+                          }`}
+                      >
+                        <span className="size-1.5 rounded-full bg-current"></span>
+                        {account.status}
+                      </span>
+                    </td>
+                    <td
+                      className="px-4 py-3 text-center border-b border-[#e7edf4] sticky right-0 bg-white group-hover:bg-[#f8fafc] z-10 transition-colors"
+                      style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
                     >
-                      <span className="size-1.5 rounded-full bg-current"></span>
-                      {account.status}
-                    </span>
-                  </td>
-                  <td
-                    className="px-4 py-3 text-center border-b border-[#e7edf4] sticky right-0 bg-white group-hover:bg-[#f8fafc] z-10 transition-colors"
-                    style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
-                  >
-                    <div className="inline-flex items-center justify-center gap-2 flex-wrap">
-                      <Tooltip text="Edit">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            openEdit(account)
-                          }}
-                          className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        >
-                          <Pencil size={16} />
-                        </button>
-                      </Tooltip>
-                      <Tooltip text="Delete">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setDeleteId(account.id)
-                          }}
-                          className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </Tooltip>
-                      <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
-                        <ToggleSwitch
-                          initialState={account.status === "Active"}
-                          onChange={(state) => {
-                            if (state) handleActivate(account.id)
-                            else handleDisable(account.id)
-                          }}
-                        />
+                      <div className="inline-flex items-center justify-center gap-2 flex-wrap">
+                        <Tooltip text="Edit">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              openEdit(account)
+                            }}
+                            className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                        </Tooltip>
+                        <Tooltip text="Delete">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setDeleteId(account.id)
+                            }}
+                            className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </Tooltip>
+                        <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
+                          <ToggleSwitch
+                            initialState={account.status === "Active"}
+                            onChange={(state) => {
+                              if (state) handleActivate(account.id)
+                              else handleDisable(account.id)
+                            }}
+                          />
+                        </div>
                       </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-text-secondary">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <span className="material-symbols-outlined text-4xl text-slate-300">group_off</span>
+                      <p className="font-medium">No accounts found</p>
+                      <p className="text-xs">Create a new account or adjust filters</p>
                     </div>
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-text-secondary">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <span className="material-symbols-outlined text-4xl text-slate-300">group_off</span>
-                    <p className="font-medium">No accounts found</p>
-                    <p className="text-xs">Create a new account or adjust filters</p>
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
 
-        <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-white">
-          <span className="text-sm text-text-secondary">
-            Showing {accounts.length > 0 ? startIndex + 1 : 0} - {startIndex + accounts.length} of{" "}
-            {totalAccounts} accounts
-          </span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50
-              ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
-            >
-              Previous
-            </button>
-            <span className="px-3 py-1 text-sm">
-              Page {currentPage} / {totalPages || 1}
+          <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-white">
+            <span className="text-sm text-text-secondary">
+              Showing {totalAccounts > 0 ? startIndex + 1 : 0} -{" "}
+              {Math.min(startIndex + itemsPerPage, totalAccounts)} of{" "}
+              {totalAccounts} accounts
             </span>
-            <button
-              type="button"
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages || totalPages === 0}
-              className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50
+              ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                Previous
+              </button>
+              <span className="px-3 py-1 text-sm">
+                Page {currentPage} / {totalPages || 1}
+              </span>
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages || totalPages === 0}
+                className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50
               ${currentPage === totalPages || totalPages === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-            >
-              Next
-            </button>
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <AnimatePresence>
-        {modalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
-          >
+        <AnimatePresence>
+          {modalOpen && (
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="bg-white w-full max-w-md rounded-2xl p-6 flex flex-col gap-6 shadow-2xl border border-slate-100"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
             >
-              <div className="flex justify-between items-center">
-                <h3 className="font-bold text-xl text-slate-800">
-                  {editing ? "Edit Account" : "Create Account"}
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Email</label>
-                  <input
-                    type="email"
-                    placeholder="user@example.com"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Full name</label>
-                  <input
-                    placeholder="Display name"
-                    value={form.fullName}
-                    onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Role</label>
-                  <select
-                    value={form.roleName}
-                    onChange={(e) => setForm({ ...form, roleName: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                className="bg-white w-full max-w-md rounded-2xl p-6 flex flex-col gap-6 shadow-2xl border border-slate-100"
+              >
+                <div className="flex justify-between items-center">
+                  <h3 className="font-bold text-xl text-slate-800">
+                    {editing ? "Edit Account" : "Create Account"}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(false)}
+                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
                   >
-                    {ROLE_OPTIONS.map((r) => (
-                      <option key={r} value={r}>
-                        {r}
-                      </option>
-                    ))}
-                  </select>
+                    <X size={20} />
+                  </button>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">
-                    Password {editing ? "(leave blank to keep)" : ""}
-                  </label>
-                  <input
-                    type="password"
-                    placeholder={editing ? "••••••••" : "Minimum 6 characters"}
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
-                  />
-                </div>
-              </div>
 
-              <div className="flex justify-end gap-3 mt-2">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={
-                    !form.email.trim() ||
-                    !form.fullName.trim() ||
-                    (!editing && !form.password.trim())
-                  }
-                  className="px-5 py-2.5 text-sm font-semibold text-white bg-[#5ab473] hover:bg-[#499A60] rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:pointer-events-none"
-                >
-                  {editing ? "Save Changes" : "Create Account"}
-                </button>
-              </div>
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-slate-700">Email</label>
+                    <input
+                      type="email"
+                      placeholder="user@example.com"
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-slate-700">Full name</label>
+                    <input
+                      placeholder="Display name"
+                      value={form.fullName}
+                      onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-slate-700">Role</label>
+                    <select
+                      value={form.roleName}
+                      onChange={(e) => setForm({ ...form, roleName: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                    >
+                      {ROLE_OPTIONS.map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-slate-700">
+                      Password {editing ? "(leave blank to keep)" : ""}
+                    </label>
+                    <input
+                      type="password"
+                      placeholder={editing ? "••••••••" : "Minimum 6 characters"}
+                      value={form.password}
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(false)}
+                    className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={
+                      !form.email.trim() ||
+                      !form.fullName.trim() ||
+                      (!editing && !form.password.trim())
+                    }
+                    className="px-5 py-2.5 text-sm font-semibold text-white bg-[#5ab473] hover:bg-[#499A60] rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    {editing ? "Save Changes" : "Create Account"}
+                  </button>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
 
-      <AnimatePresence>
-        {deleteId && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
-          >
+        <AnimatePresence>
+          {deleteId && (
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="bg-white w-full max-w-sm rounded-2xl p-6 flex flex-col gap-6 shadow-2xl border border-slate-100 items-center text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
             >
-              <div className="w-14 h-14 bg-red-100/80 text-red-600 rounded-full flex items-center justify-center mb-1">
-                <Trash2 size={26} strokeWidth={2.5} />
-              </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="font-bold text-xl text-slate-800">Delete account?</h3>
-                <p className="text-sm text-slate-500 font-medium">
-                  This action cannot be undone. The user will lose access immediately.
-                </p>
-              </div>
-              <div className="flex justify-center gap-3 w-full mt-2">
-                <button
-                  type="button"
-                  onClick={() => setDeleteId(null)}
-                  className="flex-1 px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => deleteId && handleDelete(deleteId)}
-                  className="flex-1 px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl shadow-sm transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                className="bg-white w-full max-w-sm rounded-2xl p-6 flex flex-col gap-6 shadow-2xl border border-slate-100 items-center text-center"
+              >
+                <div className="w-14 h-14 bg-red-100/80 text-red-600 rounded-full flex items-center justify-center mb-1">
+                  <Trash2 size={26} strokeWidth={2.5} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <h3 className="font-bold text-xl text-slate-800">Delete account?</h3>
+                  <p className="text-sm text-slate-500 font-medium">
+                    This action cannot be undone. The user will lose access immediately.
+                  </p>
+                </div>
+                <div className="flex justify-center gap-3 w-full mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setDeleteId(null)}
+                    className="flex-1 px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteId && handleDelete(deleteId)}
+                    className="flex-1 px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl shadow-sm transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
+
 }
+
