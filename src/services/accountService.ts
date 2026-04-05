@@ -34,14 +34,14 @@ export const deactivateAccount = (id: string) => {
 export type CreateAccountPayload = {
   email: string
   password: string
-  fullName: string
-  roleName: string
+  name: string
+  roleId: number
 }
 
 export type UpdateAccountPayload = {
   email?: string
-  fullName?: string
-  roleName?: string
+  name?: string
+  roleId?: number
   password?: string
 }
 

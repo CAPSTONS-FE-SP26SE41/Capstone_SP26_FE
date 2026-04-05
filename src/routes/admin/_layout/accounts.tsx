@@ -120,7 +120,12 @@ type Account = {
   status: "Active" | "Inactive"
   createdAt: string
 }
-
+const ROLE_MAP: Record<string, number> = {
+  Admin: 1,
+  User: 2,
+  Staff: 3,
+  Partner: 4,
+}
 const ROLE_OPTIONS = ["Admin", "User", "Staff", "Partner"] as const
 
 function AccountsPage() {
@@ -206,17 +211,15 @@ function AccountsPage() {
         return {
           id,
           name:
-            String(
-              (acc.profile as { name?: string } | undefined)?.name ??
-                acc.name ??
-                acc.fullName ??
-                "User"
-            ),
+            acc.name ||
+            acc.fullName ||
+            (acc.profile as any)?.name ||
+            "User",
           email: String(acc.email ?? ""),
           avatarUrl: String(
             (acc.profile as { avtUrl?: string } | undefined)?.avtUrl ??
-              acc.avatarUrl ??
-              ""
+            acc.avatarUrl ??
+            ""
           ),
           role: { id: String(acc.roleId ?? ""), name: roleName },
           status: active ? "Active" : "Inactive",
@@ -263,13 +266,15 @@ function AccountsPage() {
       if (editing) {
         const payload: {
           email: string
-          fullName: string
-          roleName: string
+          name: string
+          roleId: number
           password?: string
+          id: string
         } = {
+          id: editing.id,
           email: form.email.trim(),
-          fullName: form.fullName.trim(),
-          roleName: form.roleName,
+          name: form.fullName.trim(),
+          roleId: ROLE_MAP[form.roleName],
         }
         if (form.password.trim()) payload.password = form.password.trim()
         await updateAccount(editing.id, payload)
@@ -278,8 +283,8 @@ function AccountsPage() {
         await createAccount({
           email: form.email.trim(),
           password: form.password.trim(),
-          fullName: form.fullName.trim(),
-          roleName: form.roleName,
+          name: form.fullName.trim(),
+          roleId: ROLE_MAP[form.roleName],
         })
       }
       setModalOpen(false)
@@ -510,10 +515,9 @@ function AccountsPage() {
                   <td className="px-4 py-3 text-center border-b border-[#e7edf4]">
                     <span
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
-                        ${
-                          account.status === "Active"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-rose-100 text-rose-700"
+                        ${account.status === "Active"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-rose-100 text-rose-700"
                         }`}
                     >
                       <span className="size-1.5 rounded-full bg-current"></span>
