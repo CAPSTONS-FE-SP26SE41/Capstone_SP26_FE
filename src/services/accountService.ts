@@ -35,7 +35,7 @@ export type CreateAccountPayload = {
   email: string
   password: string
   name: string
-  roleId: number
+  roleName: string
 }
 
 export type UpdateAccountPayload = {
