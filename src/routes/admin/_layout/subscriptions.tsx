@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState, useRef } from "react"
 import { createPortal } from "react-dom"
-import { Plus, Pencil, Trash2, X, Search, ChevronDown } from "lucide-react"
+import { Plus, Pencil, Trash2, X, Search, ChevronDown, Upload, Download } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 import ToggleSwitch from "../../../components/ToggleSwitch"
 
@@ -12,7 +12,9 @@ import {
   updateSubscription,
   deleteSubscription,
   activateSubscription,
-  deactivateSubscription
+  deactivateSubscription,
+  importSubscriptionPackages,
+  exportSubscriptionPackages,
 } from "../../../services/subscriptionService"
 
 export const Route = createFileRoute("/admin/_layout/subscriptions")({
@@ -145,6 +147,7 @@ function SubscriptionsPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Subscription | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
     title: "",
@@ -296,6 +299,32 @@ function SubscriptionsPage() {
     }
   }
 
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file) return
+    try {
+      await importSubscriptionPackages(file)
+      await fetchSubscriptions()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleExport = async () => {
+    try {
+      const blob = await exportSubscriptionPackages()
+      const url = URL.createObjectURL(blob as Blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "AdSubscriptionPackages.xlsx"
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center py-20 text-sm text-slate-500">
@@ -311,6 +340,14 @@ function SubscriptionsPage() {
   return (
 
     <div className="flex flex-col gap-6" onClick={() => { setOpenFilter(null); }}>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".xlsx,.xls"
+        className="hidden"
+        onChange={handleImportFile}
+      />
 
       {/* Filters & Control Panel - STICKY */}
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-sm -mx-6 px-6 py-4 mb-2 border-b border-transparent transition-all">
@@ -329,14 +366,32 @@ function SubscriptionsPage() {
             </div>
           </div>
 
-          {/* Action Button */}
-          <button
-            onClick={openCreate}
-            className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors"
-          >
-            <Plus size={18} />
-            <span className="text-sm">Add Package</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={openCreate}
+              className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors"
+            >
+              <Plus size={18} />
+              <span className="text-sm">Add Package</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 border border-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-sm"
+            >
+              <Upload size={18} />
+              Import
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleExport()}
+              className="flex items-center gap-2 border border-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-sm"
+            >
+              <Download size={18} />
+              Export
+            </button>
+          </div>
 
         </div>
       </div>
@@ -691,4 +746,4 @@ function SubscriptionsPage() {
 
   )
 
-}
+}

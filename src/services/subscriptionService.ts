@@ -51,3 +51,17 @@ export const deactivateSubscription = (id: string) => {
     method: "PUT",
   })
 }
+
+/** Multipart upload — backend: ImportPackagesExcelForm.File */
+export const importSubscriptionPackages = (file: File) => {
+  const formData = new FormData()
+  formData.append("File", file)
+  return apiClient("/ad-subscription-packages/import", {
+    method: "POST",
+    body: formData,
+  })
+}
+
+export const exportSubscriptionPackages = () => {
+  return apiClient("/ad-subscription-packages/export", { parseAs: "blob" })
+}
