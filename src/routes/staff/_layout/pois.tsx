@@ -603,10 +603,10 @@ function StaffPOIsPage() {
                 <table className="min-w-[880px] w-full table-auto border-collapse">
                   <thead className="sticky top-0 z-10 bg-slate-100">
                     <tr className="text-slate-700 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
-                      <th className="px-6 py-4 text-left w-16">STT</th>
-                      <th className="px-6 py-4 text-left w-40">Tên</th>
-                      <th className="px-6 py-4 text-left">Trong nhà</th>
-                      <th className="px-6 py-4 text-left">Thao tác</th>
+                      <th className="px-6 py-4 text-center w-16">STT</th>
+                      <th className="px-6 py-4 text-center w-40">Tên</th>
+                      <th className="px-6 py-4 text-center">Trong nhà</th>
+                      <th className="px-6 py-4 text-center">Thao tác</th>
                     </tr>
                   </thead>
 
@@ -616,17 +616,17 @@ function StaffPOIsPage() {
                         key={p.Id}
                         className="transition-shadow hover:shadow-[inset_0_0_0_2px_#3b82f6]"
                       >
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
+                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap text-center">
                           {startIndex + idx + 1}
                         </td>
 
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-medium text-slate-900 max-w-[180px] overflow-x-auto whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <div className="font-medium text-slate-900 max-w-[180px] overflow-x-auto whitespace-nowrap mx-auto">
                             {p.Name}
                           </div>
                         </td>
 
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 text-center">
                           <span
                             className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${p.IsIndoor
                               ? "bg-emerald-100 text-emerald-800 border-emerald-200"
@@ -638,7 +638,7 @@ function StaffPOIsPage() {
                         </td>
 
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={() => void openDetailModal(p.Id)}
                               title="Xem chi tiết"
@@ -781,35 +781,35 @@ function StaffPOIsPage() {
               </div>
 
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Chi phí</dt>
                   <dd className="mt-1 text-sm text-slate-800">{selectedPoi.ApproxCost || "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Trong nhà</dt>
                   <dd className="mt-1 text-sm text-slate-800">{selectedPoi.IsIndoor ? "Có" : "Không"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Mở cửa</dt>
                   <dd className="mt-1 text-sm text-slate-800">{selectedPoi.OpenHour || "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Đóng cửa</dt>
                   <dd className="mt-1 text-sm text-slate-800">{selectedPoi.CloseHour || "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">LocationId</dt>
                   <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.LocationId || "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Status</dt>
                   <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.Status ?? "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">PartnerId</dt>
                   <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.PartnerId ?? "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Latitude / Longitude</dt>
                   <dd className="mt-1 text-sm text-slate-800">
                     {Number.isFinite(selectedPoi.Latitude) ? selectedPoi.Latitude.toFixed(6) : "—"}

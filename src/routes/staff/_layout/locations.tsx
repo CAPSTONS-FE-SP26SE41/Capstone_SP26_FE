@@ -362,11 +362,11 @@ function StaffLocationsPage() {
                 <table className="min-w-[1100px] w-full table-auto border-collapse">
                   <thead className="sticky top-0 z-10 bg-slate-100">
                     <tr className="text-slate-700 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
-                      <th className="px-6 py-4 text-left w-16">STT</th>
-                      <th className="px-6 py-4 text-left">Tên địa điểm</th>
-                      <th className="px-6 py-4 text-left">Vĩ độ</th>
-                      <th className="px-6 py-4 text-left">Kinh độ</th>
-                      <th className="px-6 py-4 text-left">Thao tác</th>
+                      <th className="px-6 py-4 text-center w-16">STT</th>
+                      <th className="px-6 py-4 text-center">Tên địa điểm</th>
+                      <th className="px-6 py-4 text-center">Vĩ độ</th>
+                      <th className="px-6 py-4 text-center">Kinh độ</th>
+                      <th className="px-6 py-4 text-center">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -375,22 +375,22 @@ function StaffLocationsPage() {
                         key={loc.LocationId}
                         className="transition-shadow hover:shadow-[inset_0_0_0_2px_#3b82f6]"
                       >
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
+                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap text-center">
                           {startIndex + idx + 1}
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-800 whitespace-nowrap">
+                        <td className="px-6 py-4 text-sm text-slate-800 whitespace-nowrap text-center">
                           {loc.LocationName}
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
+                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap text-center">
                           {Number.isFinite(loc.Latitude) ? loc.Latitude.toFixed(6) : "-"}
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
+                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap text-center">
                           {Number.isFinite(loc.Longitude)
                             ? loc.Longitude.toFixed(6)
                             : "-"}
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={() => openDetail(loc.LocationId)}
                               title="Chi tiet"
@@ -659,7 +659,7 @@ function StaffLocationsPage() {
             </div>
             <div className="p-6">
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">
                     Tên địa điểm
                   </dt>
@@ -667,7 +667,7 @@ function StaffLocationsPage() {
                     {selectedLocation.LocationName}
                   </dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">
                     Vĩ độ
                   </dt>
@@ -675,7 +675,7 @@ function StaffLocationsPage() {
                     {selectedLocation.Latitude}
                   </dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">
                     Kinh độ
                   </dt>
