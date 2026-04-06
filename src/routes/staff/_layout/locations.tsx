@@ -713,6 +713,7 @@ function StaffLocationsPage() {
         </div>
       ) : null}
     </div>
+    </div>
   )
 }
 
