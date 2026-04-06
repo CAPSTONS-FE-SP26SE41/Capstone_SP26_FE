@@ -316,7 +316,7 @@ export const getStaffLocations = async (): Promise<StaffLocationOption[]> => {
 export type CreateStaffPOIPayload = {
   Name: string
   Address: string
-  City: string
+  City?: string
   ApproxCost: string
   OpenHour: string
   CloseHour: string
@@ -344,7 +344,6 @@ export const createStaffPOI = async (
   const formData = new FormData()
   formData.append("Name", payload.Name)
   formData.append("Address", payload.Address)
-  formData.append("City", payload.City)
   formData.append("ApproxCost", payload.ApproxCost)
   formData.append("OpenHour", normalizeTimeOnly(payload.OpenHour))
   formData.append("CloseHour", normalizeTimeOnly(payload.CloseHour))
@@ -353,6 +352,9 @@ export const createStaffPOI = async (
   formData.append("IsIndoor", String(payload.IsIndoor))
   if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
     formData.append("VisitRecommendation", payload.VisitRecommendation.trim())
+  }
+  if (payload.City && payload.City.trim().length > 0) {
+    formData.append("City", payload.City.trim())
   }
   if (payload.PoiPreferences?.length) {
     // Khi backend map sang Dictionary/Map, gửi kiểu key-value giúp binding ổn định hơn.
@@ -404,7 +406,7 @@ export const createStaffPOI = async (
 export type UpdateStaffPOIPayload = {
   Name: string
   Address: string
-  City: string
+  City?: string
   ApproxCost: string
   OpenHour: string
   CloseHour: string
@@ -440,7 +442,6 @@ export const updateStaffPOI = async (
   const paramsObj: Record<string, string> = {
     Name: payload.Name ?? "",
     Address: payload.Address ?? "",
-    City: payload.City ?? "",
     ApproxCost: payload.ApproxCost ?? "",
     OpenHour: normalizeTimeOnly(payload.OpenHour ?? ""),
     CloseHour: normalizeTimeOnly(payload.CloseHour ?? ""),
@@ -452,6 +453,9 @@ export const updateStaffPOI = async (
 
   if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
     paramsObj.VisitRecommendation = payload.VisitRecommendation.trim()
+  }
+  if (payload.City && payload.City.trim().length > 0) {
+    paramsObj.City = payload.City.trim()
   }
 
   if (payload.Status !== undefined) {

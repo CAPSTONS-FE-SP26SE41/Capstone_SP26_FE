@@ -59,7 +59,6 @@ function StaffPOIsPage() {
   const [createForm, setCreateForm] = useState({
     Name: "",
     Address: "",
-    City: "",
     ApproxCost: "",
     OpenHour: "",
     CloseHour: "",
@@ -75,7 +74,6 @@ function StaffPOIsPage() {
   const [editForm, setEditForm] = useState({
     Name: "",
     Address: "",
-    City: "",
     ApproxCost: "",
     OpenHour: "",
     CloseHour: "",
@@ -97,7 +95,6 @@ function StaffPOIsPage() {
     setCreateForm({
       Name: "",
       Address: "",
-      City: "",
       ApproxCost: "",
       OpenHour: "",
       CloseHour: "",
@@ -145,9 +142,7 @@ function StaffPOIsPage() {
 
     return pois.filter((p) => {
       const haystack = [
-        p.Id,
         p.Name,
-        p.City,
         p.ApproxCost,
         p.Address,
         String(p.Latitude),
@@ -326,7 +321,6 @@ function StaffPOIsPage() {
       setEditForm({
         Name: detail.Name ?? "",
         Address: detail.Address ?? "",
-        City: detail.City ?? "",
         ApproxCost: detail.ApproxCost ?? "",
         OpenHour: detail.OpenHour ?? "",
         CloseHour: detail.CloseHour ?? "",
@@ -384,7 +378,6 @@ function StaffPOIsPage() {
       await createStaffPOI({
         Name: createForm.Name.trim(),
         Address: createForm.Address.trim(),
-        City: createForm.City.trim(),
         ApproxCost: createForm.ApproxCost.trim(),
         OpenHour: createForm.OpenHour.trim(),
         CloseHour: createForm.CloseHour.trim(),
@@ -457,7 +450,6 @@ function StaffPOIsPage() {
       await updateStaffPOI(editingPoiId, {
         Name: editForm.Name.trim(),
         Address: editForm.Address.trim(),
-        City: editForm.City.trim(),
         ApproxCost: editForm.ApproxCost.trim(),
         OpenHour: editForm.OpenHour.trim(),
         CloseHour: editForm.CloseHour.trim(),
@@ -525,7 +517,7 @@ function StaffPOIsPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full h-10 pl-10 pr-4 bg-slate-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all border border-slate-200"
-              placeholder="Tìm theo tên, địa chỉ, thành phố..."
+              placeholder="Tìm theo tên, địa chỉ..."
             />
           </div>
           <button
@@ -612,9 +604,7 @@ function StaffPOIsPage() {
                   <thead className="sticky top-0 z-10 bg-slate-100">
                     <tr className="text-slate-700 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
                       <th className="px-6 py-4 text-left w-16">STT</th>
-                      <th className="px-6 py-4 text-left w-28">Mã Id</th>
                       <th className="px-6 py-4 text-left w-40">Tên</th>
-                      <th className="px-6 py-4 text-left">Thành phố</th>
                       <th className="px-6 py-4 text-left">Trong nhà</th>
                       <th className="px-6 py-4 text-left">Thao tác</th>
                     </tr>
@@ -630,20 +620,10 @@ function StaffPOIsPage() {
                           {startIndex + idx + 1}
                         </td>
 
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-                          <div className="max-w-[180px] overflow-x-auto whitespace-nowrap">
-                            {p.Id}
-                          </div>
-                        </td>
-
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="font-medium text-slate-900 max-w-[180px] overflow-x-auto whitespace-nowrap">
                             {p.Name}
                           </div>
-                        </td>
-
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-                          {p.City}
                         </td>
 
                         <td className="px-6 py-4">
@@ -790,16 +770,8 @@ function StaffPOIsPage() {
                     <dd className="mt-1 text-sm font-semibold text-slate-900">{selectedPoi.Name || "—"}</dd>
                   </div>
                   <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500">Mã ID</dt>
-                    <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.Id || "—"}</dd>
-                  </div>
-                  <div className="border-b border-slate-100 pb-2">
                     <dt className="text-xs uppercase tracking-wide text-slate-500">Địa chỉ</dt>
                     <dd className="mt-1 text-sm text-slate-800">{selectedPoi.Address || "—"}</dd>
-                  </div>
-                  <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500">Thành phố</dt>
-                    <dd className="mt-1 text-sm text-slate-800">{selectedPoi.City || "—"}</dd>
                   </div>
                   <div className="border-b border-slate-100 pb-2">
                     <dt className="text-xs uppercase tracking-wide text-slate-500">Google Maps</dt>
@@ -899,17 +871,6 @@ function StaffPOIsPage() {
                   />
                 </label>
 
-                <label className="text-sm text-slate-700">
-                  Thành phố
-                  <input
-                    value={createForm.City}
-                    onChange={(e) =>
-                      setCreateForm((prev) => ({ ...prev, City: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    placeholder="City"
-                  />
-                </label>
 
                 <label className="text-sm text-slate-700">
                   Chi phí gần đúng
@@ -1164,16 +1125,6 @@ function StaffPOIsPage() {
                   />
                 </label>
 
-                <label className="text-sm text-slate-700">
-                  Thành phố
-                  <input
-                    value={editForm.City}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, City: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                  />
-                </label>
 
                 <label className="text-sm text-slate-700">
                   Chi phí gần đúng
@@ -1379,7 +1330,7 @@ function StaffPOIsPage() {
 
       {toast ? (
         <div
-          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${toast.type === "success"
+          className={`fixed top-4 right-4 z-60 px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${toast.type === "success"
             ? "bg-emerald-50 text-emerald-700 border-emerald-200"
             : "bg-rose-50 text-rose-700 border-rose-200"
             }`}

@@ -87,7 +87,7 @@ function StaffLocationsPage() {
     const q = query.trim().toLowerCase()
     if (!q) return locations
     return locations.filter((l) =>
-      [l.LocationId, l.LocationName, String(l.Latitude), String(l.Longitude)]
+      [l.LocationName, String(l.Latitude), String(l.Longitude)]
         .join(" ")
         .toLowerCase()
         .includes(q)
@@ -274,7 +274,7 @@ function StaffLocationsPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full h-10 pl-10 pr-4 bg-slate-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all border border-slate-200"
-              placeholder="Tim theo id, tên, tọa độ..."
+              placeholder="Tim theo tên, tọa độ..."
             />
           </div>
 
@@ -339,6 +339,7 @@ function StaffLocationsPage() {
     {exporting ? "Đang export..." : "Export Excel"}
   </button>
 </div>
+      </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-200">
@@ -362,7 +363,6 @@ function StaffLocationsPage() {
                   <thead className="sticky top-0 z-10 bg-slate-100">
                     <tr className="text-slate-700 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
                       <th className="px-6 py-4 text-left w-16">STT</th>
-                      <th className="px-6 py-4 text-left">Location Id</th>
                       <th className="px-6 py-4 text-left">Tên địa điểm</th>
                       <th className="px-6 py-4 text-left">Vĩ độ</th>
                       <th className="px-6 py-4 text-left">Kinh độ</th>
@@ -377,11 +377,6 @@ function StaffLocationsPage() {
                       >
                         <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
                           {startIndex + idx + 1}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-                          <div className="max-w-[240px] overflow-x-auto whitespace-nowrap">
-                            {loc.LocationId}
-                          </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-slate-800 whitespace-nowrap">
                           {loc.LocationName}
@@ -666,14 +661,6 @@ function StaffLocationsPage() {
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                 <div className="border-b border-slate-100 pb-2">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">
-                    Location Id
-                  </dt>
-                  <dd className="mt-1 text-sm text-slate-800 break-all">
-                    {selectedLocation.LocationId}
-                  </dd>
-                </div>
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">
                     Tên địa điểm
                   </dt>
                   <dd className="mt-1 text-sm text-slate-800">
@@ -704,7 +691,7 @@ function StaffLocationsPage() {
 
       {toast ? (
         <div
-          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${toast.type === "success"
+          className={`fixed top-4 right-4 z-60 px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${toast.type === "success"
             ? "bg-emerald-50 text-emerald-700 border-emerald-200"
             : "bg-rose-50 text-rose-700 border-rose-200"
             }`}
@@ -712,7 +699,6 @@ function StaffLocationsPage() {
           {toast.message}
         </div>
       ) : null}
-    </div>
     </div>
   )
 }
