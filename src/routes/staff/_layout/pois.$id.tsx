@@ -169,207 +169,165 @@ function StaffPOIDetailPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-semibold text-slate-900">Chi tiết POI</h2>
-          <p className="text-sm text-slate-500 mt-1">ID: {id}</p>
-        </div>
-        <Link
-          to="/staff/pois"
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50"
-        >
-          <ArrowLeft size={16} />
-          Quay lại
-        </Link>
+  <div className="flex flex-col gap-6">
+    <div className="flex items-center justify-between gap-3">
+      <div>
+        <h2 className="text-2xl font-semibold text-slate-900">Chi tiết POI</h2>
+        <p className="text-sm text-slate-500 mt-1">ID: {id}</p>
       </div>
+      <Link
+        to="/staff/pois"
+        className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50"
+      >
+        <ArrowLeft size={16} />
+        Quay lại
+      </Link>
+    </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="py-16 text-center text-slate-500">Đang tải chi tiết...</div>
-        ) : (
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <label className="text-sm text-slate-700">
-                Tên
-                <input
-                  value={form.Name}
-                  onChange={(e) => setForm((prev) => ({ ...prev, Name: e.target.value }))}
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                  required
-                />
-              </label>
-
-              <label className="text-sm text-slate-700">
-                Địa chỉ
-                <input
-                  value={form.Address}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, Address: e.target.value }))
-                  }
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                />
-              </label>
-
-              <label className="text-sm text-slate-700">
-                Thành phố
-                <input
-                  value={form.City}
-                  onChange={(e) => setForm((prev) => ({ ...prev, City: e.target.value }))}
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                />
-              </label>
-
-              <label className="text-sm text-slate-700">
-                Chi phí gần đúng
-                <input
-                  value={form.ApproxCost}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, ApproxCost: e.target.value }))
-                  }
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                />
-              </label>
-
-              <label className="text-sm text-slate-700">
-                Giờ mở cửa
-                <input
-                  type="time"
-                  value={form.OpenHour}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, OpenHour: e.target.value }))
-                  }
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                />
-              </label>
-
-              <label className="text-sm text-slate-700">
-                Giờ đóng cửa
-                <input
-                  type="time"
-                  value={form.CloseHour}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, CloseHour: e.target.value }))
-                  }
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                />
-              </label>
-
-              <label className="text-sm text-slate-700">
-                Google map link
-                <input
-                  value={form.GoogleMapLink}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, GoogleMapLink: e.target.value }))
-                  }
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                />
-              </label>
-
-              <label className="text-sm text-slate-700">
-                LocationId
-                <select
-                  value={form.LocationId}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, LocationId: e.target.value }))
-                  }
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                  required
-                >
-                  <option value="">Chọn LocationId</option>
-                  {locationOptions.map((loc) => (
-                    <option key={loc.Id} value={loc.Id}>
-                      {loc.Name ? `${loc.Name} (${loc.Id})` : loc.Id}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <label className="text-sm text-slate-700">
-                Status
-                <input
-                  value={form.Status}
-                  onChange={(e) => setForm((prev) => ({ ...prev, Status: e.target.value }))}
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                />
-              </label>
-
-              <label className="text-sm text-slate-700">
-                PartnerId
-                <input
-                  value={form.PartnerId}
-                  onChange={(e) => setForm((prev) => ({ ...prev, PartnerId: e.target.value }))}
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                />
-              </label>
-            </div>
-
-            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      {loading ? (
+        <div className="py-16 text-center text-slate-500">Đang tải chi tiết...</div>
+      ) : (
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <label className="text-sm text-slate-700">
+              Tên
               <input
-                type="checkbox"
-                checked={form.IsIndoor}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, IsIndoor: e.target.checked }))
-                }
-                className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
+                value={form.Name}
+                onChange={(e) => setForm((prev) => ({ ...prev, Name: e.target.value }))}
+                className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+                required
               />
-              IsIndoor
             </label>
 
-            <div className="space-y-2">
-              <label className="text-sm text-slate-700 block">
-                POIImgUrl
-                <input
-                  value={form.POIImgUrl}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, POIImgUrl: e.target.value }))
-                  }
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                />
-              </label>
+            <label className="text-sm text-slate-700">
+              Địa chỉ
+              <input
+                value={form.Address}
+                onChange={(e) => setForm((prev) => ({ ...prev, Address: e.target.value }))}
+                className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+              />
+            </label>
 
-              <label className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 cursor-pointer hover:bg-slate-100">
-                <Upload size={16} />
-                {uploadingImage ? "Đang upload..." : "Upload ảnh"}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  disabled={uploadingImage}
-                  onChange={(e) => handleUploadImage(e.target.files?.[0] ?? null)}
-                />
-              </label>
-            </div>
+            <label className="text-sm text-slate-700">
+              Thành phố
+              <input
+                value={form.City}
+                onChange={(e) => setForm((prev) => ({ ...prev, City: e.target.value }))}
+                className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+              />
+            </label>
 
-            <div className="pt-2 flex items-center justify-end">
-              <button
-                type="submit"
-                disabled={saving || uploadingImage}
-                className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold disabled:opacity-60"
-              >
-                <Save size={16} />
-                {saving ? "Đang cập nhật..." : "Cập nhật"}
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
+            <label className="text-sm text-slate-700">
+              Chi phí gần đúng
+              <input
+                value={form.ApproxCost}
+                onChange={(e) => setForm((prev) => ({ ...prev, ApproxCost: e.target.value }))}
+                className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+              />
+            </label>
 
-      {toast ? (
-        <div
-          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${
-            toast.type === "success"
-              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-              : "bg-rose-50 text-rose-700 border-rose-200"
-          }`}
-        >
-          {toast.message}
-        </div>
-      ) : null}
+            <label className="text-sm text-slate-700">
+              Giờ mở cửa
+              <input
+                type="time"
+                value={form.OpenHour}
+                onChange={(e) => setForm((prev) => ({ ...prev, OpenHour: e.target.value }))}
+                className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+              />
+            </label>
+
+            <label className="text-sm text-slate-700">
+              Giờ đóng cửa
+              <input
+                type="time"
+                value={form.CloseHour}
+                onChange={(e) => setForm((prev) => ({ ...prev, CloseHour: e.target.value }))}
+                className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+              />
+            </label>
+
+            <label className="text-sm text-slate-700">
+              Google map link
+              <input
+                value={form.GoogleMapLink}
+                onChange={(e) => setForm((prev) => ({ ...prev, GoogleMapLink: e.target.value }))}
+                className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+              />
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <label className="text-sm text-slate-700">
+              Status
+              <input
+                value={form.Status}
+                onChange={(e) => setForm((prev) => ({ ...prev, Status: e.target.value }))}
+                className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+              />
+            </label>
+          </div>
+
+          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={form.IsIndoor}
+              onChange={(e) => setForm((prev) => ({ ...prev, IsIndoor: e.target.checked }))}
+              className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
+            />
+            IsIndoor
+          </label>
+
+          <div className="space-y-2">
+            <label className="text-sm text-slate-700 block">
+              POIImgUrl
+              <input
+                value={form.POIImgUrl}
+                onChange={(e) => setForm((prev) => ({ ...prev, POIImgUrl: e.target.value }))}
+                className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+              />
+            </label>
+
+            <label className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 cursor-pointer hover:bg-slate-100">
+              <Upload size={16} />
+              {uploadingImage ? "Đang upload..." : "Upload ảnh"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploadingImage}
+                onChange={(e) => handleUploadImage(e.target.files?.[0] ?? null)}
+              />
+            </label>
+          </div>
+
+          <div className="pt-2 flex items-center justify-end">
+            <button
+              type="submit"
+              disabled={saving || uploadingImage}
+              className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold disabled:opacity-60"
+            >
+              <Save size={16} />
+              {saving ? "Đang cập nhật..." : "Cập nhật"}
+            </button>
+          </div>
+        </form>
+      )}
     </div>
-  )
+
+    {toast ? (
+      <div
+        className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${
+          toast.type === "success"
+            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+            : "bg-rose-50 text-rose-700 border-rose-200"
+        }`}
+      >
+        {toast.message}
+      </div>
+    ) : null}
+  </div>
+)
 }
 
 export default StaffPOIDetailPage

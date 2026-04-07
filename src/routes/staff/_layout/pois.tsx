@@ -797,18 +797,12 @@ function StaffPOIsPage() {
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Đóng cửa</dt>
                   <dd className="mt-1 text-sm text-slate-800">{selectedPoi.CloseHour || "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2 text-center">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">LocationId</dt>
-                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.LocationId || "—"}</dd>
-                </div>
+                
                 <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Status</dt>
                   <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.Status ?? "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2 text-center">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">PartnerId</dt>
-                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.PartnerId ?? "—"}</dd>
-                </div>
+               
                 <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Latitude / Longitude</dt>
                   <dd className="mt-1 text-sm text-slate-800">
