@@ -2,11 +2,14 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useMemo, useState, type FormEvent } from "react"
 import { Edit2, Eye, Plus, Search, Trash2, Upload } from "lucide-react"
 
+
+
 import {
   createStaffLocation,
   deleteStaffLocation,
   getStaffLocationById,
   getStaffLocationsList,
+  exportStaffLocationsExcel,
   importStaffLocationsExcel,
   type StaffLocation,
   updateStaffLocation,
@@ -32,6 +35,7 @@ function StaffLocationsPage() {
   const [selectedLocation, setSelectedLocation] = useState<StaffLocation | null>(null)
   const [saving, setSaving] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [form, setForm] = useState({
     LocationName: "",
     Latitude: "",
@@ -83,7 +87,7 @@ function StaffLocationsPage() {
     const q = query.trim().toLowerCase()
     if (!q) return locations
     return locations.filter((l) =>
-      [l.LocationId, l.LocationName, String(l.Latitude), String(l.Longitude)]
+      [l.LocationName, String(l.Latitude), String(l.Longitude)]
         .join(" ")
         .toLowerCase()
         .includes(q)
@@ -260,6 +264,7 @@ function StaffLocationsPage() {
         </div>
 
         <div className="w-full sm:w-auto flex items-center gap-2">
+          {/* Search */}
           <div className="relative w-full sm:w-[360px]">
             <Search
               size={16}
@@ -269,9 +274,14 @@ function StaffLocationsPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full h-10 pl-10 pr-4 bg-slate-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all border border-slate-200"
-              placeholder="Tim theo id, tên, tọa độ..."
+              placeholder="Tim theo tên, tọa độ..."
             />
           </div>
+
+          {/* ✅ EXPORT */}
+          
+
+          {/* Create */}
           <button
             onClick={() => {
               resetForm()
@@ -282,16 +292,19 @@ function StaffLocationsPage() {
             <Plus size={16} />
             Tạo mới
           </button>
-          <label className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${
-            importing
-              ? "bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
-              : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
-          }`}>
+
+          {/* Import */}
+          <label
+            className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${importing
+                ? "bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
+                : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
+              }`}
+          >
             <Upload size={16} />
             {importing ? "Đang import..." : "Import Excel"}
             <input
               type="file"
-              accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+              accept=".xlsx,.xls"
               className="hidden"
               disabled={importing}
               onChange={(e) => {
@@ -301,7 +314,31 @@ function StaffLocationsPage() {
               }}
             />
           </label>
-        </div>
+          
+          <button
+            disabled={exporting}
+            onClick={async () => {
+              try {
+                setExporting(true)
+                await exportStaffLocationsExcel()
+                showToast("success", "Export thành công")
+              } catch (e) {
+                console.error(e)
+                showToast("error", "Export thất bại")
+              } finally {
+                setExporting(false)
+              }
+            }}
+            className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap ${
+      exporting
+        ? "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
+        : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
+    }`}
+  >
+    <span className="text-lg">⬇</span>
+    {exporting ? "Đang export..." : "Export Excel"}
+  </button>
+</div>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -316,7 +353,7 @@ function StaffLocationsPage() {
           <div className="py-16 text-center text-slate-500">Dang tai dia diem...</div>
         ) : filteredLocations.length === 0 ? (
           <div className="py-16 text-center text-slate-500">
-          Không có Location phù hợp với bộ lọc
+            Không có Location phù hợp với bộ lọc
           </div>
         ) : (
           <>
@@ -325,12 +362,11 @@ function StaffLocationsPage() {
                 <table className="min-w-[1100px] w-full table-auto border-collapse">
                   <thead className="sticky top-0 z-10 bg-slate-100">
                     <tr className="text-slate-700 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
-                      <th className="px-6 py-4 text-left w-16">STT</th>
-                      <th className="px-6 py-4 text-left">Location Id</th>
-                      <th className="px-6 py-4 text-left">Tên địa điểm</th>
-                      <th className="px-6 py-4 text-left">Vĩ độ</th>
-                      <th className="px-6 py-4 text-left">Kinh độ</th>
-                      <th className="px-6 py-4 text-left">Thao tác</th>
+                      <th className="px-6 py-4 text-center w-16">STT</th>
+                      <th className="px-6 py-4 text-center">Tên địa điểm</th>
+                      <th className="px-6 py-4 text-center">Vĩ độ</th>
+                      <th className="px-6 py-4 text-center">Kinh độ</th>
+                      <th className="px-6 py-4 text-center">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -339,27 +375,22 @@ function StaffLocationsPage() {
                         key={loc.LocationId}
                         className="transition-shadow hover:shadow-[inset_0_0_0_2px_#3b82f6]"
                       >
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
+                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap text-center">
                           {startIndex + idx + 1}
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-                          <div className="max-w-[240px] overflow-x-auto whitespace-nowrap">
-                            {loc.LocationId}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-800 whitespace-nowrap">
+                        <td className="px-6 py-4 text-sm text-slate-800 whitespace-nowrap text-center">
                           {loc.LocationName}
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
+                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap text-center">
                           {Number.isFinite(loc.Latitude) ? loc.Latitude.toFixed(6) : "-"}
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
+                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap text-center">
                           {Number.isFinite(loc.Longitude)
                             ? loc.Longitude.toFixed(6)
                             : "-"}
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={() => openDetail(loc.LocationId)}
                               title="Chi tiet"
@@ -423,11 +454,10 @@ function StaffLocationsPage() {
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`h-10 w-10 rounded-xl border text-sm font-semibold transition-colors ${
-                      p === page
-                        ? "bg-emerald-600 border-emerald-600 text-white"
-                        : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
+                    className={`h-10 w-10 rounded-xl border text-sm font-semibold transition-colors ${p === page
+                      ? "bg-emerald-600 border-emerald-600 text-white"
+                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                      }`}
                   >
                     {p}
                   </button>
@@ -629,15 +659,7 @@ function StaffLocationsPage() {
             </div>
             <div className="p-6">
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">
-                    Location Id
-                  </dt>
-                  <dd className="mt-1 text-sm text-slate-800 break-all">
-                    {selectedLocation.LocationId}
-                  </dd>
-                </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">
                     Tên địa điểm
                   </dt>
@@ -645,7 +667,7 @@ function StaffLocationsPage() {
                     {selectedLocation.LocationName}
                   </dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">
                     Vĩ độ
                   </dt>
@@ -653,7 +675,7 @@ function StaffLocationsPage() {
                     {selectedLocation.Latitude}
                   </dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">
                     Kinh độ
                   </dt>
@@ -669,11 +691,10 @@ function StaffLocationsPage() {
 
       {toast ? (
         <div
-          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${
-            toast.type === "success"
-              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-              : "bg-rose-50 text-rose-700 border-rose-200"
-          }`}
+          className={`fixed top-4 right-4 z-60 px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${toast.type === "success"
+            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+            : "bg-rose-50 text-rose-700 border-rose-200"
+            }`}
         >
           {toast.message}
         </div>

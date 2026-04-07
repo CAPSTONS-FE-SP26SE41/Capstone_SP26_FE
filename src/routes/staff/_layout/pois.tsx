@@ -13,6 +13,7 @@ import {
   type StaffLocationOption,
   type StaffPOI,
   updateStaffPOI,
+  exportStaffPOIsExcel,
 } from "../../../services/poiService"
 
 export const Route = createFileRoute("/staff/_layout/pois")({
@@ -49,6 +50,7 @@ function StaffPOIsPage() {
   const [editImagePreviewUrl, setEditImagePreviewUrl] = useState<string>("")
   const [importing, setImporting] = useState(false)
   const [loadingLocations, setLoadingLocations] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [locationOptions, setLocationOptions] = useState<StaffLocationOption[]>([])
   const [toast, setToast] = useState<{
     type: "success" | "error"
@@ -57,7 +59,6 @@ function StaffPOIsPage() {
   const [createForm, setCreateForm] = useState({
     Name: "",
     Address: "",
-    City: "",
     ApproxCost: "",
     OpenHour: "",
     CloseHour: "",
@@ -73,7 +74,6 @@ function StaffPOIsPage() {
   const [editForm, setEditForm] = useState({
     Name: "",
     Address: "",
-    City: "",
     ApproxCost: "",
     OpenHour: "",
     CloseHour: "",
@@ -95,7 +95,6 @@ function StaffPOIsPage() {
     setCreateForm({
       Name: "",
       Address: "",
-      City: "",
       ApproxCost: "",
       OpenHour: "",
       CloseHour: "",
@@ -143,9 +142,7 @@ function StaffPOIsPage() {
 
     return pois.filter((p) => {
       const haystack = [
-        p.Id,
         p.Name,
-        p.City,
         p.ApproxCost,
         p.Address,
         String(p.Latitude),
@@ -324,7 +321,6 @@ function StaffPOIsPage() {
       setEditForm({
         Name: detail.Name ?? "",
         Address: detail.Address ?? "",
-        City: detail.City ?? "",
         ApproxCost: detail.ApproxCost ?? "",
         OpenHour: detail.OpenHour ?? "",
         CloseHour: detail.CloseHour ?? "",
@@ -382,7 +378,6 @@ function StaffPOIsPage() {
       await createStaffPOI({
         Name: createForm.Name.trim(),
         Address: createForm.Address.trim(),
-        City: createForm.City.trim(),
         ApproxCost: createForm.ApproxCost.trim(),
         OpenHour: createForm.OpenHour.trim(),
         CloseHour: createForm.CloseHour.trim(),
@@ -455,7 +450,6 @@ function StaffPOIsPage() {
       await updateStaffPOI(editingPoiId, {
         Name: editForm.Name.trim(),
         Address: editForm.Address.trim(),
-        City: editForm.City.trim(),
         ApproxCost: editForm.ApproxCost.trim(),
         OpenHour: editForm.OpenHour.trim(),
         CloseHour: editForm.CloseHour.trim(),
@@ -481,10 +475,10 @@ function StaffPOIsPage() {
       setPois(
         editImageFile
           ? refreshedData.map((p) =>
-              p.Id === editingPoiId && p.POIImgUrl
-                ? { ...p, POIImgUrl: withCacheBust(p.POIImgUrl) }
-                : p
-            )
+            p.Id === editingPoiId && p.POIImgUrl
+              ? { ...p, POIImgUrl: withCacheBust(p.POIImgUrl) }
+              : p
+          )
           : refreshedData
       )
       setShowEditModal(false)
@@ -513,7 +507,7 @@ function StaffPOIsPage() {
           <h2 className="text-2xl font-semibold text-slate-900">
             Quản lí POIs
           </h2>
-         
+
         </div>
 
         <div className="w-full sm:w-auto flex items-center gap-2">
@@ -523,7 +517,7 @@ function StaffPOIsPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full h-10 pl-10 pr-4 bg-slate-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all border border-slate-200"
-              placeholder="Tìm theo tên, địa chỉ, thành phố..."
+              placeholder="Tìm theo tên, địa chỉ..."
             />
           </div>
           <button
@@ -533,11 +527,10 @@ function StaffPOIsPage() {
             <Plus size={16} />
             Tạo mới
           </button>
-          <label className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${
-            importing
-              ? "bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
-              : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
-          }`}>
+          <label className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${importing
+            ? "bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
+            : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
+            }`}>
             <Upload size={16} />
             {importing ? "Đang import..." : "Import Excel"}
             <input
@@ -552,8 +545,31 @@ function StaffPOIsPage() {
               }}
             />
           </label>
-        </div>
-      </div>
+          <button
+            disabled={exporting}
+            onClick={async () => {
+              try {
+                setExporting(true)
+                await exportStaffPOIsExcel() // 👈 nhớ dùng đúng API POI
+                showToast("success", "Export POIs thành công")
+              } catch (e) {
+                console.error(e)
+                showToast("error", "Export POIs thất bại")
+              } finally {
+                setExporting(false)
+              }
+            }}
+            className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap ${
+        exporting
+          ? "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
+          : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300 shadow-sm"
+      }`}
+    >
+      <span className="text-lg">⬇</span>
+      {exporting ? "Đang export..." : "Export Excel"}
+    </button>
+  </div>
+</div>
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -587,12 +603,10 @@ function StaffPOIsPage() {
                 <table className="min-w-[880px] w-full table-auto border-collapse">
                   <thead className="sticky top-0 z-10 bg-slate-100">
                     <tr className="text-slate-700 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
-                      <th className="px-6 py-4 text-left w-16">STT</th>
-                      <th className="px-6 py-4 text-left w-28">Mã Id</th>
-                      <th className="px-6 py-4 text-left w-40">Tên</th>
-                      <th className="px-6 py-4 text-left">Thành phố</th>
-                      <th className="px-6 py-4 text-left">Trong nhà</th>
-                      <th className="px-6 py-4 text-left">Thao tác</th>
+                      <th className="px-6 py-4 text-center w-16">STT</th>
+                      <th className="px-6 py-4 text-center w-40">Tên</th>
+                      <th className="px-6 py-4 text-center">Trong nhà</th>
+                      <th className="px-6 py-4 text-center">Thao tác</th>
                     </tr>
                   </thead>
 
@@ -602,40 +616,29 @@ function StaffPOIsPage() {
                         key={p.Id}
                         className="transition-shadow hover:shadow-[inset_0_0_0_2px_#3b82f6]"
                       >
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
+                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap text-center">
                           {startIndex + idx + 1}
                         </td>
 
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-                          <div className="max-w-[180px] overflow-x-auto whitespace-nowrap">
-                            {p.Id}
-                          </div>
-                        </td>
-
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-medium text-slate-900 max-w-[180px] overflow-x-auto whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <div className="font-medium text-slate-900 max-w-[180px] overflow-x-auto whitespace-nowrap mx-auto">
                             {p.Name}
                           </div>
                         </td>
 
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-                          {p.City}
-                        </td>
-
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 text-center">
                           <span
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
-                              p.IsIndoor
-                                ? "bg-emerald-100 text-emerald-800 border-emerald-200"
-                                : "bg-slate-100 text-slate-700 border-slate-200"
-                            }`}
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${p.IsIndoor
+                              ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                              : "bg-slate-100 text-slate-700 border-slate-200"
+                              }`}
                           >
                             {p.IsIndoor ? "Trong nhà" : "Ngoài trời"}
                           </span>
                         </td>
 
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={() => void openDetailModal(p.Id)}
                               title="Xem chi tiết"
@@ -648,14 +651,14 @@ function StaffPOIsPage() {
                               className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors text-sm font-semibold"
                             >
                               <Edit2 size={16} />
-                              
+
                             </button>
                             <button
                               onClick={() => handleDelete(p)}
                               className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors text-sm font-semibold"
                             >
                               <Trash2 size={16} />
-                              
+
                             </button>
                           </div>
                         </td>
@@ -706,11 +709,10 @@ function StaffPOIsPage() {
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`h-10 w-10 rounded-xl border text-sm font-semibold transition-colors ${
-                      p === page
-                        ? "bg-emerald-600 border-emerald-600 text-white"
-                        : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
+                    className={`h-10 w-10 rounded-xl border text-sm font-semibold transition-colors ${p === page
+                      ? "bg-emerald-600 border-emerald-600 text-white"
+                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                      }`}
                   >
                     {p}
                   </button>
@@ -768,16 +770,8 @@ function StaffPOIsPage() {
                     <dd className="mt-1 text-sm font-semibold text-slate-900">{selectedPoi.Name || "—"}</dd>
                   </div>
                   <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500">Mã ID</dt>
-                    <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.Id || "—"}</dd>
-                  </div>
-                  <div className="border-b border-slate-100 pb-2">
                     <dt className="text-xs uppercase tracking-wide text-slate-500">Địa chỉ</dt>
                     <dd className="mt-1 text-sm text-slate-800">{selectedPoi.Address || "—"}</dd>
-                  </div>
-                  <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500">Thành phố</dt>
-                    <dd className="mt-1 text-sm text-slate-800">{selectedPoi.City || "—"}</dd>
                   </div>
                   <div className="border-b border-slate-100 pb-2">
                     <dt className="text-xs uppercase tracking-wide text-slate-500">Google Maps</dt>
@@ -787,35 +781,35 @@ function StaffPOIsPage() {
               </div>
 
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Chi phí</dt>
                   <dd className="mt-1 text-sm text-slate-800">{selectedPoi.ApproxCost || "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Trong nhà</dt>
                   <dd className="mt-1 text-sm text-slate-800">{selectedPoi.IsIndoor ? "Có" : "Không"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Mở cửa</dt>
                   <dd className="mt-1 text-sm text-slate-800">{selectedPoi.OpenHour || "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Đóng cửa</dt>
                   <dd className="mt-1 text-sm text-slate-800">{selectedPoi.CloseHour || "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">LocationId</dt>
                   <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.LocationId || "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Status</dt>
                   <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.Status ?? "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">PartnerId</dt>
                   <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.PartnerId ?? "—"}</dd>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
+                <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Latitude / Longitude</dt>
                   <dd className="mt-1 text-sm text-slate-800">
                     {Number.isFinite(selectedPoi.Latitude) ? selectedPoi.Latitude.toFixed(6) : "—"}
@@ -877,17 +871,6 @@ function StaffPOIsPage() {
                   />
                 </label>
 
-                <label className="text-sm text-slate-700">
-                  Thành phố
-                  <input
-                    value={createForm.City}
-                    onChange={(e) =>
-                      setCreateForm((prev) => ({ ...prev, City: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    placeholder="City"
-                  />
-                </label>
 
                 <label className="text-sm text-slate-700">
                   Chi phí gần đúng
@@ -988,12 +971,12 @@ function StaffPOIsPage() {
                                 ? exists
                                   ? prev.PoiPreferences
                                   : [
-                                      ...prev.PoiPreferences,
-                                      { id: opt.id, name: opt.name },
-                                    ]
+                                    ...prev.PoiPreferences,
+                                    { id: opt.id, name: opt.name },
+                                  ]
                                 : prev.PoiPreferences.filter(
-                                    (x) => x.id !== opt.id,
-                                  )
+                                  (x) => x.id !== opt.id,
+                                )
 
                               return { ...prev, PoiPreferences: next }
                             })
@@ -1142,16 +1125,6 @@ function StaffPOIsPage() {
                   />
                 </label>
 
-                <label className="text-sm text-slate-700">
-                  Thành phố
-                  <input
-                    value={editForm.City}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, City: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                  />
-                </label>
 
                 <label className="text-sm text-slate-700">
                   Chi phí gần đúng
@@ -1357,11 +1330,10 @@ function StaffPOIsPage() {
 
       {toast ? (
         <div
-          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${
-            toast.type === "success"
-              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-              : "bg-rose-50 text-rose-700 border-rose-200"
-          }`}
+          className={`fixed top-4 right-4 z-60 px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${toast.type === "success"
+            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+            : "bg-rose-50 text-rose-700 border-rose-200"
+            }`}
         >
           {toast.message}
         </div>

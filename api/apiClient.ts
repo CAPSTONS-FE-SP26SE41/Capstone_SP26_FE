@@ -1,9 +1,13 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
+
+
 
 export type ApiClientOptions = RequestInit & {
   /** Override automatic JSON/text parsing (e.g. file downloads). */
   parseAs?: "json" | "text" | "blob"
 }
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5131/api";
+
 
 export const apiClient = async (
   endpoint: string,
