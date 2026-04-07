@@ -64,7 +64,6 @@ function FilterDropdown({
 
   useEffect(() => {
     if (!isOpen || !buttonRef.current) return
-
     const rect = buttonRef.current.getBoundingClientRect()
     setMenuPosition({
       top: rect.bottom + 8,
@@ -93,9 +92,7 @@ function FilterDropdown({
             {options.map((opt) => (
               <button
                 key={opt}
-                onClick={() => {
-                  onChange(opt)
-                }}
+                onClick={() => onChange(opt)}
                 className={`w-full text-left px-4 py-2 hover:bg-[#e9f5ed] hover:text-[#5ab473] transition-colors ${value === opt ? "bg-[#e9f5ed]/50 text-[#5ab473] font-medium" : "text-slate-700"}`}
               >
                 {opt}
@@ -113,10 +110,7 @@ type Account = {
   name: string
   email: string
   avatarUrl: string
-  role: {
-    id: string
-    name: string
-  }
+  role: { id: string; name: string }
   status: "Active" | "Inactive"
   createdAt: string
 }
@@ -146,14 +140,7 @@ function AccountsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [form, setForm] = useState({
-    email: "",
-    fullName: "",
-    roleName: "User",
-  })
-
-  // Frontend does not show password input. Backend still requires a password on create,
-  // so we send a default value here (consistent with the Excel import default).
+  const [form, setForm] = useState({ email: "", fullName: "", roleName: "User" })
   const DEFAULT_PASSWORD = "123456"
 
   useEffect(() => {
@@ -168,68 +155,39 @@ function AccountsPage() {
     setLoading(true)
     try {
       const trimmed = debouncedKeyword.trim()
-      const isFiltering =
-        trimmed.length > 0 || roleFilter !== "Role" || statusFilter !== "Status"
+      const isFiltering = trimmed.length > 0 || roleFilter !== "Role" || statusFilter !== "Status"
       let data
 
       if (isFiltering) {
-        data = await filterAccounts({
-          page: currentPage,
-          pageSize: itemsPerPage,
-          keyword: trimmed || undefined,
-          role: roleFilter,
-          status: statusFilter,
-        })
+        data = await filterAccounts({ page: currentPage, pageSize: itemsPerPage, keyword: trimmed || undefined, role: roleFilter, status: statusFilter })
       } else {
         data = await getAccounts(currentPage, itemsPerPage)
       }
 
       const listToMap = Array.isArray(data) ? data : (data?.items ?? data?.data ?? [])
       const _totalAccounts = data?.total ?? listToMap.length
-      const _totalPages =
-        data?.totalPages ?? Math.max(1, Math.ceil(_totalAccounts / itemsPerPage))
+      const _totalPages = data?.totalPages ?? Math.max(1, Math.ceil(_totalAccounts / itemsPerPage))
 
       setTotalAccounts(_totalAccounts)
       setTotalPages(_totalPages)
 
-      if (!Array.isArray(listToMap)) {
-        setAccounts([])
-        return
-      }
-
-      const formatted: Account[] = listToMap.map((acc: Record<string, unknown>) => {
+      const formatted: Account[] = listToMap.map((acc: any) => {
         const roleRaw = acc.roleName ?? acc.role
         let roleName = "User"
         if (typeof roleRaw === "string") roleName = roleRaw
-        else if (roleRaw && typeof roleRaw === "object" && "name" in roleRaw) {
-          roleName = String((roleRaw as { name?: string }).name ?? "User")
-        }
-
+        else if (roleRaw && typeof roleRaw === "object" && "name" in roleRaw) roleName = String(roleRaw.name ?? "User")
         const id = String(acc.id ?? acc.userId ?? acc.accountId ?? "")
-        const active =
-          acc.isActive === true ||
-          acc.isActive === "true" ||
-          String(acc.status ?? "").toLowerCase() === "active"
-
+        const active = acc.isActive === true || acc.isActive === "true" || String(acc.status ?? "").toLowerCase() === "active"
         return {
           id,
-          name:
-            acc.name ||
-            acc.fullName ||
-            (acc.profile as any)?.name ||
-            "User",
+          name: acc.name || acc.fullName || (acc.profile as any)?.name || "User",
           email: String(acc.email ?? ""),
-          avatarUrl: String(
-            (acc.profile as { avtUrl?: string } | undefined)?.avtUrl ??
-            acc.avatarUrl ??
-            ""
-          ),
+          avatarUrl: String((acc.profile as any)?.avtUrl ?? acc.avatarUrl ?? ""),
           role: { id: String(acc.roleId ?? ""), name: roleName },
           status: active ? "Active" : "Inactive",
           createdAt: String(acc.createdAt ?? ""),
         }
       })
-
       setAccounts(formatted)
     } catch (error) {
       console.error("Failed to fetch accounts", error)
@@ -244,46 +202,22 @@ function AccountsPage() {
 
   const openCreate = () => {
     setEditing(null)
-    setForm({
-      email: "",
-      fullName: "",
-      roleName: "User",
-    })
+    setForm({ email: "", fullName: "", roleName: "User" })
     setModalOpen(true)
   }
 
   const openEdit = (acc: Account) => {
     setEditing(acc)
-    setForm({
-      email: acc.email,
-      fullName: acc.name,
-      roleName: acc.role.name,
-    })
+    setForm({ email: acc.email, fullName: acc.name, roleName: acc.role.name })
     setModalOpen(true)
   }
 
   const handleSubmit = async () => {
     try {
       if (editing) {
-        const payload: {
-          email: string
-          name: string
-          roleId: number
-          id: string
-        } = {
-          id: editing.id,
-          email: form.email.trim(),
-          name: form.fullName.trim(),
-          roleId: ROLE_MAP[form.roleName],
-        }
-        await updateAccount(editing.id, payload)
+        await updateAccount(editing.id, {  email: form.email.trim(), name: form.fullName.trim(), roleId: ROLE_MAP[form.roleName] })
       } else {
-        await createAccount({
-          email: form.email.trim(),
-          password: DEFAULT_PASSWORD,
-          name: form.fullName.trim(),
-          roleId: ROLE_MAP[form.roleName],
-        })
+        await createAccount({ email: form.email.trim(), password: DEFAULT_PASSWORD, name: form.fullName.trim(), roleId: ROLE_MAP[form.roleName] })
       }
       setModalOpen(false)
       await fetchAccounts()
@@ -296,11 +230,8 @@ function AccountsPage() {
     try {
       await deleteAccount(id)
       setDeleteId(null)
-      if (accounts.length <= 1 && currentPage > 1) {
-        setCurrentPage((p) => Math.max(1, p - 1))
-      } else {
-        await fetchAccounts()
-      }
+      if (accounts.length <= 1 && currentPage > 1) setCurrentPage((p) => Math.max(1, p - 1))
+      else await fetchAccounts()
     } catch (err) {
       console.error(err)
     }
@@ -309,9 +240,7 @@ function AccountsPage() {
   const handleDisable = async (id: string) => {
     try {
       await deactivateAccount(id)
-      setAccounts((prev) =>
-        prev.map((acc) => (acc.id === id ? { ...acc, status: "Inactive" } : acc))
-      )
+      setAccounts((prev) => prev.map((acc) => (acc.id === id ? { ...acc, status: "Inactive" } : acc)))
     } catch (error) {
       console.error("Disable account failed", error)
     }
@@ -320,9 +249,7 @@ function AccountsPage() {
   const handleActivate = async (id: string) => {
     try {
       await activateAccount(id)
-      setAccounts((prev) =>
-        prev.map((acc) => (acc.id === id ? { ...acc, status: "Active" } : acc))
-      )
+      setAccounts((prev) => prev.map((acc) => (acc.id === id ? { ...acc, status: "Active" } : acc)))
     } catch (error) {
       console.error("Activate account failed", error)
     }
@@ -354,45 +281,27 @@ function AccountsPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-20 text-sm text-slate-500">
-        Loading accounts...
-      </div>
-    )
-  }
+  if (loading) return <div className="flex justify-center py-20 text-sm text-slate-500">Loading accounts...</div>
 
   const startIndex = (currentPage - 1) * itemsPerPage
-  const currentAccounts = accounts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  )
+  const currentAccounts = accounts.slice(startIndex, startIndex + itemsPerPage)
 
   const getRoleStyle = (roleName: string) => {
     switch (roleName.trim().toUpperCase()) {
-      case "ADMIN":
-        return { backgroundColor: "#F5EEF8", color: "#8E44AD" }
-      case "USER":
-        return { backgroundColor: "#EBF5FB", color: "#3498DB" }
-      case "STAFF":
-        return { backgroundColor: "#FEF5E7", color: "#F39C12" }
-      case "PARTNER":
-        return { backgroundColor: "#EAFAF1", color: "#2ECC71" }
-      default:
-        return { backgroundColor: "#f8fafc", color: "#475569" }
+      case "ADMIN": return { backgroundColor: "#F5EEF8", color: "#8E44AD" }
+      case "USER": return { backgroundColor: "#EBF5FB", color: "#3498DB" }
+      case "STAFF": return { backgroundColor: "#FEF5E7", color: "#F39C12" }
+      case "PARTNER": return { backgroundColor: "#EAFAF1", color: "#2ECC71" }
+      default: return { backgroundColor: "#f8fafc", color: "#475569" }
     }
   }
 
   return (
     <div className="flex flex-col gap-6" onClick={() => setOpenFilter(null)}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".csv,.xlsx,.xls"
-        className="hidden"
-        onChange={handleImportFile}
-      />
+      {/* file input hidden */}
+      <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={handleImportFile} />
 
+      {/* header with search + buttons */}
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-sm -mx-6 px-6 py-4 mb-2 border-b border-transparent transition-all">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="w-full md:max-w-md">
@@ -406,34 +315,16 @@ function AccountsPage() {
               />
             </div>
           </div>
-
           <div className="flex flex-wrap items-center gap-2">
-
-            <button
-              type="button"
-              onClick={openCreate}
-              className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors"
-            >
-              <Plus size={18} />
-              <span className="text-sm">Create New Account</span>
+            <button type="button" onClick={openCreate} className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors">
+              <Plus size={18} /> <span className="text-sm">Create New Account</span>
             </button>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 border border-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-sm"
-            >
-              <Upload size={18} />
-              Import
+            <button type="button" onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 border border-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-sm">
+              <Upload size={18} /> Import
             </button>
-            <button
-              type="button"
-              onClick={handleExport}
-              className="flex items-center gap-2 border border-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-sm"
-            >
-              <Download size={18} />
-              Export
+            <button type="button" onClick={handleExport} className="flex items-center gap-2 border border-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-sm">
+              <Download size={18} /> Export
             </button>
-
           </div>
         </div>
       </div>

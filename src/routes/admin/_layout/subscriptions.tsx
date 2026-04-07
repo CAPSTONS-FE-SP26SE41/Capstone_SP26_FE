@@ -32,7 +32,7 @@ type Subscription = {
   currency: string
 }
 
-// Custom Tooltip component
+// Tooltip component
 function Tooltip({ text, children }: { text: string; children: React.ReactNode }) {
   return (
     <div className="relative group/tooltip">
@@ -47,6 +47,7 @@ function Tooltip({ text, children }: { text: string; children: React.ReactNode }
   )
 }
 
+// Filter dropdown
 function FilterDropdown({ 
   label, 
   value, 
@@ -67,7 +68,6 @@ function FilterDropdown({
 
   useEffect(() => {
     if (!isOpen || !buttonRef.current) return
-
     const rect = buttonRef.current.getBoundingClientRect()
     setMenuPosition({
       top: rect.bottom + 8,
@@ -110,11 +110,10 @@ function FilterDropdown({
   )
 }
 
+// Expandable description
 function ExpandableDescription({ text }: { text: string }) {
   const [isExpanded, setIsExpanded] = useState(false)
-
   if (!text) return <span className="text-slate-400 italic text-xs">No description</span>
-
   return (
     <div className="flex flex-col items-center justify-center gap-0.5 text-center max-w-full min-h-[40px]">
       <div className={`w-full text-sm ${isExpanded ? "" : "line-clamp-1"} break-words text-center`}>
@@ -142,7 +141,10 @@ function SubscriptionsPage() {
   const [priceSort, setPriceSort] = useState("Price")
   const [searchKeyword, setSearchKeyword] = useState("")
   const [debouncedKeyword, setDebouncedKeyword] = useState("")
-  const itemsPerPage = 10
+
+  // Fix cứng phân trang
+  const itemsPerPage = 4
+const totalPages = Math.max(1, Math.ceil(subscriptions.length / itemsPerPage))
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Subscription | null>(null)
@@ -172,7 +174,6 @@ function SubscriptionsPage() {
     try {
       const isFiltering = debouncedKeyword.trim().length > 0 || statusFilter !== "Status" || priceSort !== "Price"
       let data
-
       if (isFiltering) {
         data = await filterSubscriptions({
           title: debouncedKeyword.trim(),
@@ -182,7 +183,6 @@ function SubscriptionsPage() {
       } else {
         data = await getSubscriptions()
       }
-
       setSubscriptions(data)
     } catch (err) {
       console.error(err)
@@ -196,107 +196,50 @@ function SubscriptionsPage() {
   }, [debouncedKeyword, statusFilter, priceSort])
 
   const openCreate = () => {
-
     setEditing(null)
-
-    setForm({
-      title: "",
-      description: "",
-      price: 0,
-      durationDays: 30,
-      maxAdsPerPeriod: 5,
-      status: "Active",
-      currency: "VNĐ"
-    })
-
+    setForm({ title: "", description: "", price: 0, durationDays: 30, maxAdsPerPeriod: 5, status: "Active", currency: "VNĐ" })
     setModalOpen(true)
-
   }
 
   const openEdit = (sub: Subscription) => {
-
     setEditing(sub)
-
-    setForm({
-      title: sub.title,
-      description: sub.description,
-      price: sub.price,
-      durationDays: sub.durationDays,
-      maxAdsPerPeriod: sub.maxAdsPerPeriod,
-      status: sub.status,
-      currency: sub.currency
-    })
-
+    setForm({ title: sub.title, description: sub.description, price: sub.price, durationDays: sub.durationDays, maxAdsPerPeriod: sub.maxAdsPerPeriod, status: sub.status, currency: sub.currency })
     setModalOpen(true)
-
   }
 
   const handleSubmit = async () => {
-
     try {
-
-      if (editing) {
-        await updateSubscription(editing.packageId, form)
-      } else {
-        await createSubscription(form)
-      }
-
+      if (editing) await updateSubscription(editing.packageId, form)
+      else await createSubscription(form)
       setModalOpen(false)
-
       fetchSubscriptions()
-
     } catch (err) {
-
       console.error(err)
-
     }
-
   }
 
   const handleDelete = async (id: string) => {
-
     try {
-
       await deleteSubscription(id)
-
-      setSubscriptions((prev) =>
-        prev.filter((s) => s.packageId !== id)
-      )
-
+      setSubscriptions((prev) => prev.filter((s) => s.packageId !== id))
       setDeleteId(null)
-
     } catch (err) {
-
       console.error(err)
-
     }
-
   }
 
   const handleActivate = async (id: string) => {
     try {
       await activateSubscription(id)
-      setSubscriptions((prev) =>
-        prev.map((s) =>
-          s.packageId === id ? { ...s, status: "active" } : s
-        )
-      )
-    } catch (err) {
-      console.error(err)
-    }
+      setSubscriptions((prev) => prev.map((s) => s.packageId === id ? { ...s, status: "active" } : s))
+    } catch (err) { console.error(err) }
   }
 
   const handleDeactivate = async (id: string) => {
     try {
       await deactivateSubscription(id)
-      setSubscriptions((prev) =>
-        prev.map((s) =>
-          s.packageId === id ? { ...s, status: "inactive" } : s
-        )
-      )
-    } catch (err) {
-      console.error(err)
-    }
+      setSubscriptions((prev) => prev.map((s) => s.packageId === id ? { ...s, status: "inactive" } : s))
+    } catch (err) { console.error(err) }
   }
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -325,20 +268,12 @@ function SubscriptionsPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-20 text-sm text-slate-500">
-        Loading subscriptions...
-      </div>
-    )
-  }
+  if (loading) return <div className="flex justify-center py-20 text-sm text-slate-500">Loading subscriptions...</div>
 
-  const totalPages = Math.ceil(subscriptions.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const currentSubscriptions = subscriptions.slice(startIndex, startIndex + itemsPerPage)
 
   return (
-
     <div className="flex flex-col gap-6" onClick={() => { setOpenFilter(null); }}>
 
       <input
@@ -550,30 +485,14 @@ function SubscriptionsPage() {
         </table>
 
         <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-white">
-          <span className="text-sm text-text-secondary">
-            Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, subscriptions.length)} of {subscriptions.length} packages
-          </span>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50
-              ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
-            >
-              Previous
-            </button>
-            <span className="px-3 py-1 text-sm">
-              Page {currentPage} / {totalPages || 1}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages || totalPages === 0}
-              className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50
-              ${currentPage === totalPages || totalPages === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-            >
-              Next
-            </button>
-          </div>
+        <span className="text-sm text-text-secondary">
+          Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, subscriptions.length)} of {subscriptions.length} packages
+        </span>
+        <div className="flex gap-2">
+          <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1} className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}>Previous</button>
+          <span className="px-3 py-1 text-sm">Page {currentPage} / {totalPages}</span>
+          <button onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50 ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}>Next</button>
+        </div>
         </div>
 
       </div>
