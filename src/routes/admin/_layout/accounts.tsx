@@ -148,10 +148,13 @@ function AccountsPage() {
 
   const [form, setForm] = useState({
     email: "",
-    password: "",
     fullName: "",
     roleName: "User",
   })
+
+  // Frontend does not show password input. Backend still requires a password on create,
+  // so we send a default value here (consistent with the Excel import default).
+  const DEFAULT_PASSWORD = "123456"
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -243,7 +246,6 @@ function AccountsPage() {
     setEditing(null)
     setForm({
       email: "",
-      password: "",
       fullName: "",
       roleName: "User",
     })
@@ -254,7 +256,6 @@ function AccountsPage() {
     setEditing(acc)
     setForm({
       email: acc.email,
-      password: "",
       fullName: acc.name,
       roleName: acc.role.name,
     })
@@ -268,7 +269,6 @@ function AccountsPage() {
           email: string
           name: string
           roleId: number
-          password?: string
           id: string
         } = {
           id: editing.id,
@@ -276,13 +276,11 @@ function AccountsPage() {
           name: form.fullName.trim(),
           roleId: ROLE_MAP[form.roleName],
         }
-        if (form.password.trim()) payload.password = form.password.trim()
         await updateAccount(editing.id, payload)
       } else {
-        if (!form.password.trim()) return
         await createAccount({
           email: form.email.trim(),
-          password: form.password.trim(),
+          password: DEFAULT_PASSWORD,
           name: form.fullName.trim(),
           roleId: ROLE_MAP[form.roleName],
         })
@@ -684,18 +682,6 @@ function AccountsPage() {
                       ))}
                     </select>
                   </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-semibold text-slate-700">
-                      Password {editing ? "(leave blank to keep)" : ""}
-                    </label>
-                    <input
-                      type="password"
-                      placeholder={editing ? "••••••••" : "Minimum 6 characters"}
-                      value={form.password}
-                      onChange={(e) => setForm({ ...form, password: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
-                    />
-                  </div>
                 </div>
 
                 <div className="flex justify-end gap-3 mt-2">
@@ -712,7 +698,7 @@ function AccountsPage() {
                     disabled={
                       !form.email.trim() ||
                       !form.fullName.trim() ||
-                      (!editing && !form.password.trim())
+                      !form.roleName
                     }
                     className="px-5 py-2.5 text-sm font-semibold text-white bg-[#5ab473] hover:bg-[#499A60] rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:pointer-events-none"
                   >
