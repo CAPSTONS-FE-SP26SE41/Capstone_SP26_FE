@@ -398,16 +398,16 @@ function SubscriptionsPage() {
 
       {/* Table - single overflow-x:auto container so sticky right column works */}
       <div
-        className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-x-auto"
+        className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-x-auto overflow-y-auto max-h-[60vh]"
       >
         <table className="w-full text-center table-fixed min-w-[900px] border-separate border-spacing-0">
 
           <thead>
             <tr>
-              <th className="w-[5%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">No.</th>
-              <th className="w-[15%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Package</th>
-              <th className="w-[28%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Description</th>
-              <th className="w-[10%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+              <th className="w-[5%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">No.</th>
+              <th className="w-[15%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Package</th>
+              <th className="w-[28%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Description</th>
+              <th className="w-[10%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
                 <FilterDropdown
                   label="Price"
                   value={priceSort}
@@ -417,9 +417,9 @@ function SubscriptionsPage() {
                   onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "price" ? null : "price"); }}
                 />
               </th>
-              <th className="w-[10%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Duration</th>
-              <th className="w-[9%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Max Ads</th>
-              <th className="w-[10%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+              <th className="w-[10%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Duration</th>
+              <th className="w-[9%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Max Ads</th>
+              <th className="w-[10%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
                 <FilterDropdown
                   label="Status"
                   value={statusFilter}
@@ -430,7 +430,7 @@ function SubscriptionsPage() {
                 />
               </th>
               <th
-                className="w-[13%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc] sticky right-0 z-20"
+                className="w-[170px] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc] sticky top-0 right-0 z-30"
                 style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
               >Actions</th>
             </tr>
@@ -488,7 +488,7 @@ function SubscriptionsPage() {
                     className="px-4 py-3 text-center border-b border-[#e7edf4] sticky right-0 bg-white group-hover:bg-[#f8fafc] z-10 transition-colors"
                     style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
                   >
-                    <div className="inline-flex items-center gap-2">
+                    <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
 
                       {/* Edit */}
                       <Tooltip text="Edit">
