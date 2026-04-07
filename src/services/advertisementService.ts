@@ -74,4 +74,4 @@ export const rejectAdvertisement = async (id: string, reason?: string) => {
     method: "POST",
     body: JSON.stringify({ reason }),
   })
-}
+}

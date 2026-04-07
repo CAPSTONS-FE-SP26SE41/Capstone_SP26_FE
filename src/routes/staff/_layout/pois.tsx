@@ -15,7 +15,7 @@ import {
   updateStaffPOI,
   uploadStaffPOIImage,
 } from "../../../services/poiService"
-import { getDistrictsByLocationId, type District } from "../../../services/partnerPoiService"
+import { getDistrictsByLocationId, getPreferences, type District, type POIPreference } from "../../../services/partnerPoiService"
 import { CustomSelect } from "../../../components/ui/CustomSelect"
 
 export const Route = createFileRoute("/staff/_layout/pois")({
@@ -38,6 +38,8 @@ function StaffPOIsPage() {
   const [importing, setImporting] = useState(false)
   const [loadingLocations, setLoadingLocations] = useState(false)
   const [locationOptions, setLocationOptions] = useState<StaffLocationOption[]>([])
+  const [preferencesList, setPreferencesList] = useState<POIPreference[]>([])
+  const [loadingPreferences, setLoadingPreferences] = useState(false)
   const [toast, setToast] = useState<{
     type: "success" | "error"
     message: string
@@ -54,6 +56,7 @@ function StaffPOIsPage() {
     POIImgUrl: "",
     LocationId: "",
     DistrictId: "",
+    PoiPreferences: [] as string[],
   })
   const [createImageFile, setCreateImageFile] = useState<File | null>(null)
   const [editingPoiId, setEditingPoiId] = useState("")
@@ -92,11 +95,27 @@ function StaffPOIsPage() {
       POIImgUrl: "",
       LocationId: "",
       DistrictId: "",
+      PoiPreferences: [] as string[],
     })
     setDistricts([])
     setFormErrors({})
     setCreateImageFile(null)
   }
+
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      setLoadingPreferences(true)
+      try {
+        const data = await getPreferences()
+        setPreferencesList(data)
+      } catch (e) {
+        console.error("Failed to fetch preferences", e)
+      } finally {
+        setLoadingPreferences(false)
+      }
+    }
+    fetchPreferences()
+  }, [])
 
   useEffect(() => {
     const fetchPois = async () => {
@@ -372,6 +391,7 @@ function StaffPOIsPage() {
         IsIndoor: createForm.IsIndoor,
         LocationId: createForm.LocationId.trim(),
         DistrictId: createForm.DistrictId.trim(),
+        PoiPreferences: createForm.PoiPreferences,
       }, createImageFile)
 
       const refreshedData = await getStaffPOIs()
@@ -949,6 +969,40 @@ function StaffPOIsPage() {
                   />
                   {formErrors.districtId && <p className="text-red-500 text-xs mt-1">{formErrors.districtId}</p>}
                 </label>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm text-slate-700 block">Nhãn (Preferences)</label>
+                {loadingPreferences ? (
+                  <p className="text-sm text-slate-500">Đang tải...</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {preferencesList.map((pref) => {
+                      const isSelected = createForm.PoiPreferences.includes(pref.id)
+                      return (
+                        <button
+                          type="button"
+                          key={pref.id}
+                          onClick={() => {
+                            setCreateForm((prev) => ({
+                              ...prev,
+                              PoiPreferences: isSelected
+                                ? prev.PoiPreferences.filter((p) => p !== pref.id)
+                                : [...prev.PoiPreferences, pref.id],
+                            }))
+                          }}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                            isSelected
+                              ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-600 hover:text-emerald-600'
+                          }`}
+                        >
+                          {pref.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
 
               <label className="inline-flex items-center gap-2 text-sm text-slate-700">

@@ -341,7 +341,7 @@ function PartnerPOIPage() {
 }
 
 // ── Modal Form Component ────────────────────────────────────────────
-import { getLocations, getDistrictsByLocationId, type LocationOption, type District } from '../../../services/partnerPoiService'
+import { getLocations, getDistrictsByLocationId, getPreferences, type LocationOption, type District, type POIPreference } from '../../../services/partnerPoiService'
 import { CustomSelect } from '../../../components/ui/CustomSelect'
 
 interface POIFormModalProps {
@@ -369,13 +369,32 @@ function POIFormModal({ poi, submitting, onClose, onSubmit }: POIFormModalProps)
   const [type, setType] = useState<POIType>(poi?.type ?? 'Attraction')
   const [locationId, setLocationId] = useState(poi?.locationId ?? '')
   const [districtId, setDistrictId] = useState(poi?.districtId ?? '')
+  const [poiPreferences, setPoiPreferences] = useState<string[]>(poi?.poiPreferences ?? [])
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(poi?.poiImgUrl ?? null)
 
   const [locations, setLocations] = useState<LocationOption[]>([])
   const [districts, setDistricts] = useState<District[]>([])
+  const [preferencesList, setPreferencesList] = useState<POIPreference[]>([])
   const [loadingLocations, setLoadingLocations] = useState(false)
   const [loadingDistricts, setLoadingDistricts] = useState(false)
+  const [loadingPreferences, setLoadingPreferences] = useState(false)
+
+  // Fetch Preferences
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      setLoadingPreferences(true)
+      try {
+        const data = await getPreferences()
+        setPreferencesList(data)
+      } catch (e) {
+        console.error("Lỗi khi tải danh sách POI Preferences", e)
+      } finally {
+        setLoadingPreferences(false)
+      }
+    }
+    fetchPreferences()
+  }, [])
 
   const [formErrors, setFormErrors] = useState<{locationId?: string, districtId?: string}>({})
 
@@ -417,12 +436,6 @@ function POIFormModal({ poi, submitting, onClose, onSubmit }: POIFormModalProps)
     }
     fetchDistricts()
   }, [locationId])
-
-  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setLocationId(e.target.value)
-    setDistrictId('') // reset district when location changes
-    setDistricts([]) // clear old districts while loading
-  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -466,6 +479,7 @@ function POIFormModal({ poi, submitting, onClose, onSubmit }: POIFormModalProps)
           Type: type,
           LocationId: locationId,
           DistrictId: districtId,
+          PoiPreferences: poiPreferences,
         }
         await onSubmit(payload, imageFile)
       } else {
@@ -487,7 +501,7 @@ function POIFormModal({ poi, submitting, onClose, onSubmit }: POIFormModalProps)
           Type: type,
           LocationId: locationId,
           DistrictId: districtId,
-          PoiPreferences: [],
+          PoiPreferences: poiPreferences,
         }
         await onSubmit(payload, imageFile)
       }
@@ -502,7 +516,6 @@ function POIFormModal({ poi, submitting, onClose, onSubmit }: POIFormModalProps)
   }
 
   const inputClasses = "w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#e28743]/20 focus:border-[#e28743] transition-all text-slate-700"
-  const selectClasses = "w-full px-4 py-2.5 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#e28743]/20 transition-all text-slate-700 disabled:opacity-60"
   const labelClasses = "block text-sm font-semibold text-slate-600 mb-1.5"
 
   return (
@@ -645,6 +658,38 @@ function POIFormModal({ poi, submitting, onClose, onSubmit }: POIFormModalProps)
               />
               <span className="text-sm text-slate-600 font-medium">Trong nhà</span>
             </label>
+          </div>
+
+          {/* Preferences */}
+          <div>
+            <label className={labelClasses}>Nhãn (Preferences)</label>
+            {loadingPreferences ? (
+              <p className="text-sm text-slate-500">Đang tải...</p>
+            ) : (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {preferencesList.map(pref => {
+                  const isSelected = poiPreferences.includes(pref.id)
+                  return (
+                    <button
+                      type="button"
+                      key={pref.id}
+                      onClick={() => {
+                        setPoiPreferences(prev => 
+                          isSelected ? prev.filter(p => p !== pref.id) : [...prev, pref.id]
+                        )
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                        isSelected 
+                          ? 'bg-[#e28743] border-[#e28743] hover:bg-[#cf7632] hover:border-[#cf7632] text-white' 
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-[#e28743] hover:text-[#e28743]'
+                      }`}
+                    >
+                      {pref.name}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
           {/* Visit Recommendation */}

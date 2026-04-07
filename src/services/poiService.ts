@@ -230,6 +230,7 @@ export type CreateStaffPOIPayload = {
   IsIndoor: boolean
   LocationId: string
   DistrictId: string
+  PoiPreferences?: string[]
 }
 
 export const createStaffPOI = async (
@@ -247,6 +248,11 @@ export const createStaffPOI = async (
   formData.append("DistrictId", payload.DistrictId)
   formData.append("GoogleMapLink", payload.GoogleMapLink)
   formData.append("IsIndoor", String(payload.IsIndoor))
+  if (payload.PoiPreferences && payload.PoiPreferences.length > 0) {
+    payload.PoiPreferences.forEach(pref => {
+      formData.append("PoiPreferences", pref)
+    })
+  }
   if (imageFile) {
     formData.append("POIImgUrl", imageFile)
   }

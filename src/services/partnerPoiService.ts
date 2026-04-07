@@ -72,6 +72,7 @@ export interface UpdatePartnerPOIPayload {
   Type?: POIType
   LocationId?: string
   DistrictId?: string
+  PoiPreferences?: string[]
 }
 
 // ── Normalizer ──────────────────────────────────────────────────────
@@ -137,6 +138,24 @@ export const getDistrictsByLocationId = async (locationId: string): Promise<Dist
     id: String(d?.Id ?? d?.id ?? ""),
     name: String(d?.Name ?? d?.name ?? ""),
   }))
+}
+
+export interface POIPreference {
+  id: string
+  name: string
+}
+
+export const getPreferences = async (): Promise<POIPreference[]> => {
+  try {
+    const data = await apiClient("/preferences/get-all")
+    if (!Array.isArray(data)) return []
+    return data.map((p: any) => ({
+      id: String(p?.Id ?? p?.id ?? ""),
+      name: String(p?.Name ?? p?.name ?? "")
+    })).filter(x => x.id)
+  } catch {
+    return []
+  }
 }
 
 // ── 1. POST /api/partner/pois ───────────────────────────────────────
@@ -258,6 +277,17 @@ export const updateMyPartnerPOI = async (
   if (payload.Type !== undefined) formData.append("Type", payload.Type)
   if (payload.LocationId !== undefined) formData.append("LocationId", payload.LocationId)
   if (payload.DistrictId !== undefined) formData.append("DistrictId", payload.DistrictId)
+
+  if (payload.PoiPreferences !== undefined) {
+    if (payload.PoiPreferences.length > 0) {
+      payload.PoiPreferences.forEach((pref) => {
+        formData.append("PoiPreferences", pref)
+      })
+    } else {
+      // Send an empty value so the backend knows to clear the list.
+      formData.append("PoiPreferences", "")
+    }
+  }
 
   if (imageFile) {
     formData.append("POIImgUrl", imageFile)
