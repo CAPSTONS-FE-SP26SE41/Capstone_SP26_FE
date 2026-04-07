@@ -1,14 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import {
+  ResponsiveContainer,
   BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
-  Legend,
   PieChart,
   Pie,
   Cell,
@@ -21,11 +20,11 @@ import {
   getSubscriptionStats,
 } from "../../../services/analyticsService"
 
+import { Wallet, BarChart3, ShieldCheck } from "lucide-react"
+
 export const Route = createFileRoute("/admin/_layout/analytics")({
   component: AdminAnalytics,
 })
-
-const COLORS = ["#258cf4", "#10b981", "#f59e0b", "#ef4444"]
 
 function AdminAnalytics() {
   const [loading, setLoading] = useState(true)
@@ -59,24 +58,21 @@ function AdminAnalytics() {
           getSubscriptionStats(),
         ])
 
-      // ===== SUMMARY =====
       setSummary(summaryRes)
 
-      // ===== REVENUE =====
       const mappedRevenue = revenueRes.map((item: any) => ({
         name: item.month,
         income: item.revenue,
-        expense: item.revenue * 0.4, // fake nếu chưa có expense
       }))
       setRevenueData(mappedRevenue)
 
-      // ===== ACCOUNT STATUS PIE =====
-      setAccountStatus([
-        { name: "Active", value: accountRes.activeUsers },
-        { name: "Inactive", value: accountRes.inactiveUsers },
-      ])
+      setAccountStatus(
+        accountRes.map((item: any) => ({
+          name: item.status,
+          value: item.count,
+        }))
+      )
 
-      // ===== SUBSCRIPTION =====
       setSubscriptionStats(subRes)
     } catch (err) {
       console.error("Analytics error:", err)
@@ -95,110 +91,172 @@ function AdminAnalytics() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* ================= SUMMARY ================= */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-5 rounded-xl border shadow-sm">
-          <p className="text-sm text-slate-500">Total Revenue</p>
-          <p className="text-2xl font-bold mt-2">
-            {summary.totalRevenue.toLocaleString()} VND
-          </p>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border shadow-sm">
-          <p className="text-sm text-slate-500">Total Users</p>
-          <p className="text-2xl font-bold mt-2">
-            {summary.totalUsers}
-          </p>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border shadow-sm">
-          <p className="text-sm text-slate-500">Active Users</p>
-          <p className="text-2xl font-bold mt-2">
-            {summary.activeUsers}
-          </p>
-        </div>
+      {/* HEADER */}
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900">
+          Admin Dashboard
+        </h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Theo dõi hệ thống và hiệu suất
+        </p>
       </div>
 
-      {/* ================= CHART ================= */}
+      {/* SUMMARY */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <SummaryCard
+          title="Doanh thu"
+          value={`${summary.totalRevenue.toLocaleString()} VND`}
+          icon={<Wallet size={18} className="text-emerald-700" />}
+        />
+        <SummaryCard
+          title="Tổng người dùng"
+          value={String(summary.totalUsers)}
+          icon={<BarChart3 size={18} className="text-emerald-700" />}
+        />
+        <SummaryCard
+          title="Đang hoạt động"
+          value={String(summary.activeUsers)}
+          icon={<ShieldCheck size={18} className="text-emerald-700" />}
+        />
+      </div>
+
+      {/* CHART */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue */}
-        <div className="bg-white p-6 rounded-xl border shadow-sm">
-          <h3 className="font-bold mb-4">
-            Revenue
-          </h3>
+        <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">
+            Doanh thu theo tháng
+          </h2>
 
-          <div className="h-[300px]">
+          <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={revenueData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" />
-                <YAxis />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                <YAxis axisLine={false} tickLine={false} />
                 <Tooltip />
-                <Legend />
-                <Bar dataKey="income" fill="#258cf4" />
-                <Bar dataKey="expense" fill="#cbd5e1" />
+                <Bar
+                  dataKey="income"
+                  fill="#059669"
+                  radius={[8, 8, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Account Status */}
-        <div className="bg-white p-6 rounded-xl border shadow-sm">
-          <h3 className="font-bold mb-4">
-            Account Status
-          </h3>
+        <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">
+            Trạng thái tài khoản
+          </h2>
 
-          <div className="h-[300px]">
+          <div className="h-64">
             <ResponsiveContainer>
               <PieChart>
                 <Pie
                   data={accountStatus}
                   dataKey="value"
-                  nameKey="name"
                   innerRadius={70}
                   outerRadius={100}
                 >
                   {accountStatus.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    <Cell
+                      key={i}
+                      fill={i === 0 ? "#059669" : "#e5e7eb"}
+                    />
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      {/* ================= SUBSCRIPTION ================= */}
-      <div className="bg-white p-6 rounded-xl border shadow-sm">
-        <h3 className="font-bold mb-4">
-          Subscription Packages
-        </h3>
+      {/* SUBSCRIPTION */}
+      <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">
+          Gói đăng ký
+        </h2>
 
         <div className="grid grid-cols-3 gap-4">
-          <div className="p-4 bg-slate-50 rounded-lg text-center">
-            <p className="text-sm text-slate-500">Total</p>
-            <p className="text-xl font-bold">
-              {subscriptionStats.totalPackages}
-            </p>
-          </div>
-
-          <div className="p-4 bg-emerald-50 rounded-lg text-center">
-            <p className="text-sm text-emerald-600">Active</p>
-            <p className="text-xl font-bold text-emerald-600">
-              {subscriptionStats.activePackages}
-            </p>
-          </div>
-
-          <div className="p-4 bg-rose-50 rounded-lg text-center">
-            <p className="text-sm text-rose-600">Inactive</p>
-            <p className="text-xl font-bold text-rose-600">
-              {subscriptionStats.inactivePackages}
-            </p>
-          </div>
+          <MiniWalletCard
+            title="Tổng"
+            value={String(subscriptionStats.totalPackages)}
+            tag="Packages"
+            active
+          />
+          <MiniWalletCard
+            title="Đang hoạt động"
+            value={String(subscriptionStats.activePackages)}
+            tag="Active"
+          />
+          <MiniWalletCard
+            title="Ngừng"
+            value={String(subscriptionStats.inactivePackages)}
+            tag="Inactive"
+          />
         </div>
       </div>
+    </div>
+  )
+}
+
+/* ================= COMPONENTS ================= */
+
+function SummaryCard({
+  title,
+  value,
+  icon,
+}: {
+  title: string
+  value: string
+  icon: JSX.Element
+}) {
+  return (
+    <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm p-5">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm text-slate-500">{title}</p>
+          <p className="text-2xl font-bold text-slate-900 mt-2">{value}</p>
+        </div>
+        <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center border border-emerald-100">
+          {icon}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MiniWalletCard({
+  title,
+  value,
+  tag,
+  active,
+}: {
+  title: string
+  value: string
+  tag: string
+  active?: boolean
+}) {
+  return (
+    <div
+      className={`flex items-center justify-between rounded-xl border px-4 py-3 ${active
+          ? "bg-emerald-50 border-emerald-200"
+          : "bg-slate-50 border-slate-200"
+        }`}
+    >
+      <div>
+        <p className="text-sm font-semibold text-slate-900">{title}</p>
+        <p className="text-xs text-slate-500">{tag}</p>
+      </div>
+      <p
+        className={`text-sm font-bold ${active ? "text-emerald-700" : "text-slate-700"
+          }`}
+      >
+        {value}
+      </p>
     </div>
   )
 }
