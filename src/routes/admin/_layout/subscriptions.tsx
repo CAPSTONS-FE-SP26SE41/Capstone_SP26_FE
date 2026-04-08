@@ -4,7 +4,7 @@ import { createPortal } from "react-dom"
 import { Plus, Pencil, Trash2, X, Search, ChevronDown, Upload, Download } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 import ToggleSwitch from "../../../components/ToggleSwitch"
-
+import { formatVND } from "../../../utils/format"
 import {
   getSubscriptions,
   filterSubscriptions,
@@ -404,7 +404,7 @@ function SubscriptionsPage() {
                   </td>
 
                   <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
-                    {sub.price} {sub.currency}
+                    {formatVND(sub.price)}
                   </td>
 
                   <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
