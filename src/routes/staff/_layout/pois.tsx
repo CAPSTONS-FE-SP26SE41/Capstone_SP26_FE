@@ -559,17 +559,16 @@ function StaffPOIsPage() {
                 setExporting(false)
               }
             }}
-            className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap ${
-        exporting
-          ? "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
-          : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300 shadow-sm"
-      }`}
-    >
-      <span className="text-lg">⬇</span>
-      {exporting ? "Đang export..." : "Export Excel"}
-    </button>
-  </div>
-</div>
+            className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap ${exporting
+                ? "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
+                : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300 shadow-sm"
+              }`}
+          >
+            <span className="text-lg">⬇</span>
+            {exporting ? "Đang export..." : "Export Excel"}
+          </button>
+        </div>
+      </div>
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -639,26 +638,31 @@ function StaffPOIsPage() {
 
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-center gap-2">
+                            {/* Nút Xem Chi Tiết */}
                             <button
                               onClick={() => void openDetailModal(p.Id)}
                               title="Xem chi tiết"
-                              className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition-colors"
+                              className="flex items-center justify-center h-9 w-9 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition-colors"
                             >
-                              <Eye size={16} />
+                              <Eye size={18} />
                             </button>
+
+                            {/* Nút Chỉnh Sửa */}
                             <button
                               onClick={() => void openEditModal(p.Id)}
-                              className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors text-sm font-semibold"
+                              title="Chỉnh sửa"
+                              className="flex items-center justify-center h-9 w-9 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
                             >
-                              <Edit2 size={16} />
-
+                              <Edit2 size={18} />
                             </button>
+
+                            {/* Nút Xóa */}
                             <button
                               onClick={() => handleDelete(p)}
-                              className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors text-sm font-semibold"
+                              title="Xóa"
+                              className="flex items-center justify-center h-9 w-9 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors"
                             >
-                              <Trash2 size={16} />
-
+                              <Trash2 size={18} />
                             </button>
                           </div>
                         </td>
@@ -797,12 +801,12 @@ function StaffPOIsPage() {
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Đóng cửa</dt>
                   <dd className="mt-1 text-sm text-slate-800">{selectedPoi.CloseHour || "—"}</dd>
                 </div>
-                
+
                 <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Status</dt>
                   <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.Status ?? "—"}</dd>
                 </div>
-               
+
                 <div className="border-b border-slate-100 pb-2 text-center">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Latitude / Longitude</dt>
                   <dd className="mt-1 text-sm text-slate-800">
