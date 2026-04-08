@@ -48,17 +48,17 @@ function Tooltip({ text, children }: { text: string; children: React.ReactNode }
 }
 
 // Filter dropdown
-function FilterDropdown({ 
-  label, 
-  value, 
-  options, 
-  onChange, 
-  isOpen, 
-  onToggle 
-}: { 
-  label: string, 
-  value: string, 
-  options: string[], 
+function FilterDropdown({
+  label,
+  value,
+  options,
+  onChange,
+  isOpen,
+  onToggle
+}: {
+  label: string,
+  value: string,
+  options: string[],
   onChange: (val: string) => void,
   isOpen: boolean,
   onToggle: (e: React.MouseEvent) => void
@@ -138,13 +138,13 @@ function SubscriptionsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [openFilter, setOpenFilter] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState("Status")
-  const [priceSort, setPriceSort] = useState("Price")
+  const [priceSort, setPriceSort] = useState("Price (VNĐ)")
   const [searchKeyword, setSearchKeyword] = useState("")
   const [debouncedKeyword, setDebouncedKeyword] = useState("")
 
   // Fix cứng phân trang
   const itemsPerPage = 4
-const totalPages = Math.max(1, Math.ceil(subscriptions.length / itemsPerPage))
+  const totalPages = Math.max(1, Math.ceil(subscriptions.length / itemsPerPage))
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Subscription | null>(null)
@@ -287,7 +287,7 @@ const totalPages = Math.max(1, Math.ceil(subscriptions.length / itemsPerPage))
       {/* Filters & Control Panel - STICKY */}
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-sm -mx-6 px-6 py-4 mb-2 border-b border-transparent transition-all">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          
+
           {/* Search */}
           <div className="w-full md:max-w-md">
             <div className="relative">
@@ -343,16 +343,25 @@ const totalPages = Math.max(1, Math.ceil(subscriptions.length / itemsPerPage))
               <th className="w-[15%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Package</th>
               <th className="w-[28%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Description</th>
               <th className="w-[10%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
-                <FilterDropdown
-                  label="Price"
-                  value={priceSort}
-                  options={["Price", "Low to High", "High to Low"]}
-                  isOpen={openFilter === "price"}
-                  onChange={(val) => { setPriceSort(val); setOpenFilter(null); }}
-                  onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "price" ? null : "price"); }}
-                />
+                <div className="flex items-center justify-center gap-1">
+                  <FilterDropdown
+                    label="Price (VNĐ)"
+                    value={priceSort}
+                    /* Simplified options to avoid "Price (VNĐ) VND" */
+                    options={["Price (VNĐ)", "Low to High", "High to Low"]}
+                    isOpen={openFilter === "price"}
+                    onChange={(val) => {
+                      setPriceSort(val);
+                      setOpenFilter(null);
+                    }}
+                    onToggle={(e) => {
+                      e.stopPropagation();
+                      setOpenFilter(openFilter === "price" ? null : "price");
+                    }}
+                  />
+                </div>
               </th>
-              <th className="w-[10%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Duration</th>
+              <th className="w-[10%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Duration Days</th>
               <th className="w-[9%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Max Ads</th>
               <th className="w-[10%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
                 <FilterDropdown
@@ -485,14 +494,14 @@ const totalPages = Math.max(1, Math.ceil(subscriptions.length / itemsPerPage))
         </table>
 
         <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-white">
-        <span className="text-sm text-text-secondary">
-          Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, subscriptions.length)} of {subscriptions.length} packages
-        </span>
-        <div className="flex gap-2">
-          <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1} className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}>Previous</button>
-          <span className="px-3 py-1 text-sm">Page {currentPage} / {totalPages}</span>
-          <button onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50 ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}>Next</button>
-        </div>
+          <span className="text-sm text-text-secondary">
+            Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, subscriptions.length)} of {subscriptions.length} packages
+          </span>
+          <div className="flex gap-2">
+            <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1} className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}>Previous</button>
+            <span className="px-3 py-1 text-sm">Page {currentPage} / {totalPages}</span>
+            <button onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50 ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}>Next</button>
+          </div>
         </div>
 
       </div>
@@ -501,7 +510,7 @@ const totalPages = Math.max(1, Math.ceil(subscriptions.length / itemsPerPage))
       {/* Create/Edit Modal */}
       <AnimatePresence>
         {modalOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -515,98 +524,98 @@ const totalPages = Math.max(1, Math.ceil(subscriptions.length / itemsPerPage))
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               className="bg-white w-full max-w-md rounded-2xl p-6 flex flex-col gap-6 shadow-2xl border border-slate-100"
             >
-            
-            {/* Header */}
-            <div className="flex justify-between items-center">
-              <h3 className="font-bold text-xl text-slate-800">
-                {editing ? "Edit Package" : "Create Package"}
-              </h3>
-              <button 
-                onClick={() => setModalOpen(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
 
-            {/* Form */}
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-slate-700">Package Title</label>
-                <input
-                  placeholder="e.g. Premium Plan"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
-                />
+              {/* Header */}
+              <div className="flex justify-between items-center">
+                <h3 className="font-bold text-xl text-slate-800">
+                  {editing ? "Edit Package" : "Create Package"}
+                </h3>
+                <button
+                  onClick={() => setModalOpen(false)}
+                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                >
+                  <X size={20} />
+                </button>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm font-semibold text-slate-700">Description</label>
-                  <span className="text-xs text-slate-400 font-medium">{form.description?.length || 0}/500</span>
-                </div>
-                <textarea
-                  placeholder="Describe this package's features..."
-                  value={form.description}
-                  maxLength={500}
-                  rows={3}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all resize-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+              {/* Form */}
+              <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Price (VNĐ)</label>
+                  <label className="text-sm font-semibold text-slate-700">Package Title</label>
                   <input
-                    type="number"
-                    placeholder="0"
-                    value={form.price}
-                    onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                    placeholder="e.g. Premium Plan"
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Duration (Days)</label>
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-semibold text-slate-700">Description</label>
+                    <span className="text-xs text-slate-400 font-medium">{form.description?.length || 0}/500</span>
+                  </div>
+                  <textarea
+                    placeholder="Describe this package's features..."
+                    value={form.description}
+                    maxLength={500}
+                    rows={3}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all resize-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-slate-700">Price (VNĐ)</label>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      value={form.price}
+                      onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-slate-700">Duration (Days)</label>
+                    <input
+                      type="number"
+                      placeholder="30"
+                      value={form.durationDays}
+                      onChange={(e) => setForm({ ...form, durationDays: Number(e.target.value) })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-slate-700">Max Ads Allowed</label>
                   <input
                     type="number"
-                    placeholder="30"
-                    value={form.durationDays}
-                    onChange={(e) => setForm({ ...form, durationDays: Number(e.target.value) })}
+                    placeholder="10"
+                    value={form.maxAdsPerPeriod}
+                    onChange={(e) => setForm({ ...form, maxAdsPerPeriod: Number(e.target.value) })}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
                   />
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-slate-700">Max Ads Allowed</label>
-                <input
-                  type="number"
-                  placeholder="10"
-                  value={form.maxAdsPerPeriod}
-                  onChange={(e) => setForm({ ...form, maxAdsPerPeriod: Number(e.target.value) })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
-                />
+              {/* Footer */}
+              <div className="flex justify-end gap-3 mt-2">
+                <button
+                  onClick={() => setModalOpen(false)}
+                  className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  className="px-5 py-2.5 text-sm font-semibold text-white bg-[#5ab473] hover:bg-[#499A60] rounded-xl shadow-sm transition-colors"
+                >
+                  {editing ? "Save Changes" : "Create Package"}
+                </button>
               </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex justify-end gap-3 mt-2">
-              <button
-                onClick={() => setModalOpen(false)}
-                className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="px-5 py-2.5 text-sm font-semibold text-white bg-[#5ab473] hover:bg-[#499A60] rounded-xl shadow-sm transition-colors"
-              >
-                {editing ? "Save Changes" : "Create Package"}
-              </button>
-            </div>
 
             </motion.div>
           </motion.div>
@@ -616,7 +625,7 @@ const totalPages = Math.max(1, Math.ceil(subscriptions.length / itemsPerPage))
       {/* Delete Confirmation Modal */}
       <AnimatePresence>
         {deleteId && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -630,32 +639,32 @@ const totalPages = Math.max(1, Math.ceil(subscriptions.length / itemsPerPage))
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               className="bg-white w-full max-w-sm rounded-2xl p-6 flex flex-col gap-6 shadow-2xl border border-slate-100 items-center text-center"
             >
-            
-            <div className="w-14 h-14 bg-red-100/80 text-red-600 rounded-full flex items-center justify-center mb-1">
-              <Trash2 size={26} strokeWidth={2.5} />
-            </div>
 
-            <div className="flex flex-col gap-2">
-              <h3 className="font-bold text-xl text-slate-800">Delete Package?</h3>
-              <p className="text-sm text-slate-500 font-medium">
-                Are you sure you want to delete this subscription package? This action cannot be undone.
-              </p>
-            </div>
+              <div className="w-14 h-14 bg-red-100/80 text-red-600 rounded-full flex items-center justify-center mb-1">
+                <Trash2 size={26} strokeWidth={2.5} />
+              </div>
 
-            <div className="flex justify-center gap-3 w-full mt-2">
-              <button
-                onClick={() => setDeleteId(null)}
-                className="flex-1 px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(deleteId)}
-                className="flex-1 px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl shadow-sm transition-colors"
-              >
-                Delete
-              </button>
-            </div>
+              <div className="flex flex-col gap-2">
+                <h3 className="font-bold text-xl text-slate-800">Delete Package?</h3>
+                <p className="text-sm text-slate-500 font-medium">
+                  Are you sure you want to delete this subscription package? This action cannot be undone.
+                </p>
+              </div>
+
+              <div className="flex justify-center gap-3 w-full mt-2">
+                <button
+                  onClick={() => setDeleteId(null)}
+                  className="flex-1 px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDelete(deleteId)}
+                  className="flex-1 px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl shadow-sm transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
