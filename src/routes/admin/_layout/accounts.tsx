@@ -362,7 +362,7 @@ function AccountsPage() {
       </div>
 
       {/* Table Section with Scroll */}
-      <div className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-hidden flex flex-col max-h-[600px]">
+      <div className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-hidden flex flex-col max-h-[calc(100vh-220px)]">
         <div className="overflow-x-auto overflow-y-auto flex-1">
           <table className="w-full text-center table-fixed min-w-[880px] border-separate border-spacing-0">
             <thead className="sticky top-0 z-20">

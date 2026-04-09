@@ -331,167 +331,167 @@ function SubscriptionsPage() {
         </div>
       </div>
 
-      {/* Table - single overflow-x:auto container so sticky right column works */}
-      <div
-        className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-x-auto overflow-y-auto max-h-[60vh]"
-      >
-        <table className="w-full text-center table-fixed min-w-[900px] border-separate border-spacing-0">
+      {/* Table Section */}
+      <div className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-hidden flex flex-col max-h-[calc(100vh-220px)]">
+        <div className="overflow-x-auto overflow-y-auto flex-1">
+          <table className="w-full text-center table-fixed min-w-[900px] border-separate border-spacing-0">
 
-          <thead>
-            <tr>
-              <th className="w-[5%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">No.</th>
-              <th className="w-[15%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Package</th>
-              <th className="w-[28%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Description</th>
-              <th className="w-[10%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
-                <div className="flex items-center justify-center gap-1">
+            <thead>
+              <tr>
+                <th className="w-[5%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">No.</th>
+                <th className="w-[15%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Package</th>
+                <th className="w-[28%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Description</th>
+                <th className="w-[10%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+                  <div className="flex items-center justify-center gap-1">
+                    <FilterDropdown
+                      label="Price (VNĐ)"
+                      value={priceSort}
+                      /* Simplified options to avoid "Price (VNĐ) VND" */
+                      options={["Price (VNĐ)", "Low to High", "High to Low"]}
+                      isOpen={openFilter === "price"}
+                      onChange={(val) => {
+                        setPriceSort(val);
+                        setOpenFilter(null);
+                      }}
+                      onToggle={(e) => {
+                        e.stopPropagation();
+                        setOpenFilter(openFilter === "price" ? null : "price");
+                      }}
+                    />
+                  </div>
+                </th>
+                <th className="w-[10%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Duration Days</th>
+                <th className="w-[9%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Max Ads</th>
+                <th className="w-[10%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
                   <FilterDropdown
-                    label="Price (VNĐ)"
-                    value={priceSort}
-                    /* Simplified options to avoid "Price (VNĐ) VND" */
-                    options={["Price (VNĐ)", "Low to High", "High to Low"]}
-                    isOpen={openFilter === "price"}
-                    onChange={(val) => {
-                      setPriceSort(val);
-                      setOpenFilter(null);
-                    }}
-                    onToggle={(e) => {
-                      e.stopPropagation();
-                      setOpenFilter(openFilter === "price" ? null : "price");
-                    }}
+                    label="Status"
+                    value={statusFilter}
+                    options={["Status", "Active", "Inactive"]}
+                    isOpen={openFilter === "status"}
+                    onChange={(val) => { setStatusFilter(val); setOpenFilter(null); }}
+                    onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "status" ? null : "status"); }}
                   />
-                </div>
-              </th>
-              <th className="w-[10%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Duration Days</th>
-              <th className="w-[9%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Max Ads</th>
-              <th className="w-[10%] sticky top-0 z-20 px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
-                <FilterDropdown
-                  label="Status"
-                  value={statusFilter}
-                  options={["Status", "Active", "Inactive"]}
-                  isOpen={openFilter === "status"}
-                  onChange={(val) => { setStatusFilter(val); setOpenFilter(null); }}
-                  onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "status" ? null : "status"); }}
-                />
-              </th>
-              <th
-                className="w-[170px] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc] sticky top-0 right-0 z-30"
-                style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
-              >Actions</th>
-            </tr>
-          </thead>
+                </th>
+                <th
+                  className="w-[170px] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc] sticky top-0 right-0 z-30"
+                  style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
+                >Actions</th>
+              </tr>
+            </thead>
 
-          <tbody>
+            <tbody>
 
-            {currentSubscriptions.length > 0 ? (
+              {currentSubscriptions.length > 0 ? (
 
-              currentSubscriptions.map((sub, index) => (
+                currentSubscriptions.map((sub, index) => (
 
-                <tr
-                  key={sub.packageId}
-                  className="hover:bg-[#f8fafc] transition-colors group"
-                >
-
-                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
-                    {startIndex + index + 1}
-                  </td>
-
-                  <td className="px-4 py-3 font-medium text-text-main text-center border-b border-[#e7edf4] truncate">
-                    {sub.title}
-                  </td>
-
-                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
-                    <ExpandableDescription text={sub.description} />
-                  </td>
-
-                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
-                    {formatVND(sub.price)}
-                  </td>
-
-                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
-                    {sub.durationDays} days
-                  </td>
-
-                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
-                    {sub.maxAdsPerPeriod}
-                  </td>
-
-                  <td className="px-4 py-3 text-center border-b border-[#e7edf4]">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
-                      ${sub.status?.toLowerCase() === "active"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-red-100 text-red-600"
-                        }`}
-                    >
-                      <span className="size-1.5 rounded-full bg-current"></span>
-                      {sub.status?.toLowerCase() === "active" ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-
-                  <td
-                    className="px-4 py-3 text-center border-b border-[#e7edf4] sticky right-0 bg-white group-hover:bg-[#f8fafc] z-10 transition-colors"
-                    style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
+                  <tr
+                    key={sub.packageId}
+                    className="hover:bg-[#f8fafc] transition-colors group"
                   >
-                    <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
 
-                      {/* Edit */}
-                      <Tooltip text="Edit">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); openEdit(sub); }}
-                          className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        >
-                          <Pencil size={16} />
-                        </button>
-                      </Tooltip>
+                    <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                      {startIndex + index + 1}
+                    </td>
 
-                      {/* Delete */}
-                      <Tooltip text="Delete">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setDeleteId(sub.packageId); }}
-                          className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </Tooltip>
+                    <td className="px-4 py-3 font-medium text-text-main text-center border-b border-[#e7edf4] truncate">
+                      {sub.title}
+                    </td>
 
-                      {/* Activate / Deactivate */}
-                      <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
-                        <ToggleSwitch
-                          initialState={sub.status?.toLowerCase() === "active"}
-                          onChange={(state) => {
-                            if (state) {
-                              handleActivate(sub.packageId)
-                            } else {
-                              handleDeactivate(sub.packageId)
-                            }
-                          }}
-                        />
+                    <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                      <ExpandableDescription text={sub.description} />
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                      {formatVND(sub.price)}
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                      {sub.durationDays} days
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                      {sub.maxAdsPerPeriod}
+                    </td>
+
+                    <td className="px-4 py-3 text-center border-b border-[#e7edf4]">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
+                      ${sub.status?.toLowerCase() === "active"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-red-100 text-red-600"
+                          }`}
+                      >
+                        <span className="size-1.5 rounded-full bg-current"></span>
+                        {sub.status?.toLowerCase() === "active" ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+
+                    <td
+                      className="px-4 py-3 text-center border-b border-[#e7edf4] sticky right-0 bg-white group-hover:bg-[#f8fafc] z-10 transition-colors"
+                      style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
+                    >
+                      <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
+
+                        {/* Edit */}
+                        <Tooltip text="Edit">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); openEdit(sub); }}
+                            className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                        </Tooltip>
+
+                        {/* Delete */}
+                        <Tooltip text="Delete">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setDeleteId(sub.packageId); }}
+                            className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </Tooltip>
+
+                        {/* Activate / Deactivate */}
+                        <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
+                          <ToggleSwitch
+                            initialState={sub.status?.toLowerCase() === "active"}
+                            onChange={(state) => {
+                              if (state) {
+                                handleActivate(sub.packageId)
+                              } else {
+                                handleDeactivate(sub.packageId)
+                              }
+                            }}
+                          />
+                        </div>
+
                       </div>
+                    </td>
 
+                  </tr>
+
+                ))
+
+              ) : (
+
+                <tr>
+                  <td colSpan={8} className="px-6 py-12 text-center text-text-secondary">
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="text-4xl text-slate-300">📦</span>
+                      <p className="font-medium">No subscription packages</p>
+                      <p className="text-xs">Create your first subscription plan</p>
                     </div>
                   </td>
-
                 </tr>
 
-              ))
+              )}
 
-            ) : (
+            </tbody>
 
-              <tr>
-                <td colSpan={8} className="px-6 py-12 text-center text-text-secondary">
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="text-4xl text-slate-300">📦</span>
-                    <p className="font-medium">No subscription packages</p>
-                    <p className="text-xs">Create your first subscription plan</p>
-                  </div>
-                </td>
-              </tr>
-
-            )}
-
-          </tbody>
-
-        </table>
+          </table>
+        </div>
 
         <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-white">
           <span className="text-sm text-text-secondary">
