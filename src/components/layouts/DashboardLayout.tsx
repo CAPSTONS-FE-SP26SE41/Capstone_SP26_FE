@@ -9,6 +9,7 @@ type DashboardLayoutProps = {
   userRole?: string
   userAvatarUrl?: string
   searchPlaceholder?: string
+  showSearch?: boolean
   themeColor?: string
 }
 
@@ -19,6 +20,7 @@ export default function DashboardLayout({
   userRole,
   userAvatarUrl,
   searchPlaceholder,
+  showSearch = true,
   themeColor = 'green',
 }: DashboardLayoutProps) {
   return (
@@ -30,13 +32,14 @@ export default function DashboardLayout({
       />
 
       <div className="flex-1 flex flex-col">
-      <AppTopbar
-  userName={userName}
-  userRole={userRole}
-  userAvatarUrl={userAvatarUrl}
-  searchPlaceholder={searchPlaceholder}
-  themeColor={themeColor}
-/>
+        <AppTopbar
+          userName={userName}
+          userRole={userRole}
+          userAvatarUrl={userAvatarUrl}
+          searchPlaceholder={searchPlaceholder}
+          showSearch={showSearch}
+          themeColor={themeColor}
+        />
 
         <main className="flex-1 p-6 overflow-auto">
           <Outlet />

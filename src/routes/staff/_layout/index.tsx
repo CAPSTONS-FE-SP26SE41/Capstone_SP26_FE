@@ -72,34 +72,7 @@ function StaffDashboard() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">
-            Chào mừng trở lại
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Theo dõi và quản lí POIs của bạn theo thời gian thực.
-          </p>
-        </div>
-
-        <div className="flex gap-3">
-          <Link
-            to="/staff/pois"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-sm"
-          >
-            <ShieldCheck size={18} />
-            Duyệt POIs
-          </Link>
-          <Link
-            to="/staff/pois"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold"
-          >
-            <Plus size={18} />
-            Tạo POI mới
-          </Link>
-        </div>
-      </div>
+      {/* Removed Header */}
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

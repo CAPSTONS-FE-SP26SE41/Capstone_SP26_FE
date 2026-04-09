@@ -28,19 +28,47 @@ export default function AppSidebar({
   themeColor = 'green',
 }: AppSidebarProps) {
   const BrandIcon = brand.icon
+  const accentMap = {
+    blue: {
+      logoBg: "bg-blue-100",
+      logoText: "text-blue-600",
+      activeBg: "bg-blue-600",
+      activeHoverBg: "hover:bg-blue-700",
+      hoverBg: "hover:bg-blue-600",
+      hoverText: "hover:text-white",
+    },
+    emerald: {
+      logoBg: "bg-[#e9f5ed]",
+      logoText: "text-[#5ab473]",
+      activeBg: "bg-[#5ab473]",
+      activeHoverBg: "hover:bg-[#68bc80]",
+      hoverBg: "hover:bg-[#5ab473]",
+      hoverText: "hover:text-white",
+    },
+    orange: {
+      logoBg: "bg-[#faeadd]",
+      logoText: "text-[#e28743]",
+      activeBg: "bg-[#e28743]",
+      activeHoverBg: "hover:bg-[#eb9e61]",
+      hoverBg: "hover:bg-[#e28743]",
+      hoverText: "hover:text-white",
+    },
+  } as const
+
+  const accent = (themeColor === 'green' ? 'emerald' : themeColor) as keyof typeof accentMap
+  const accentClasses = accentMap[accent] || accentMap.emerald
   const navigate = useNavigate()
  const handleLogout = () => {
     logout()
     navigate({ to: '/' })
   }
 
-  const isOrange = themeColor === 'orange'
-  const brandBg = isOrange ? 'bg-[#faeadd]' : 'bg-[#e9f5ed]'
-  const primaryText = isOrange ? 'text-[#e28743]' : 'text-[#5ab473]'
-  const activeBg = isOrange ? 'bg-[#e28743]' : 'bg-[#5ab473]'
-  const activeHoverBg = isOrange ? 'hover:bg-[#eb9e61]' : 'hover:bg-[#68bc80]'
-  const hoverBg = isOrange ? 'hover:bg-[#e28743]' : 'hover:bg-[#5ab473]'
-  const hoverContent = isOrange ? 'hover:text-white' : 'hover:text-white'
+  const brandBg = accentClasses.logoBg
+  const primaryText = accentClasses.logoText
+  const activeBg = accentClasses.activeBg
+  const activeHoverBg = accentClasses.activeHoverBg
+  const hoverBg = accentClasses.hoverBg
+  const hoverContent = accentClasses.hoverText
 
   return (
     <aside className="w-72 bg-white border-r border-slate-200 flex flex-col justify-between">

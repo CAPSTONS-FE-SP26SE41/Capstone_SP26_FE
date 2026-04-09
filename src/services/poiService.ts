@@ -10,6 +10,7 @@ export type StaffPOI = {
   Address: string
   City: string
   ApproxCost: string
+  Status?: string
 
   // Thời gian mở cửa
   OpenHour: string
@@ -25,6 +26,7 @@ export type StaffPOI = {
   Latitude: number
   Longitude: number
   LocationId: string
+  DistrictId?: string
 
   // Các trường mới từ backend
   Status?: string | number
@@ -167,6 +169,7 @@ function normalizeStaffPOI(p: any): StaffPOI {
     Address: String(p?.Address ?? p?.address ?? ""),
     City: String(p?.City ?? p?.city ?? ""),
     ApproxCost: String(p?.ApproxCost ?? p?.approxCost ?? p?.approx_cost ?? ""),
+    Status: String(p?.Status ?? p?.status ?? ""),
 
     OpenHour: openHour,
     CloseHour: closeHour,
@@ -187,6 +190,7 @@ function normalizeStaffPOI(p: any): StaffPOI {
     Latitude: Number(p?.Latitude ?? p?.latitude ?? 0),
     Longitude: Number(p?.Longitude ?? p?.longitude ?? 0),
     LocationId: String(p?.LocationId ?? p?.locationId ?? ""),
+    DistrictId: String(p?.DistrictId ?? p?.districtId ?? ""),
     Status: statusNormalized,
     PartnerId: partnerIdNormalized,
     PoiPreferences: poiPreferencesNormalized,
@@ -199,6 +203,30 @@ export const getStaffPOIs = async (): Promise<StaffPOI[]> => {
   const data = await apiClient("/manager/pois")
   if (!Array.isArray(data)) return []
   return data.map(normalizeStaffPOI)
+}
+
+export type ManagerPendingPOIResult = {
+  items: StaffPOI[]
+  page: number
+  pageSize: number
+  totalItems: number
+  totalPages: number
+}
+
+export const getManagerPendingPOIs = async (
+  page: number = 1,
+  pageSize: number = 10
+): Promise<ManagerPendingPOIResult> => {
+  const data = await apiClient(`/manager/pois/pending?page=${page}&pageSize=${pageSize}`)
+  const rawItems = data?.Items ?? data?.items ?? []
+
+  return {
+    items: Array.isArray(rawItems) ? rawItems.map(normalizeStaffPOI) : [],
+    page: Number(data?.Page ?? data?.page ?? page),
+    pageSize: Number(data?.PageSize ?? data?.pageSize ?? pageSize),
+    totalItems: Number(data?.TotalItems ?? data?.totalItems ?? 0),
+    totalPages: Number(data?.TotalPages ?? data?.totalPages ?? 1),
+  }
 }
 
 export const getStaffPOIById = async (id: string): Promise<StaffPOI | null> => {
@@ -323,6 +351,8 @@ export type CreateStaffPOIPayload = {
   GoogleMapLink: string
   IsIndoor: boolean
   LocationId: string
+  DistrictId: string
+  PoiPreferences?: string[]
   Status?: string | number
   PartnerId?: string
   VisitRecommendation?: string
@@ -349,15 +379,15 @@ export const createStaffPOI = async (
   formData.append("OpenHour", normalizeTimeOnly(payload.OpenHour))
   formData.append("CloseHour", normalizeTimeOnly(payload.CloseHour))
   formData.append("LocationId", payload.LocationId)
+  formData.append("DistrictId", payload.DistrictId)
   formData.append("GoogleMapLink", payload.GoogleMapLink)
   formData.append("IsIndoor", String(payload.IsIndoor))
-  if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
+if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
     formData.append("VisitRecommendation", payload.VisitRecommendation.trim())
   }
+  
   if (payload.PoiPreferences?.length) {
-    // Khi backend map sang Dictionary/Map, gửi kiểu key-value giúp binding ổn định hơn.
-    // - Nếu là string: gửi nhiều field cùng key
-    // - Nếu là object {id,name}: gửi PoiPreferences[id]=name
+    // Xử lý thông minh từ dev_2 (đã bao hàm luôn logic của nhánh feat)
     payload.PoiPreferences.forEach((pref) => {
       if (pref && typeof pref === "object") {
         const id = (pref as any).id ?? (pref as any).Id
@@ -365,12 +395,15 @@ export const createStaffPOI = async (
         if (id) formData.append(`PoiPreferences[${id}]`, String(name ?? ""))
         return
       }
+      // Nếu là string bình thường (giống nhánh feat), vẫn append vào mảng
       formData.append("PoiPreferences", String(pref))
     })
   }
+
   if (payload.Status !== undefined) {
     formData.append("Status", String(payload.Status))
   }
+
   if (payload.PartnerId) {
     formData.append("PartnerId", payload.PartnerId)
   }
@@ -412,6 +445,7 @@ export type UpdateStaffPOIPayload = {
   IsIndoor: boolean
   POIImgUrl: string
   LocationId: string
+  DistrictId: string
   Status?: string | number
   PartnerId?: string
   VisitRecommendation?: string
@@ -445,6 +479,7 @@ export const updateStaffPOI = async (
     OpenHour: normalizeTimeOnly(payload.OpenHour ?? ""),
     CloseHour: normalizeTimeOnly(payload.CloseHour ?? ""),
     LocationId: payload.LocationId ?? "",
+    DistrictId: payload.DistrictId ?? "",
     GoogleMapLink: payload.GoogleMapLink ?? "",
     IsIndoor: String(Boolean(payload.IsIndoor)),
     POIImgUrl: poiImgUrlForUpdate ?? "",
@@ -486,6 +521,19 @@ export const updateStaffPOI = async (
 export const deleteStaffPOI = async (id: string): Promise<void> => {
   await apiClient(`/manager/pois/${id}`, {
     method: "DELETE",
+  })
+}
+
+export const approveManagerPendingPOI = async (id: string): Promise<void> => {
+  await apiClient(`/manager/pois/${id}/approve`, {
+    method: "POST",
+  })
+}
+
+export const rejectManagerPendingPOI = async (id: string, reason?: string): Promise<void> => {
+  await apiClient(`/manager/pois/${id}/reject`, {
+    method: "POST",
+    body: JSON.stringify(reason ? { reason } : {}),
   })
 }
 

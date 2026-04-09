@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
-import { Edit2, Eye, Plus, Search, Trash2, Upload } from "lucide-react"
+import { Edit2, Eye, Plus, Search, Trash2, Upload, X } from "lucide-react"
 
 import {
   createStaffPOI,
@@ -14,6 +14,8 @@ import {
   type StaffPOI,
   updateStaffPOI,
 } from "../../../services/poiService"
+import { getDistrictsByLocationId, getPreferences, type District, type POIPreference } from "../../../services/partnerPoiService"
+import { CustomSelect } from "../../../components/ui/CustomSelect"
 
 export const Route = createFileRoute("/staff/_layout/pois")({
   component: StaffPOIsPage,
@@ -50,6 +52,8 @@ function StaffPOIsPage() {
   const [importing, setImporting] = useState(false)
   const [loadingLocations, setLoadingLocations] = useState(false)
   const [locationOptions, setLocationOptions] = useState<StaffLocationOption[]>([])
+  const [preferencesList, setPreferencesList] = useState<POIPreference[]>([])
+  const [loadingPreferences, setLoadingPreferences] = useState(false)
   const [toast, setToast] = useState<{
     type: "success" | "error"
     message: string
@@ -67,6 +71,8 @@ function StaffPOIsPage() {
     PoiPreferences: [] as Array<{ id: string; name: string }>,
     POIImgUrl: "",
     LocationId: "",
+    DistrictId: "",
+    PoiPreferences: [] as string[],
   })
   const [createImageFile, setCreateImageFile] = useState<File | null>(null)
   const [editingPoiId, setEditingPoiId] = useState("")
@@ -83,9 +89,14 @@ function StaffPOIsPage() {
     PoiPreferences: [] as Array<{ id: string; name: string }>,
     POIImgUrl: "",
     LocationId: "",
+    DistrictId: "",
     Status: "",
     PartnerId: "",
   })
+  
+  const [districts, setDistricts] = useState<District[]>([])
+  const [loadingDistricts, setLoadingDistricts] = useState(false)
+  const [formErrors, setFormErrors] = useState<{districtId?: string}>({})
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message })
@@ -105,9 +116,28 @@ function StaffPOIsPage() {
       PoiPreferences: [],
       POIImgUrl: "",
       LocationId: "",
+      DistrictId: "",
+      PoiPreferences: [] as string[],
     })
+    setDistricts([])
+    setFormErrors({})
     setCreateImageFile(null)
   }
+
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      setLoadingPreferences(true)
+      try {
+        const data = await getPreferences()
+        setPreferencesList(data)
+      } catch (e) {
+        console.error("Failed to fetch preferences", e)
+      } finally {
+        setLoadingPreferences(false)
+      }
+    }
+    fetchPreferences()
+  }, [])
 
   useEffect(() => {
     const fetchPois = async () => {
@@ -258,7 +288,33 @@ function StaffPOIsPage() {
     }
 
     fetchLocations()
-  }, [showCreateModal, locationOptions.length, loadingLocations])
+  }, [showCreateModal, showEditModal, locationOptions.length, loadingLocations])
+
+  useEffect(() => {
+    const locId = showCreateModal ? createForm.LocationId : (showEditModal ? editForm.LocationId : null)
+    if (!locId) {
+      setDistricts([])
+      return
+    }
+    const fetchDistricts = async () => {
+      setLoadingDistricts(true)
+      try {
+        const data = await getDistrictsByLocationId(locId)
+        setDistricts(data)
+        if (showCreateModal && createForm.DistrictId && !data.some(d => d.id === createForm.DistrictId)) {
+          setCreateForm(prev => ({ ...prev, DistrictId: "" }))
+        }
+        if (showEditModal && editForm.DistrictId && !data.some(d => d.id === editForm.DistrictId)) {
+          setEditForm(prev => ({ ...prev, DistrictId: "" }))
+        }
+      } catch(e) {
+        console.error("Failed to fetch districts", e)
+      } finally {
+        setLoadingDistricts(false)
+      }
+    }
+    fetchDistricts()
+  }, [showCreateModal, showEditModal, createForm.LocationId, editForm.LocationId])
 
   const handleDelete = async (poi: StaffPOI) => {
     const ok = window.confirm(`Bạn có chắc muốn xóa POI "${poi.Name}"?`)
@@ -334,6 +390,7 @@ function StaffPOIsPage() {
         PoiPreferences: normalizedEditPrefs,
         POIImgUrl: detail.POIImgUrl ?? "",
         LocationId: detail.LocationId ?? "",
+        DistrictId: detail.DistrictId ?? "",
         Status: detail.Status !== undefined ? String(detail.Status) : "",
         PartnerId: detail.PartnerId ?? "",
       })
@@ -360,6 +417,7 @@ function StaffPOIsPage() {
 
   const handleCreateSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setFormErrors({})
 
     if (!createForm.Name.trim()) {
       showToast("error", "Tên POI không được để trống")
@@ -373,7 +431,11 @@ function StaffPOIsPage() {
       (loc) => loc.Id === createForm.LocationId.trim()
     )
     if (!isValidLocationId) {
-      showToast("error", "Vui lòng chọn LocationId hợp lệ từ danh sách")
+      showToast("error", "Vui lòng chọn Location hợp lệ từ danh sách")
+      return
+    }
+    if (!createForm.DistrictId.trim()) {
+      showToast("error", "Vui lòng chọn District")
       return
     }
 
@@ -393,6 +455,8 @@ function StaffPOIsPage() {
           ? createForm.PoiPreferences
           : undefined,
         LocationId: createForm.LocationId.trim(),
+        DistrictId: createForm.DistrictId.trim(),
+        PoiPreferences: createForm.PoiPreferences,
       }, createImageFile)
 
       const refreshedData = await getStaffPOIs()
@@ -403,7 +467,9 @@ function StaffPOIsPage() {
     } catch (e) {
       console.error("Failed to create POI", e)
       const message = e instanceof Error ? e.message : String(e)
-      if (message.includes("FK_pois_locations_LocationId")) {
+      if (message.toLowerCase().includes("district") || message.toLowerCase().includes("không thuộc")) {
+        setFormErrors({ districtId: "District không thuộc City đã chọn" })
+      } else if (message.includes("FK_pois_locations_LocationId")) {
         showToast("error", "LocationId không tồn tại trong hệ thống")
       } else {
         showToast("error", "Tạo POI thất bại")
@@ -439,6 +505,7 @@ function StaffPOIsPage() {
 
   const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setFormErrors({})
     if (!editingPoiId) return
 
     if (!editForm.Name.trim()) {
@@ -447,6 +514,10 @@ function StaffPOIsPage() {
     }
     if (!editForm.LocationId.trim()) {
       showToast("error", "LocationId không được để trống")
+      return
+    }
+    if (!editForm.DistrictId.trim()) {
+      showToast("error", "DistrictId không được để trống")
       return
     }
 
@@ -465,6 +536,8 @@ function StaffPOIsPage() {
         PoiPreferences: editForm.PoiPreferences,
         POIImgUrl: editForm.POIImgUrl.trim(),
         LocationId: editForm.LocationId.trim(),
+        DistrictId: editForm.DistrictId.trim(),
+      })
         Status: editForm.Status || undefined,
         PartnerId: editForm.PartnerId || undefined,
       }, editImageFile)
@@ -493,7 +566,12 @@ function StaffPOIsPage() {
       showToast("success", "Cập nhật POI thành công")
     } catch (e) {
       console.error("Failed to update POI", e)
-      showToast("error", "Cập nhật POI thất bại")
+      const message = e instanceof Error ? e.message : String(e)
+      if (message.toLowerCase().includes("district") || message.toLowerCase().includes("không thuộc")) {
+        setFormErrors({ districtId: "District không thuộc City đã chọn" })
+      } else {
+        showToast("error", "Cập nhật POI thất bại")
+      }
     } finally {
       setEditing(false)
     }
@@ -509,12 +587,7 @@ function StaffPOIsPage() {
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-semibold text-slate-900">
-            Quản lí POIs
-          </h2>
-         
-        </div>
+      {/* Removed Title */}
 
         <div className="w-full sm:w-auto flex items-center gap-2">
           <div className="relative w-full sm:w-[360px]">
@@ -588,7 +661,6 @@ function StaffPOIsPage() {
                   <thead className="sticky top-0 z-10 bg-slate-100">
                     <tr className="text-slate-700 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
                       <th className="px-6 py-4 text-left w-16">STT</th>
-                      <th className="px-6 py-4 text-left w-28">Mã Id</th>
                       <th className="px-6 py-4 text-left w-40">Tên</th>
                       <th className="px-6 py-4 text-left">Thành phố</th>
                       <th className="px-6 py-4 text-left">Trong nhà</th>
@@ -600,16 +672,10 @@ function StaffPOIsPage() {
                     {pagedPois.map((p, idx) => (
                       <tr
                         key={p.Id}
-                        className="transition-shadow hover:shadow-[inset_0_0_0_2px_#3b82f6]"
+                        className="hover:bg-slate-100 transition-colors"
                       >
                         <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
                           {startIndex + idx + 1}
-                        </td>
-
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-                          <div className="max-w-[180px] overflow-x-auto whitespace-nowrap">
-                            {p.Id}
-                          </div>
                         </td>
 
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -619,7 +685,7 @@ function StaffPOIsPage() {
                         </td>
 
                         <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-                          {p.City}
+                          {p.LocationName || p.City || "—"}
                         </td>
 
                         <td className="px-6 py-4">
@@ -638,24 +704,33 @@ function StaffPOIsPage() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => void openDetailModal(p.Id)}
-                              title="Xem chi tiết"
-                              className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition-colors"
+                              className="group relative inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-200 transition-colors"
                             >
                               <Eye size={16} />
+                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
+                                Xem chi tiết
+                                <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                              </span>
                             </button>
                             <button
                               onClick={() => void openEditModal(p.Id)}
-                              className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors text-sm font-semibold"
+                              className="group relative inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors"
                             >
                               <Edit2 size={16} />
-                              
+                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
+                                Chỉnh sửa
+                                <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                              </span>
                             </button>
                             <button
                               onClick={() => handleDelete(p)}
-                              className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors text-sm font-semibold"
+                              className="group relative inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors"
                             >
                               <Trash2 size={16} />
-                              
+                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
+                                Xóa
+                                <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                              </span>
                             </button>
                           </div>
                         </td>
@@ -740,9 +815,9 @@ function StaffPOIsPage() {
               </h3>
               <button
                 onClick={() => setSelectedPoi(null)}
-                className="h-9 px-3 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
               >
-                Đóng
+                <X size={20} />
               </button>
             </div>
 
@@ -841,9 +916,9 @@ function StaffPOIsPage() {
                   setShowCreateModal(false)
                   resetCreateForm()
                 }}
-                className="h-9 px-3 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
               >
-                Đóng
+                <X size={20} />
               </button>
             </div>
 
@@ -877,17 +952,7 @@ function StaffPOIsPage() {
                   />
                 </label>
 
-                <label className="text-sm text-slate-700">
-                  Thành phố
-                  <input
-                    value={createForm.City}
-                    onChange={(e) =>
-                      setCreateForm((prev) => ({ ...prev, City: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    placeholder="City"
-                  />
-                </label>
+
 
                 <label className="text-sm text-slate-700">
                   Chi phí gần đúng
@@ -952,86 +1017,75 @@ function StaffPOIsPage() {
                 </label>
 
                 <label className="text-sm text-slate-700">
-                  VisitRecommendation
-                  <input
-                    value={createForm.VisitRecommendation}
-                    onChange={(e) =>
+                  Thành phố (City)
+                  <CustomSelect
+                    value={createForm.LocationId}
+                    onChange={(val: string) => {
+                      const selName = mergedLocationOptions.find(l => l.Id === val)?.Name || "";
                       setCreateForm((prev) => ({
                         ...prev,
-                        VisitRecommendation: e.target.value,
+                        LocationId: val,
+                        City: selName,
+                        DistrictId: ""
                       }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    placeholder="VisitRecommendation"
+                    }}
+                    options={mergedLocationOptions.map(l => ({ value: l.Id, label: l.Name || l.Id }))}
+                    placeholder={loadingLocations ? "Đang tải..." : "-- Chọn Thành phố --"}
                   />
                 </label>
 
-                <div className="text-sm text-slate-700">
-                  <div>PoiPreferences</div>
-                  <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {POI_PREFERENCES_OPTIONS.map((opt) => (
-                      <label
-                        key={opt.id}
-                        className="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={createForm.PoiPreferences.some(
-                            (x) => x.id === opt.id,
-                          )}
-                          onChange={(e) => {
-                            setCreateForm((prev) => {
-                              const exists = prev.PoiPreferences.some(
-                                (x) => x.id === opt.id,
-                              )
-                              const next = e.target.checked
-                                ? exists
-                                  ? prev.PoiPreferences
-                                  : [
-                                      ...prev.PoiPreferences,
-                                      { id: opt.id, name: opt.name },
-                                    ]
-                                : prev.PoiPreferences.filter(
-                                    (x) => x.id !== opt.id,
-                                  )
-
-                              return { ...prev, PoiPreferences: next }
-                            })
-                          }}
-                          className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
-                        />
-                        {opt.name}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
                 <label className="text-sm text-slate-700">
-                  LocationId
-                  <select
-                    value={createForm.LocationId}
-                    onChange={(e) =>
+                  Quận huyện (District)
+                  <CustomSelect
+                    value={createForm.DistrictId}
+                    onChange={(val: string) => {
                       setCreateForm((prev) => ({
                         ...prev,
-                        LocationId: e.target.value,
+                        DistrictId: val,
                       }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    required
-                    disabled={loadingLocations}
-                  >
-                    <option value="">
-                      {loadingLocations
-                        ? "Đang tải location..."
-                        : "Chọn LocationId"}
-                    </option>
-                    {mergedLocationOptions.map((loc) => (
-                      <option key={loc.Id} value={loc.Id}>
-                        {loc.Name ? `${loc.Name} (${loc.Id})` : loc.Id}
-                      </option>
-                    ))}
-                  </select>
+                      setFormErrors({})
+                    }}
+                    options={districts.map(d => ({ value: d.id, label: d.name }))}
+                    placeholder={loadingDistricts ? "Đang tải..." : (!createForm.LocationId ? "-- Chọn City trước --" : (districts.length === 0 ? "City này chưa có district" : "-- Chọn District --"))}
+                    disabled={!createForm.LocationId || loadingDistricts}
+                    error={!!formErrors.districtId}
+                  />
+                  {formErrors.districtId && <p className="text-red-500 text-xs mt-1">{formErrors.districtId}</p>}
                 </label>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm text-slate-700 block">Nhãn (Preferences)</label>
+                {loadingPreferences ? (
+                  <p className="text-sm text-slate-500">Đang tải...</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {preferencesList.map((pref) => {
+                      const isSelected = createForm.PoiPreferences.includes(pref.id)
+                      return (
+                        <button
+                          type="button"
+                          key={pref.id}
+                          onClick={() => {
+                            setCreateForm((prev) => ({
+                              ...prev,
+                              PoiPreferences: isSelected
+                                ? prev.PoiPreferences.filter((p) => p !== pref.id)
+                                : [...prev.PoiPreferences, pref.id],
+                            }))
+                          }}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                            isSelected
+                              ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-600 hover:text-emerald-600'
+                          }`}
+                        >
+                          {pref.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
 
               <label className="inline-flex items-center gap-2 text-sm text-slate-700">
@@ -1043,7 +1097,7 @@ function StaffPOIsPage() {
                   }
                   className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
                 />
-                IsIndoor
+                Trong nhà
               </label>
 
               <div className="space-y-2">
@@ -1108,9 +1162,9 @@ function StaffPOIsPage() {
                   setShowEditModal(false)
                   setEditingPoiId("")
                 }}
-                className="h-9 px-3 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
               >
-                Đóng
+                <X size={20} />
               </button>
             </div>
 
@@ -1142,16 +1196,7 @@ function StaffPOIsPage() {
                   />
                 </label>
 
-                <label className="text-sm text-slate-700">
-                  Thành phố
-                  <input
-                    value={editForm.City}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, City: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                  />
-                </label>
+
 
                 <label className="text-sm text-slate-700">
                   Chi phí gần đúng
@@ -1221,30 +1266,40 @@ function StaffPOIsPage() {
                 </label>
 
                 <label className="text-sm text-slate-700">
-                  LocationId
-                  <select
+                  Thành phố (City)
+                  <CustomSelect
                     value={editForm.LocationId}
-                    onChange={(e) =>
+                    onChange={(val: string) => {
+                      const selName = mergedLocationOptions.find(l => l.Id === val)?.Name || "";
                       setEditForm((prev) => ({
                         ...prev,
-                        LocationId: e.target.value,
+                        LocationId: val,
+                        City: selName,
+                        DistrictId: ""
                       }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    required
-                    disabled={loadingLocations}
-                  >
-                    <option value="">
-                      {loadingLocations
-                        ? "Đang tải location..."
-                        : "Chọn LocationId"}
-                    </option>
-                    {mergedLocationOptions.map((loc) => (
-                      <option key={loc.Id} value={loc.Id}>
-                        {loc.Name ? `${loc.Name} (${loc.Id})` : loc.Id}
-                      </option>
-                    ))}
-                  </select>
+                    }}
+                    options={mergedLocationOptions.map(l => ({ value: l.Id, label: l.Name || l.Id }))}
+                    placeholder={loadingLocations ? "Đang tải..." : "-- Chọn Thành phố --"}
+                  />
+                </label>
+
+                <label className="text-sm text-slate-700">
+                  Quận huyện (District)
+                  <CustomSelect
+                    value={editForm.DistrictId}
+                    onChange={(val: string) => {
+                      setEditForm((prev) => ({
+                        ...prev,
+                        DistrictId: val,
+                      }))
+                      setFormErrors({})
+                    }}
+                    options={districts.map(d => ({ value: d.id, label: d.name }))}
+                    placeholder={loadingDistricts ? "Đang tải..." : (!editForm.LocationId ? "-- Chọn City trước --" : (districts.length === 0 ? "City này chưa có district" : "-- Chọn District --"))}
+                    disabled={!editForm.LocationId || loadingDistricts}
+                    error={!!formErrors.districtId}
+                  />
+                  {formErrors.districtId && <p className="text-red-500 text-xs mt-1">{formErrors.districtId}</p>}
                 </label>
               </div>
 
@@ -1288,7 +1343,7 @@ function StaffPOIsPage() {
                   }
                   className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
                 />
-                IsIndoor
+                Trong nhà
               </label>
 
               <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50">
