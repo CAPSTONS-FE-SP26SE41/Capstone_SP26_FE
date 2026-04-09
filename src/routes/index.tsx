@@ -52,7 +52,7 @@ function LoginPortalPage() {
         localStorage.setItem("manager_token", token)
         localStorage.setItem("role", role)
         localStorage.setItem("user_name", name)
-        localStorage.setItem("user_role", role)
+        localStorage.setItem("user_role", "Manager")
         navigate({ to: "/staff" })
         return
       }
@@ -71,7 +71,7 @@ function LoginPortalPage() {
         localStorage.setItem("role", role)
         localStorage.setItem("user_name", name)
         localStorage.setItem("user_role", role)
-        navigate({ to: "/partner" })
+        navigate({ to: "/partner", search: { tab: "my-packages" } })
         return
       }
 

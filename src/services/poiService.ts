@@ -28,6 +28,11 @@ export type StaffPOI = {
   LocationId: string
   DistrictId?: string
 
+  // Các trường mới từ backend
+  Status?: string | number
+  PartnerId?: string
+  PoiPreferences?: string[]
+
   // Một số backend có thể trả thêm, nhưng không bắt buộc
   LocationName?: string
 
@@ -62,6 +67,102 @@ function normalizeStaffPOI(p: any): StaffPOI {
       ? `${openHour} - ${closeHour}`
       : openHour || closeHour || ""
 
+  const statusRaw = p?.Status ?? p?.POIStatus ?? p?.status
+  const partnerIdRaw = p?.PartnerId ?? p?.partnerId ?? p?.PartnerID ?? p?.partner_id
+
+  const poiPreferencesRaw = p?.PoiPreferences ?? p?.poiPreferences ?? p?.POIPreferences
+  const poiPreferencesNormalized =
+    Array.isArray(poiPreferencesRaw)
+      ? poiPreferencesRaw.map((x) => {
+          if (x === null || x === undefined) return ""
+          if (typeof x === "string") return x
+          if (typeof x === "number") return String(x)
+          if (typeof x === "object") {
+            const maybeId = (x as any)?.id ?? (x as any)?.Id
+            const maybeName = (x as any)?.name ?? (x as any)?.Name
+            return String(maybeId ?? maybeName ?? x)
+          }
+          return String(x)
+        })
+        .filter(Boolean)
+      : typeof poiPreferencesRaw === "string"
+        ? poiPreferencesRaw
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : undefined
+
+  const statusNormalized =
+    statusRaw === null || statusRaw === undefined ? undefined : (typeof statusRaw === "number" ? statusRaw : String(statusRaw))
+  const partnerIdNormalized =
+    partnerIdRaw === null || partnerIdRaw === undefined || partnerIdRaw === ""
+      ? undefined
+      : String(partnerIdRaw)
+
+  const extractImgString = (value: any): string => {
+    if (value === null || value === undefined) return ""
+    if (typeof value === "string") return value
+    if (typeof value === "number") return String(value)
+    if (typeof value === "object") {
+      // Some APIs return { url: "..." } or { Url: "..." }
+      const maybeUrl =
+        (value as any)?.url ??
+        (value as any)?.Url ??
+        (value as any)?.imageUrl ??
+        (value as any)?.ImageUrl ??
+        (value as any)?.POIImgUrl ??
+        (value as any)?.poiImgUrl
+      if (typeof maybeUrl === "string") return maybeUrl
+    }
+    return String(value)
+  }
+
+  const rawImg = String(
+    extractImgString(
+      p?.POIImgUrl ??
+        p?.POIImgeUrl ??
+        p?.poiImgUrl ??
+        p?.poiImgeUrl ??
+        p?.POIImageUrl ??
+        p?.poi_image_url ??
+        // common alternates
+        p?.imageUrl ??
+        p?.ImageUrl ??
+        p?.url ??
+        p?.Url ??
+        p?.image?.url ??
+        p?.Image?.Url ??
+        ""
+    )
+  ).trim()
+
+  const resolvePoiImgUrl = (value: string) => {
+    if (!value) return ""
+    const v = value.trim()
+    // Một số backend có thể trả placeholder kiểu .NET type name
+    if (v.includes("Microsoft.AspNetCore.Http.FormFile")) return ""
+    if (v === "null" || v === "undefined") return ""
+
+    // data URL
+    if (v.startsWith("data:")) return v
+
+    // absolute URL
+    if (/^https?:\/\//i.test(v)) return v
+
+    // relative path -> prefix origin từ VITE_API_BASE_URL (vd http://localhost:5131/api -> http://localhost:5131)
+    const origin = (() => {
+      try {
+        return new URL(API_BASE_URL).origin
+      } catch {
+        return ""
+      }
+    })()
+
+    if (!origin) return v
+    if (v.startsWith("/")) return `${origin}${v}`
+    return `${origin}/${v}`
+  }
+
   return {
     Id: String(p?.Id ?? p?.id ?? ""),
     Name: String(p?.Name ?? p?.name ?? ""),
@@ -83,21 +184,16 @@ function normalizeStaffPOI(p: any): StaffPOI {
     GoogleMapLink: String(
       p?.GoogleMapLink ?? p?.googleMapLink ?? p?.google_map_link ?? ""
     ),
-    POIImgUrl: String(
-      p?.POIImgUrl ??
-        p?.POIImgeUrl ??
-        p?.poiImgUrl ??
-        p?.poiImgeUrl ??
-        p?.POIImageUrl ??
-        p?.poi_image_url ??
-        ""
-    ),
+    POIImgUrl: resolvePoiImgUrl(rawImg),
 
     IsIndoor: Boolean(p?.IsIndoor ?? p?.isIndoor ?? false),
     Latitude: Number(p?.Latitude ?? p?.latitude ?? 0),
     Longitude: Number(p?.Longitude ?? p?.longitude ?? 0),
     LocationId: String(p?.LocationId ?? p?.locationId ?? ""),
     DistrictId: String(p?.DistrictId ?? p?.districtId ?? ""),
+    Status: statusNormalized,
+    PartnerId: partnerIdNormalized,
+    PoiPreferences: poiPreferencesNormalized,
     LocationName: p?.LocationName ?? p?.locationName,
     OpeningHours: String(p?.OpeningHours ?? openingHours ?? ""),
   }
@@ -257,27 +353,59 @@ export type CreateStaffPOIPayload = {
   LocationId: string
   DistrictId: string
   PoiPreferences?: string[]
+  Status?: string | number
+  PartnerId?: string
+  VisitRecommendation?: string
+  // Backend đang map sang Dictionary/Map, nên có thể truyền array object {id,name}
+  PoiPreferences?: Array<string | { id: string; name: string }>
 }
 
 export const createStaffPOI = async (
   payload: CreateStaffPOIPayload,
   imageFile?: File | null
 ): Promise<StaffPOI> => {
+  const normalizeTimeOnly = (t: string) => {
+    const s = String(t ?? "").trim()
+    // Input time thường là "HH:mm" => backend TimeOnly cần "HH:mm:ss"
+    if (/^\d{2}:\d{2}$/.test(s)) return `${s}:00`
+    return s
+  }
+
   const formData = new FormData()
   formData.append("Name", payload.Name)
   formData.append("Address", payload.Address)
   formData.append("City", payload.City)
   formData.append("ApproxCost", payload.ApproxCost)
-  formData.append("OpenHour", payload.OpenHour)
-  formData.append("CloseHour", payload.CloseHour)
+  formData.append("OpenHour", normalizeTimeOnly(payload.OpenHour))
+  formData.append("CloseHour", normalizeTimeOnly(payload.CloseHour))
   formData.append("LocationId", payload.LocationId)
   formData.append("DistrictId", payload.DistrictId)
   formData.append("GoogleMapLink", payload.GoogleMapLink)
   formData.append("IsIndoor", String(payload.IsIndoor))
-  if (payload.PoiPreferences && payload.PoiPreferences.length > 0) {
-    payload.PoiPreferences.forEach(pref => {
-      formData.append("PoiPreferences", pref)
+if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
+    formData.append("VisitRecommendation", payload.VisitRecommendation.trim())
+  }
+  
+  if (payload.PoiPreferences?.length) {
+    // Xử lý thông minh từ dev_2 (đã bao hàm luôn logic của nhánh feat)
+    payload.PoiPreferences.forEach((pref) => {
+      if (pref && typeof pref === "object") {
+        const id = (pref as any).id ?? (pref as any).Id
+        const name = (pref as any).name ?? (pref as any).Name
+        if (id) formData.append(`PoiPreferences[${id}]`, String(name ?? ""))
+        return
+      }
+      // Nếu là string bình thường (giống nhánh feat), vẫn append vào mảng
+      formData.append("PoiPreferences", String(pref))
     })
+  }
+
+  if (payload.Status !== undefined) {
+    formData.append("Status", String(payload.Status))
+  }
+
+  if (payload.PartnerId) {
+    formData.append("PartnerId", payload.PartnerId)
   }
   if (imageFile) {
     formData.append("POIImgUrl", imageFile)
@@ -318,25 +446,68 @@ export type UpdateStaffPOIPayload = {
   POIImgUrl: string
   LocationId: string
   DistrictId: string
+  Status?: string | number
+  PartnerId?: string
+  VisitRecommendation?: string
+  PoiPreferences?: Array<string | { id: string; name: string }>
 }
 
 export const updateStaffPOI = async (
   id: string,
-  payload: UpdateStaffPOIPayload
+  payload: UpdateStaffPOIPayload,
+  imageFile?: File | null
 ): Promise<StaffPOI> => {
-  const params = new URLSearchParams({
+  const normalizeTimeOnly = (t: string) => {
+    const s = String(t ?? "").trim()
+    if (/^\d{2}:\d{2}$/.test(s)) return `${s}:00`
+    return s
+  }
+
+  // Backend của bạn có endpoint upload ảnh riêng:
+  // POST /api/manager/pois/upload-image -> trả về URL ảnh
+  // Sau đó update POI bằng POIImgUrl (string) sẽ giúp GET chi tiết trả ảnh đúng.
+  let poiImgUrlForUpdate = payload.POIImgUrl ?? ""
+  if (imageFile) {
+    poiImgUrlForUpdate = await uploadStaffPOIImage(imageFile)
+  }
+
+  const paramsObj: Record<string, string> = {
     Name: payload.Name ?? "",
     Address: payload.Address ?? "",
     City: payload.City ?? "",
     ApproxCost: payload.ApproxCost ?? "",
-    OpenHour: payload.OpenHour ?? "",
-    CloseHour: payload.CloseHour ?? "",
+    OpenHour: normalizeTimeOnly(payload.OpenHour ?? ""),
+    CloseHour: normalizeTimeOnly(payload.CloseHour ?? ""),
     LocationId: payload.LocationId ?? "",
     DistrictId: payload.DistrictId ?? "",
     GoogleMapLink: payload.GoogleMapLink ?? "",
     IsIndoor: String(Boolean(payload.IsIndoor)),
-    POIImgUrl: payload.POIImgUrl ?? "",
-  })
+    POIImgUrl: poiImgUrlForUpdate ?? "",
+  }
+
+  if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
+    paramsObj.VisitRecommendation = payload.VisitRecommendation.trim()
+  }
+
+  if (payload.Status !== undefined) {
+    paramsObj.Status = String(payload.Status)
+  }
+  if (payload.PartnerId) {
+    paramsObj.PartnerId = payload.PartnerId
+  }
+
+  const params = new URLSearchParams(paramsObj)
+  if (payload.PoiPreferences?.length) {
+    payload.PoiPreferences.forEach((pref) => {
+      if (pref && typeof pref === "object") {
+        const pid = (pref as any).id ?? (pref as any).Id
+        const name = (pref as any).name ?? (pref as any).Name
+        if (pid) params.append(`PoiPreferences[${pid}]`, String(name ?? ""))
+        return
+      }
+      params.append("PoiPreferences", String(pref))
+    })
+  }
 
   const data = await apiClient(
     `/manager/pois/${encodeURIComponent(id)}?${params.toString()}`,

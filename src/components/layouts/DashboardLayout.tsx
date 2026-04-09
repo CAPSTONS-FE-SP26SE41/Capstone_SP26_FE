@@ -25,15 +25,12 @@ export default function DashboardLayout({
 }: DashboardLayoutProps) {
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Sidebar */}
       <AppSidebar
         brand={brand}
         navItems={navItems}
         themeColor={themeColor}
       />
 
-
-      {/* Main Area */}
       <div className="flex-1 flex flex-col">
         <AppTopbar
           userName={userName}

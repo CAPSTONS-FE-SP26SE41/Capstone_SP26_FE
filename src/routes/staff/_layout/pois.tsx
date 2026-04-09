@@ -13,7 +13,6 @@ import {
   type StaffLocationOption,
   type StaffPOI,
   updateStaffPOI,
-  uploadStaffPOIImage,
 } from "../../../services/poiService"
 import { getDistrictsByLocationId, getPreferences, type District, type POIPreference } from "../../../services/partnerPoiService"
 import { CustomSelect } from "../../../components/ui/CustomSelect"
@@ -21,6 +20,20 @@ import { CustomSelect } from "../../../components/ui/CustomSelect"
 export const Route = createFileRoute("/staff/_layout/pois")({
   component: StaffPOIsPage,
 })
+
+const POI_PREFERENCES_OPTIONS: Array<{ id: string; name: string }> = [
+  { id: "4b16bf5c-c699-4a61-880f-98460a2d4daa", name: "Adventure" },
+  { id: "4eb0fdb5-105d-40bd-9f5e-2df53b8ad9db", name: "Budget" },
+  { id: "37e3b490-ad00-432d-8e35-c3dbc019630f", name: "Culture" },
+  { id: "2c109efa-8ceb-4c56-b5b9-a1a2c82c91a1", name: "Food" },
+  { id: "b43e3fc0-234a-45f3-8e27-10124cee0ee8", name: "Indoor" },
+  { id: "9b9159e1-1b60-4a12-9607-1bcf02da3e50", name: "Luxury" },
+  { id: "ce454660-2991-42ea-800c-b6853da8ba2c", name: "Nature" },
+  { id: "b41066e4-7857-4a3d-b92d-b7c2aa113334", name: "Nightlife" },
+  { id: "7bb12f2c-567d-4bc2-a715-037b7a195dc1", name: "Outdoor" },
+  { id: "2cc0a43b-4d97-4d3d-8a3d-02af16d8999d", name: "Relax" },
+  { id: "ab4509fd-4b2c-4705-bed3-afed9f51af78", name: "Shopping" },
+]
 
 function StaffPOIsPage() {
   const navigate = useNavigate()
@@ -34,7 +47,8 @@ function StaffPOIsPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState(false)
-  const [uploadingEditImage, setUploadingEditImage] = useState(false)
+  const [editImageFile, setEditImageFile] = useState<File | null>(null)
+  const [editImagePreviewUrl, setEditImagePreviewUrl] = useState<string>("")
   const [importing, setImporting] = useState(false)
   const [loadingLocations, setLoadingLocations] = useState(false)
   const [locationOptions, setLocationOptions] = useState<StaffLocationOption[]>([])
@@ -52,7 +66,9 @@ function StaffPOIsPage() {
     OpenHour: "",
     CloseHour: "",
     GoogleMapLink: "",
+    VisitRecommendation: "",
     IsIndoor: false,
+    PoiPreferences: [] as Array<{ id: string; name: string }>,
     POIImgUrl: "",
     LocationId: "",
     DistrictId: "",
@@ -68,10 +84,14 @@ function StaffPOIsPage() {
     OpenHour: "",
     CloseHour: "",
     GoogleMapLink: "",
+    VisitRecommendation: "",
     IsIndoor: false,
+    PoiPreferences: [] as Array<{ id: string; name: string }>,
     POIImgUrl: "",
     LocationId: "",
     DistrictId: "",
+    Status: "",
+    PartnerId: "",
   })
   
   const [districts, setDistricts] = useState<District[]>([])
@@ -91,7 +111,9 @@ function StaffPOIsPage() {
       OpenHour: "",
       CloseHour: "",
       GoogleMapLink: "",
+      VisitRecommendation: "",
       IsIndoor: false,
+      PoiPreferences: [],
       POIImgUrl: "",
       LocationId: "",
       DistrictId: "",
@@ -174,6 +196,21 @@ function StaffPOIsPage() {
       return haystack.includes(q)
     })
   }, [pois, query])
+
+  useEffect(() => {
+    if (!showEditModal) {
+      setEditImagePreviewUrl("")
+      return
+    }
+
+    if (editImageFile) {
+      const url = URL.createObjectURL(editImageFile)
+      setEditImagePreviewUrl(url)
+      return () => URL.revokeObjectURL(url)
+    }
+
+    setEditImagePreviewUrl(editForm.POIImgUrl ?? "")
+  }, [showEditModal, editImageFile, editForm.POIImgUrl])
 
   const fallbackLocationOptions = useMemo(() => {
     const seen = new Set<string>()
@@ -320,6 +357,25 @@ function StaffPOIsPage() {
         showToast("error", "Không tìm thấy POI")
         return
       }
+
+      const normalizedEditPrefs: Array<{ id: string; name: string }> = (() => {
+        const raw = detail.PoiPreferences ?? []
+        if (!Array.isArray(raw) || raw.length === 0) return []
+        return raw
+          .map((v) => String(v ?? "").trim())
+          .filter(Boolean)
+          .map((v) => {
+            const byId = POI_PREFERENCES_OPTIONS.find((o) => o.id === v)
+            if (byId) return byId
+            const byName = POI_PREFERENCES_OPTIONS.find(
+              (o) => o.name.toLowerCase() === v.toLowerCase()
+            )
+            if (byName) return byName
+            // fallback: keep something visible/selectable
+            return { id: v, name: v }
+          })
+      })()
+
       setEditingPoiId(detail.Id)
       setEditForm({
         Name: detail.Name ?? "",
@@ -329,11 +385,16 @@ function StaffPOIsPage() {
         OpenHour: detail.OpenHour ?? "",
         CloseHour: detail.CloseHour ?? "",
         GoogleMapLink: detail.GoogleMapLink ?? "",
+        VisitRecommendation: detail.VisitRecommendation ?? "",
         IsIndoor: Boolean(detail.IsIndoor),
+        PoiPreferences: normalizedEditPrefs,
         POIImgUrl: detail.POIImgUrl ?? "",
         LocationId: detail.LocationId ?? "",
         DistrictId: detail.DistrictId ?? "",
+        Status: detail.Status !== undefined ? String(detail.Status) : "",
+        PartnerId: detail.PartnerId ?? "",
       })
+      setEditImageFile(null)
       setShowEditModal(true)
     } catch (e) {
       console.error("Failed to load POI for edit", e)
@@ -388,7 +449,11 @@ function StaffPOIsPage() {
         OpenHour: createForm.OpenHour.trim(),
         CloseHour: createForm.CloseHour.trim(),
         GoogleMapLink: createForm.GoogleMapLink.trim(),
+        VisitRecommendation: createForm.VisitRecommendation.trim(),
         IsIndoor: createForm.IsIndoor,
+        PoiPreferences: createForm.PoiPreferences.length
+          ? createForm.PoiPreferences
+          : undefined,
         LocationId: createForm.LocationId.trim(),
         DistrictId: createForm.DistrictId.trim(),
         PoiPreferences: createForm.PoiPreferences,
@@ -466,16 +531,38 @@ function StaffPOIsPage() {
         OpenHour: editForm.OpenHour.trim(),
         CloseHour: editForm.CloseHour.trim(),
         GoogleMapLink: editForm.GoogleMapLink.trim(),
+        VisitRecommendation: editForm.VisitRecommendation.trim(),
         IsIndoor: editForm.IsIndoor,
+        PoiPreferences: editForm.PoiPreferences,
         POIImgUrl: editForm.POIImgUrl.trim(),
         LocationId: editForm.LocationId.trim(),
         DistrictId: editForm.DistrictId.trim(),
       })
+        Status: editForm.Status || undefined,
+        PartnerId: editForm.PartnerId || undefined,
+      }, editImageFile)
 
       const refreshedData = await getStaffPOIs()
-      setPois(refreshedData)
+      // Nếu backend lưu ảnh tại cùng 1 URL, browser có thể cache -> thêm query để luôn thấy ảnh mới
+      const cacheBust = Date.now()
+      const withCacheBust = (url: string) => {
+        if (!url) return url
+        const hasQuery = url.includes("?")
+        return `${url}${hasQuery ? "&" : "?"}v=${cacheBust}`
+      }
+
+      setPois(
+        editImageFile
+          ? refreshedData.map((p) =>
+              p.Id === editingPoiId && p.POIImgUrl
+                ? { ...p, POIImgUrl: withCacheBust(p.POIImgUrl) }
+                : p
+            )
+          : refreshedData
+      )
       setShowEditModal(false)
       setEditingPoiId("")
+      setEditImageFile(null)
       showToast("success", "Cập nhật POI thành công")
     } catch (e) {
       console.error("Failed to update POI", e)
@@ -490,19 +577,10 @@ function StaffPOIsPage() {
     }
   }
 
-  const handleUploadEditImage = async (file: File | null) => {
+  const handleSelectEditImage = (file: File | null) => {
     if (!file) return
-    try {
-      setUploadingEditImage(true)
-      const imageUrl = await uploadStaffPOIImage(file)
-      setEditForm((prev) => ({ ...prev, POIImgUrl: imageUrl }))
-      showToast("success", "Upload ảnh thành công")
-    } catch (e) {
-      console.error("Failed to upload edit image", e)
-      showToast("error", "Upload ảnh thất bại")
-    } finally {
-      setUploadingEditImage(false)
-    }
+    setEditImageFile(file)
+    showToast("success", `Đã chọn ảnh: ${file.name}`)
   }
 
   return (
@@ -803,6 +881,14 @@ function StaffPOIsPage() {
                 <div className="border-b border-slate-100 pb-2">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">LocationId</dt>
                   <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.LocationId || "—"}</dd>
+                </div>
+                <div className="border-b border-slate-100 pb-2">
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Status</dt>
+                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.Status ?? "—"}</dd>
+                </div>
+                <div className="border-b border-slate-100 pb-2">
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">PartnerId</dt>
+                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.PartnerId ?? "—"}</dd>
                 </div>
                 <div className="border-b border-slate-100 pb-2">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Latitude / Longitude</dt>
@@ -1164,6 +1250,21 @@ function StaffPOIsPage() {
                   />
                 </label>
 
+                <label className="text-sm text-slate-700 sm:col-span-2">
+                  Gợi ý tham quan (VisitRecommendation)
+                  <input
+                    value={editForm.VisitRecommendation}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        VisitRecommendation: e.target.value,
+                      }))
+                    }
+                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
+                    placeholder="VD: Nên đi buổi sáng / mùa khô..."
+                  />
+                </label>
+
                 <label className="text-sm text-slate-700">
                   Thành phố (City)
                   <CustomSelect
@@ -1202,6 +1303,37 @@ function StaffPOIsPage() {
                 </label>
               </div>
 
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-slate-700">PoiPreferences</div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {POI_PREFERENCES_OPTIONS.map((opt) => {
+                    const checked = editForm.PoiPreferences.some((p) => p.id === opt.id)
+                    return (
+                      <label
+                        key={opt.id}
+                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 cursor-pointer hover:bg-slate-50"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(e) => {
+                            const nextChecked = e.target.checked
+                            setEditForm((prev) => {
+                              const next = nextChecked
+                                ? [...prev.PoiPreferences, opt]
+                                : prev.PoiPreferences.filter((p) => p.id !== opt.id)
+                              return { ...prev, PoiPreferences: next }
+                            })
+                          }}
+                          className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
+                        />
+                        <span className="truncate">{opt.name}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+
               <label className="inline-flex items-center gap-2 text-sm text-slate-700">
                 <input
                   type="checkbox"
@@ -1214,10 +1346,24 @@ function StaffPOIsPage() {
                 Trong nhà
               </label>
 
+              <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50">
+                {editImagePreviewUrl ? (
+                  <img
+                    src={editImagePreviewUrl}
+                    alt={editForm.Name || "POI"}
+                    className="w-full h-[220px] object-cover"
+                  />
+                ) : (
+                  <div className="h-[220px] flex items-center justify-center text-slate-400 text-sm">
+                    Không có ảnh
+                  </div>
+                )}
+              </div>
+
               <label className="text-sm text-slate-700 block">
                 POIImgUrl
                 <input
-                  value={editForm.POIImgUrl}
+                  value={editImageFile?.name ?? editForm.POIImgUrl}
                   onChange={(e) =>
                     setEditForm((prev) => ({ ...prev, POIImgUrl: e.target.value }))
                   }
@@ -1228,14 +1374,13 @@ function StaffPOIsPage() {
 
               <label className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 cursor-pointer hover:bg-slate-100">
                 <Upload size={16} />
-                {uploadingEditImage ? "Đang upload..." : "Import ảnh"}
+                Chọn ảnh mới
                 <input
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  disabled={uploadingEditImage}
                   onChange={(e) => {
-                    void handleUploadEditImage(e.target.files?.[0] ?? null)
+                    handleSelectEditImage(e.target.files?.[0] ?? null)
                     e.currentTarget.value = ""
                   }}
                 />
