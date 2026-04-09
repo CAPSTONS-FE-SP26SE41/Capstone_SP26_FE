@@ -10,6 +10,7 @@ export type StaffPOI = {
   Address: string
   City: string
   ApproxCost: string
+  Status?: string
 
   // Thời gian mở cửa
   OpenHour: string
@@ -67,6 +68,7 @@ function normalizeStaffPOI(p: any): StaffPOI {
     Address: String(p?.Address ?? p?.address ?? ""),
     City: String(p?.City ?? p?.city ?? ""),
     ApproxCost: String(p?.ApproxCost ?? p?.approxCost ?? p?.approx_cost ?? ""),
+    Status: String(p?.Status ?? p?.status ?? ""),
 
     OpenHour: openHour,
     CloseHour: closeHour,
@@ -105,6 +107,30 @@ export const getStaffPOIs = async (): Promise<StaffPOI[]> => {
   const data = await apiClient("/manager/pois")
   if (!Array.isArray(data)) return []
   return data.map(normalizeStaffPOI)
+}
+
+export type ManagerPendingPOIResult = {
+  items: StaffPOI[]
+  page: number
+  pageSize: number
+  totalItems: number
+  totalPages: number
+}
+
+export const getManagerPendingPOIs = async (
+  page: number = 1,
+  pageSize: number = 10
+): Promise<ManagerPendingPOIResult> => {
+  const data = await apiClient(`/manager/pois/pending?page=${page}&pageSize=${pageSize}`)
+  const rawItems = data?.Items ?? data?.items ?? []
+
+  return {
+    items: Array.isArray(rawItems) ? rawItems.map(normalizeStaffPOI) : [],
+    page: Number(data?.Page ?? data?.page ?? page),
+    pageSize: Number(data?.PageSize ?? data?.pageSize ?? pageSize),
+    totalItems: Number(data?.TotalItems ?? data?.totalItems ?? 0),
+    totalPages: Number(data?.TotalPages ?? data?.totalPages ?? 1),
+  }
 }
 
 export const getStaffPOIById = async (id: string): Promise<StaffPOI | null> => {
@@ -324,6 +350,19 @@ export const updateStaffPOI = async (
 export const deleteStaffPOI = async (id: string): Promise<void> => {
   await apiClient(`/manager/pois/${id}`, {
     method: "DELETE",
+  })
+}
+
+export const approveManagerPendingPOI = async (id: string): Promise<void> => {
+  await apiClient(`/manager/pois/${id}/approve`, {
+    method: "POST",
+  })
+}
+
+export const rejectManagerPendingPOI = async (id: string, reason?: string): Promise<void> => {
+  await apiClient(`/manager/pois/${id}/reject`, {
+    method: "POST",
+    body: JSON.stringify(reason ? { reason } : {}),
   })
 }
 

@@ -59,8 +59,12 @@ export const getActiveAdvertisements = async (): Promise<AdvertisementDetail[]> 
   return Array.isArray(data) ? data : []
 }
 
-export const getPendingAdvertisements = async () => {
-  return apiClient("/advertisements/pending")
+export const getManagerAccounts = async () => {
+  return apiClient("/manager/accounts")
+}
+
+export const getManagerAccountAdvertisements = async (accountId: string) => {
+  return apiClient(`/manager/accounts/${accountId}/advertisements`)
 }
 
 export const approveAdvertisement = async (id: string) => {

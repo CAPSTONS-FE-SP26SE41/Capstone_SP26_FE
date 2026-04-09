@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
-import { Edit2, Eye, Plus, Search, Trash2, Upload } from "lucide-react"
+import { Edit2, Eye, Plus, Search, Trash2, Upload, X } from "lucide-react"
 
 import {
   createStaffPOI,
@@ -509,12 +509,7 @@ function StaffPOIsPage() {
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-semibold text-slate-900">
-            Quản lí POIs
-          </h2>
-         
-        </div>
+      {/* Removed Title */}
 
         <div className="w-full sm:w-auto flex items-center gap-2">
           <div className="relative w-full sm:w-[360px]">
@@ -588,7 +583,6 @@ function StaffPOIsPage() {
                   <thead className="sticky top-0 z-10 bg-slate-100">
                     <tr className="text-slate-700 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
                       <th className="px-6 py-4 text-left w-16">STT</th>
-                      <th className="px-6 py-4 text-left w-28">Mã Id</th>
                       <th className="px-6 py-4 text-left w-40">Tên</th>
                       <th className="px-6 py-4 text-left">Thành phố</th>
                       <th className="px-6 py-4 text-left">Trong nhà</th>
@@ -600,16 +594,10 @@ function StaffPOIsPage() {
                     {pagedPois.map((p, idx) => (
                       <tr
                         key={p.Id}
-                        className="transition-shadow hover:shadow-[inset_0_0_0_2px_#3b82f6]"
+                        className="hover:bg-slate-100 transition-colors"
                       >
                         <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
                           {startIndex + idx + 1}
-                        </td>
-
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-                          <div className="max-w-[180px] overflow-x-auto whitespace-nowrap">
-                            {p.Id}
-                          </div>
                         </td>
 
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -619,7 +607,7 @@ function StaffPOIsPage() {
                         </td>
 
                         <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-                          {p.City}
+                          {p.LocationName || p.City || "—"}
                         </td>
 
                         <td className="px-6 py-4">
@@ -638,24 +626,33 @@ function StaffPOIsPage() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => void openDetailModal(p.Id)}
-                              title="Xem chi tiết"
-                              className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition-colors"
+                              className="group relative inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-200 transition-colors"
                             >
                               <Eye size={16} />
+                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
+                                Xem chi tiết
+                                <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                              </span>
                             </button>
                             <button
                               onClick={() => void openEditModal(p.Id)}
-                              className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors text-sm font-semibold"
+                              className="group relative inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors"
                             >
                               <Edit2 size={16} />
-                              
+                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
+                                Chỉnh sửa
+                                <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                              </span>
                             </button>
                             <button
                               onClick={() => handleDelete(p)}
-                              className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors text-sm font-semibold"
+                              className="group relative inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors"
                             >
                               <Trash2 size={16} />
-                              
+                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
+                                Xóa
+                                <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                              </span>
                             </button>
                           </div>
                         </td>
@@ -740,9 +737,9 @@ function StaffPOIsPage() {
               </h3>
               <button
                 onClick={() => setSelectedPoi(null)}
-                className="h-9 px-3 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
               >
-                Đóng
+                <X size={20} />
               </button>
             </div>
 
@@ -833,9 +830,9 @@ function StaffPOIsPage() {
                   setShowCreateModal(false)
                   resetCreateForm()
                 }}
-                className="h-9 px-3 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
               >
-                Đóng
+                <X size={20} />
               </button>
             </div>
 
@@ -1014,7 +1011,7 @@ function StaffPOIsPage() {
                   }
                   className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
                 />
-                IsIndoor
+                Trong nhà
               </label>
 
               <div className="space-y-2">
@@ -1079,9 +1076,9 @@ function StaffPOIsPage() {
                   setShowEditModal(false)
                   setEditingPoiId("")
                 }}
-                className="h-9 px-3 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
               >
-                Đóng
+                <X size={20} />
               </button>
             </div>
 
@@ -1214,7 +1211,7 @@ function StaffPOIsPage() {
                   }
                   className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
                 />
-                IsIndoor
+                Trong nhà
               </label>
 
               <label className="text-sm text-slate-700 block">

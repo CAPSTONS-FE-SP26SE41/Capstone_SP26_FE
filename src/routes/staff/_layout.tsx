@@ -3,7 +3,8 @@ import {
   LayoutDashboard,
   MapPin,
   Map,
-  PlaneTakeoff
+  PlaneTakeoff,
+  ClipboardCheck
 } from "lucide-react"
 
 import DashboardLayout from "../../components/layouts/DashboardLayout"
@@ -30,11 +31,13 @@ function ManagerLayout() {
         { to: "/staff", icon: LayoutDashboard, label: "Trang chủ", exact: true },
         { to: "/staff/pois", icon: MapPin, label: "Quản lí POIs" },
         { to: "/staff/locations", icon: Map, label: "Quản lí địa điểm" },
+        { to: "/staff/advertisements", icon: ClipboardCheck, label: "Yêu cầu xét duyệt" },
       ]}
       userName={typeof window !== "undefined" ? localStorage.getItem("user_name") ?? "Manager" : "Manager"}
 
       userRole={typeof window !== "undefined" ? localStorage.getItem("user_role") ?? "Manager" : "Manager"}
       searchPlaceholder="Search..."
+      showSearch={false}
     />
   )
 }

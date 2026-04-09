@@ -15,8 +15,9 @@ export default function AppTopbar({
   userRole = 'User',
   userAvatarUrl = 'https://i.pravatar.cc/40',
   themeColor = 'green',
-  searchPlaceholder = 'Sreach ...',
-}: AppTopbarProps) {
+  searchPlaceholder = 'Search...',
+  showSearch = true,
+}: AppTopbarProps & { showSearch?: boolean }) {
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -45,6 +46,10 @@ export default function AppTopbar({
   const accentClasses = accentMap[accent] || accentMap.emerald
 
   const getPageTitle = (path: string) => {
+    if (path.includes('/staff/advertisements')) return 'Yêu cầu xét duyệt'
+    if (path.includes('/staff/locations')) return 'Quản lí địa điểm'
+    if (path.includes('/staff/pois')) return 'Quản lí POIs'
+    if (path === '/staff') return 'Trang chủ'
     if (path.includes('/accounts')) return 'Account Management'
     if (path.includes('/analytics')) return 'Analytics'
     if (path.includes('/subscriptions')) return 'Subscription Packages'
@@ -66,19 +71,27 @@ export default function AppTopbar({
   const ringColor = accentClasses.ring
 
   return (
-    <header className="sticky top-0 z-50 h-18 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8">
+    <header className="sticky top-0 z-50 h-18 py-3 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8">
 
-      {/* Search */}
-      <div className="relative w-[320px]">
-        <Search
-          size={18}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-        />
-        <input
-          className={`w-full h-10 pl-10 pr-4 bg-slate-100 rounded-xl text-sm outline-none focus:ring-2 ${accentClasses.focusRing} transition-all`}
-          placeholder={searchPlaceholder}
-        />
-      </div>
+      {/* Search or Title */}
+      {showSearch ? (
+        <div className="relative w-[320px]">
+          <Search
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          />
+          <input
+            className={`w-full h-10 pl-10 pr-4 bg-slate-100 rounded-xl text-sm outline-none focus:ring-2 ${accentClasses.focusRing} transition-all`}
+            placeholder={searchPlaceholder}
+          />
+        </div>
+      ) : (
+        <div>
+          <h1 className="text-xl font-bold text-slate-800 tracking-tight">
+            {getPageTitle(location.href)}
+          </h1>
+        </div>
+      )}
 
       {/* Right Side */}
       <div className="flex items-center gap-6">

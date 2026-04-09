@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Megaphone, Plus, Loader2, PackageX } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { getMyPartnerPOIs } from '../../../services/partnerPoiService'
 import AdsTable from '../../../components/partner/AdsTable'
 import CreateAdModal from '../../../components/partner/CreateAdModal'
 import { Ad } from '../../../types/ad'
@@ -15,6 +16,7 @@ function PartnerAdvertisementPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [ads, setAds] = useState<Ad[]>([])
   const [loading, setLoading] = useState(true)
+  const [poiNameMap, setPoiNameMap] = useState<Record<string, string>>({})
   const [checkingSubscription, setCheckingSubscription] = useState(false)
   const [showNoSubWarning, setShowNoSubWarning] = useState(false)
 
@@ -33,6 +35,22 @@ function PartnerAdvertisementPage() {
 
   useEffect(() => {
     fetchAds()
+
+    const fetchPoiNames = async () => {
+      try {
+        const result = await getMyPartnerPOIs(1, 1000)
+        const map: Record<string, string> = {}
+        result.items.forEach((poi) => {
+          if (poi.id) map[poi.id] = poi.name
+        })
+        setPoiNameMap(map)
+      } catch (error) {
+        console.error('Error fetching POI names:', error)
+        setPoiNameMap({})
+      }
+    }
+
+    fetchPoiNames()
   }, [])
 
   const handleCreateAd = async (newAdData: Omit<Ad, 'adId' | 'status'>) => {
@@ -93,7 +111,7 @@ function PartnerAdvertisementPage() {
           <p className="font-medium">Đang tải danh sách quảng cáo...</p>
         </div>
       ) : ads.length > 0 ? (
-        <AdsTable ads={ads} />
+        <AdsTable ads={ads} poiNameMap={poiNameMap} />
       ) : (
         <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm p-16 text-center">
           <div className="bg-[#faeadd] h-20 w-20 rounded-full flex items-center justify-center mx-auto mb-6">

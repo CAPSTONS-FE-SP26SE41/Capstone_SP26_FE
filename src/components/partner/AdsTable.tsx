@@ -4,25 +4,37 @@ import { Ad } from '../../types/ad';
 
 interface AdsTableProps {
   ads: Ad[];
+  poiNameMap?: Record<string, string>;
 }
 
 const statusStyles: Record<string, string> = {
   Active: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
   Pending: 'bg-amber-50 text-amber-600 border border-amber-100',
+  PendingApproval: 'bg-amber-50 text-amber-600 border border-amber-100',
   Rejected: 'bg-red-50 text-red-500 border border-red-100',
   Inactive: 'bg-slate-100 text-slate-500 border border-slate-200',
+  Expired: 'bg-slate-100 text-slate-500 border border-slate-200',
   Approved: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
 };
 
 const statusLabels: Record<string, string> = {
   Active: 'Hoạt động',
   Pending: 'Chờ duyệt',
+  PendingApproval: 'Chờ xét duyệt',
   Rejected: 'Bị từ chối',
   Inactive: 'Ngừng hoạt động',
+  Expired: 'Dừng hoạt động',
   Approved: 'Đã duyệt',
 };
 
-export default function AdsTable({ ads }: AdsTableProps) {
+const isValidImageUrl = (url?: string) => {
+  if (!url || typeof url !== 'string') return false;
+  const value = url.trim();
+  if (!value || value.toLowerCase() === 'string') return false;
+  return /^(https?:\/\/|data:|blob:|\/)/i.test(value);
+};
+
+export default function AdsTable({ ads, poiNameMap = {} }: AdsTableProps) {
   const [detailAd, setDetailAd] = useState<Ad | null>(null);
 
   const formatDate = (dateString: string) => {
@@ -39,53 +51,53 @@ export default function AdsTable({ ads }: AdsTableProps) {
 
   return (
     <>
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[900px]">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
+        <div className="overflow-x-auto overflow-y-visible">
+          <table className="w-full min-w-[980px] table-fixed text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-[13px] uppercase tracking-wider">
-                <th className="p-4 font-bold w-[35%] tracking-tight">Advertisement</th>
-                <th className="p-4 font-bold tracking-tight">Duration</th>
-                <th className="p-4 font-bold tracking-tight">Promotion</th>
-                <th className="p-4 font-bold tracking-tight text-center">Status</th>
-                <th className="p-4 font-bold tracking-tight text-right">Actions</th>
+                <th className="px-3 py-3 font-bold w-[28%] tracking-tight align-middle">Advertisement</th>
+                <th className="px-3 py-3 font-bold w-[22%] tracking-tight align-middle">Duration</th>
+                <th className="px-3 py-3 font-bold w-[20%] tracking-tight align-middle">Promotion</th>
+                <th className="px-3 py-3 font-bold w-[15%] tracking-tight text-center align-middle">Status</th>
+                <th className="px-3 py-3 font-bold w-[15%] tracking-tight text-center align-middle">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
               {ads.map(ad => (
-                <tr key={ad.adId} className="hover:bg-slate-50/50 transition-colors group">
-                  <td className="p-4">
-                    <div className="flex items-start gap-3">
-                      {ad.imageUrl ? (
-                        <img src={ad.imageUrl} alt={ad.title} className="w-12 h-12 rounded-lg object-cover border border-slate-200 shrink-0 shadow-sm" />
+                <tr key={ad.adId} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-3 py-3 align-middle">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {isValidImageUrl(ad.imageUrl) ? (
+                        <img src={ad.imageUrl} alt={ad.title} className="h-12 w-12 rounded-lg object-cover border border-slate-200 shrink-0 shadow-sm" />
                       ) : (
-                        <div className="w-12 h-12 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 shrink-0">
+                        <div className="h-12 w-12 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 shrink-0 shadow-sm">
                           <ImageIcon size={20} />
                         </div>
                       )}
-                      <div>
-                        <p className="font-bold text-slate-900 mb-0.5 line-clamp-1 leading-tight">{ad.title}</p>
-                        <p className="text-[13px] text-slate-500 line-clamp-1 font-normal leading-relaxed">{ad.content}</p>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-900 mb-0.5 truncate leading-tight">{ad.title}</p>
+                        <p className="text-[13px] text-slate-500 truncate font-normal leading-relaxed">{ad.content}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-2 text-[13px] text-slate-600">
+                  <td className="px-3 py-3 align-middle">
+                    <div className="flex items-center gap-2 text-[13px] text-slate-600 min-w-0">
                       <Calendar size={16} className="text-slate-400 shrink-0" />
-                      <div className="leading-tight">
-                        <p className="font-semibold text-slate-700">{formatDate(ad.startDate)}</p>
-                        <p className="text-slate-400 font-medium">đến {formatDate(ad.endDate)}</p>
+                      <div className="min-w-0 leading-tight">
+                        <p className="font-semibold text-slate-700 truncate">{formatDate(ad.startDate)}</p>
+                        <p className="text-slate-400 font-medium truncate">đến {formatDate(ad.endDate)}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="p-4 text-sm">
+                  <td className="px-3 py-3 text-sm align-middle">
                     {ad.promotion?.title ? (
                       <div>
                         <div className="flex items-center gap-1.5 font-bold text-slate-900 mb-0.5">
                           <Tag size={14} className="text-[#e28743]" />
                           {ad.promotion.title}
                         </div>
-                        <p className="text-xs text-slate-500 line-clamp-1 font-normal" title={ad.promotion.description}>
+                        <p className="text-xs text-slate-500 truncate font-normal" title={ad.promotion.description}>
                           {ad.promotion.description}
                         </p>
                       </div>
@@ -93,18 +105,21 @@ export default function AdsTable({ ads }: AdsTableProps) {
                       <span className="text-slate-400 italic font-normal">Không có</span>
                     )}
                   </td>
-                  <td className="p-4 text-center">
+                  <td className="px-3 py-3 text-center align-middle">
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusStyles[ad.status || ''] || 'bg-slate-100 text-slate-500'}`}>
                       {statusLabels[ad.status || ''] || ad.status || '—'}
                     </span>
                   </td>
-                  <td className="p-4 text-right">
+                  <td className="px-3 py-3 text-center align-middle">
                     <button
                       onClick={() => setDetailAd(ad)}
-                      className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                      title="Xem chi tiết"
+                      className="group relative inline-flex h-9 w-9 items-center justify-center text-slate-400 bg-slate-50 border border-slate-200 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 rounded-lg transition-all"
                     >
                       <Eye size={18} />
+                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-[70]">
+                        Xem chi tiết
+                        <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                      </span>
                     </button>
                   </td>
                 </tr>
@@ -116,7 +131,12 @@ export default function AdsTable({ ads }: AdsTableProps) {
 
       {/* Detail Modal */}
       {detailAd && (
-        <AdDetailModal ad={detailAd} onClose={() => setDetailAd(null)} formatDate={formatDate} />
+        <AdDetailModal
+          ad={detailAd}
+          onClose={() => setDetailAd(null)}
+          formatDate={formatDate}
+          poiNameMap={poiNameMap}
+        />
       )}
     </>
   );
@@ -127,9 +147,10 @@ interface AdDetailModalProps {
   ad: Ad;
   onClose: () => void;
   formatDate: (d: string) => string;
+  poiNameMap: Record<string, string>;
 }
 
-function AdDetailModal({ ad, onClose, formatDate }: AdDetailModalProps) {
+function AdDetailModal({ ad, onClose, formatDate, poiNameMap }: AdDetailModalProps) {
   const infoRows: { icon: React.ReactNode; label: string; value: React.ReactNode }[] = [
     {
       icon: <FileText size={16} />,
@@ -138,8 +159,12 @@ function AdDetailModal({ ad, onClose, formatDate }: AdDetailModalProps) {
     },
     {
       icon: <MapPin size={16} />,
-      label: 'POI ID',
-      value: <span className="font-mono text-xs">{ad.poiId}</span>,
+      label: 'Địa điểm',
+      value: (
+        <span>
+          {poiNameMap[ad.poiId] || (ad as any).poiName || (ad as any).POIName || (ad as any).PoiName || 'Không xác định'}
+        </span>
+      ),
     },
     {
       icon: <Clock size={16} />,
@@ -183,7 +208,7 @@ function AdDetailModal({ ad, onClose, formatDate }: AdDetailModalProps) {
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 rounded-t-2xl flex items-center justify-between z-10">
           <h2 className="text-lg font-bold text-slate-800">Chi tiết quảng cáo</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition-all">
+          <button onClick={onClose} className="p-2 hover:bg-red-100 rounded-lg transition-all">
             <X size={20} className="text-slate-400" />
           </button>
         </div>
@@ -191,7 +216,7 @@ function AdDetailModal({ ad, onClose, formatDate }: AdDetailModalProps) {
         <div className="p-6 space-y-6">
           {/* Image + Title header */}
           <div className="flex items-start gap-4">
-            {ad.imageUrl ? (
+            {isValidImageUrl(ad.imageUrl) ? (
               <img src={ad.imageUrl} alt={ad.title} className="h-24 w-24 rounded-2xl object-cover border border-slate-200 flex-shrink-0" />
             ) : (
               <div className="h-24 w-24 rounded-2xl bg-[#faeadd] flex items-center justify-center flex-shrink-0">

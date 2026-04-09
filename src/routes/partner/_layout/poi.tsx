@@ -184,8 +184,9 @@ function PartnerPOIPage() {
         </div>
       ) : filteredPois.length > 0 ? (
         <>
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <table className="w-full text-left border-collapse">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
+            <div className="overflow-x-auto overflow-y-visible">
+              <table className="w-full min-w-[980px] text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
                   <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider">Tên POI</th>
@@ -193,12 +194,12 @@ function PartnerPOIPage() {
                   <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider">Địa chỉ</th>
                   <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider">Giờ mở cửa</th>
                   <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider text-center">Trạng thái</th>
-                  <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider text-right">Thao tác</th>
+                  <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider text-center">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredPois.map((poi) => (
-                  <tr key={poi.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr key={poi.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {poi.poiImgUrl ? (
@@ -236,29 +237,38 @@ function PartnerPOIPage() {
                         {statusLabels[poi.status] || poi.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => setDetailPoi(poi)}
-                          className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                          title="Xem chi tiết"
+                          className="group relative inline-flex h-9 w-9 items-center justify-center text-slate-400 bg-slate-50 border border-slate-200 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 rounded-lg transition-all"
                         >
                           <Eye size={16} />
+                          <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
+                            Xem chi tiết
+                            <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                          </span>
                         </button>
                         <button
                           onClick={() => handleEdit(poi)}
-                          className="p-2 text-slate-400 hover:text-[#e28743] hover:bg-[#faeadd] rounded-lg transition-all"
-                          title="Sửa"
+                          className="group relative inline-flex h-9 w-9 items-center justify-center text-slate-400 bg-slate-50 border border-slate-200 hover:text-[#e28743] hover:bg-[#faeadd] hover:border-[#f2c9a9] rounded-lg transition-all"
                         >
                           <Edit2 size={16} />
+                          <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
+                            Chỉnh sửa
+                            <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                          </span>
                         </button>
                         {poi.status === 'Active' && (
                           <button
                             onClick={() => handleInactivate(poi)}
-                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                            title="Ngừng hoạt động"
+                            className="group relative inline-flex h-9 w-9 items-center justify-center text-slate-400 bg-slate-50 border border-slate-200 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 rounded-lg transition-all"
                           >
                             <EyeOff size={16} />
+                            <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
+                              Ngừng hoạt động
+                              <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                            </span>
                           </button>
                         )}
                       </div>
@@ -267,6 +277,7 @@ function PartnerPOIPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* Pagination */}
@@ -527,8 +538,8 @@ function POIFormModal({ poi, submitting, onClose, onSubmit }: POIFormModalProps)
           <h2 className="text-lg font-bold text-slate-800">
             {isEditing ? 'Chỉnh sửa POI' : 'Thêm POI mới'}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition-all">
-            <X size={20} className="text-slate-400" />
+          <button onClick={onClose} className="group p-2 hover:bg-red-100 rounded-lg transition-all">
+            <X size={20} className="text-slate-400 transition-colors" />
           </button>
         </div>
 
@@ -766,8 +777,8 @@ function POIDetailModal({ poi, onClose, onEdit }: POIDetailModalProps) {
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 rounded-t-2xl flex items-center justify-between z-10">
           <h2 className="text-lg font-bold text-slate-800">Chi tiết POI</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition-all">
-            <X size={20} className="text-slate-400" />
+          <button onClick={onClose} className="group p-2 hover:bg-red-100 rounded-lg transition-all">
+            <X size={20} className="text-slate-400 transition-colors" />
           </button>
         </div>
 

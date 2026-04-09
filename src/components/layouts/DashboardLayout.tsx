@@ -9,6 +9,7 @@ type DashboardLayoutProps = {
   userRole?: string
   userAvatarUrl?: string
   searchPlaceholder?: string
+  showSearch?: boolean
   themeColor?: string
 }
 
@@ -19,6 +20,7 @@ export default function DashboardLayout({
   userRole,
   userAvatarUrl,
   searchPlaceholder,
+  showSearch = true,
   themeColor = 'green',
 }: DashboardLayoutProps) {
   return (
@@ -38,6 +40,7 @@ export default function DashboardLayout({
           userRole={userRole}
           userAvatarUrl={userAvatarUrl}
           searchPlaceholder={searchPlaceholder}
+          showSearch={showSearch}
           themeColor={themeColor}
         />
 
