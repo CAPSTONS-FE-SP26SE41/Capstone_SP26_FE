@@ -143,7 +143,7 @@ function SubscriptionsPage() {
   const [debouncedKeyword, setDebouncedKeyword] = useState("")
 
   // Fix cứng phân trang
-  const itemsPerPage = 4
+  const itemsPerPage = 6
   const totalPages = Math.max(1, Math.ceil(subscriptions.length / itemsPerPage))
 
   const [modalOpen, setModalOpen] = useState(false)
@@ -517,6 +517,7 @@ function SubscriptionsPage() {
             Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, subscriptions.length)} of {subscriptions.length} packages
           </span>
           <div className="flex gap-2">
+            <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}>First</button>
             <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1} className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}>Previous</button>
             <span className="px-3 py-1 text-sm">Page {currentPage} / {totalPages}</span>
             <button onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50 ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}>Next</button>
