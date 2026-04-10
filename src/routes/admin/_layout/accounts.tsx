@@ -360,7 +360,7 @@ function AccountsPage() {
                 <option value="Role">All Roles</option>
                 <option value="Admin">Admin</option>
                 <option value="User">User</option>
-                <option value="Staff">Staff</option>
+                <option value="Manager">Manager</option>
                 <option value="Partner">Partner</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
