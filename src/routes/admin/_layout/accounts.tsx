@@ -331,6 +331,7 @@ function AccountsPage() {
   if (loading) return <div className="flex justify-center py-20 text-sm text-slate-500">Loading accounts...</div>
 
   const startIndex = (currentPage - 1) * itemsPerPage
+  const currentAccounts = accounts.slice(startIndex, startIndex + itemsPerPage)
 
   return (
     <div className="flex flex-col gap-6" onClick={() => setOpenFilter(null)}>
@@ -400,8 +401,8 @@ function AccountsPage() {
               </tr>
             </thead>
             <tbody>
-              {accounts.length > 0 ? (
-                accounts.map((account, index) => (
+              {currentAccounts.length > 0 ? (
+                currentAccounts.map((account, index) => (
                   <tr key={account.id} className="hover:bg-[#f8fafc] transition-colors group">
                     <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">{startIndex + index + 1}</td>
                     <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4] truncate">{account.email}</td>
