@@ -340,15 +340,32 @@ function AccountsPage() {
       {/* Header Panel */}
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-sm -mx-6 px-6 py-4 mb-2 border-b border-transparent transition-all">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="w-full md:max-w-md">
-            <div className="relative">
+          <div className="w-full md:max-w-xl flex gap-3">
+            <div className="relative flex-1">
               <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473]"
                 placeholder="Search by name or email..."
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
               />
+            </div>
+            
+            <div className="relative min-w-[130px]">
+              <select
+                value={roleFilter}
+                onChange={(e) => { setRoleFilter(e.target.value); setCurrentPage(1); }}
+                className="w-full appearance-none px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] cursor-pointer"
+              >
+                <option value="Role">All Roles</option>
+                <option value="Admin">Admin</option>
+                <option value="User">User</option>
+                <option value="Staff">Staff</option>
+                <option value="Partner">Partner</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                <ChevronDown size={14} />
+              </div>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -374,16 +391,7 @@ function AccountsPage() {
                 <th className="w-[6%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">No.</th>
                 <th className="w-[24%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Email</th>
                 <th className="w-[18%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Name</th>
-                <th className="w-[14%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
-                  <FilterDropdown
-                    label="Role"
-                    value={roleFilter}
-                    options={["Role", "Admin", "User", "Staff", "Partner"]}
-                    isOpen={openFilter === "role"}
-                    onChange={(val) => { setRoleFilter(val); setOpenFilter(null); setCurrentPage(1); }}
-                    onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "role" ? null : "role"); }}
-                  />
-                </th>
+                <th className="w-[14%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Role</th>
                 <th className="w-[12%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
                   <FilterDropdown
                     label="Status"
