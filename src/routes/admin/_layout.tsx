@@ -46,7 +46,6 @@ function AdminLayout() {
         { to: '/admin/analytics', icon: BarChart2, label: 'Analytics' },
         { to: '/admin/accounts', icon: UserCog, label: 'Account', exact: true },
         { to: '/admin/subscriptions', icon: CreditCard, label: 'Subscription' },
-        { to: "/admin/settings", icon: Settings, label: "System" },
       ]}
       userName={userName}
 
