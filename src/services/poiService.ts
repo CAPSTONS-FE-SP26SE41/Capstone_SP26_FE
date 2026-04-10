@@ -169,8 +169,6 @@ function normalizeStaffPOI(p: any): StaffPOI {
     Address: String(p?.Address ?? p?.address ?? ""),
     City: String(p?.City ?? p?.city ?? ""),
     ApproxCost: String(p?.ApproxCost ?? p?.approxCost ?? p?.approx_cost ?? ""),
-    Status: String(p?.Status ?? p?.status ?? ""),
-
     OpenHour: openHour,
     CloseHour: closeHour,
     Is24Hours: Boolean(p?.Is24Hours ?? p?.is24Hours ?? p?.is24hours ?? false),

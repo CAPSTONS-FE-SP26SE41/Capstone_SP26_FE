@@ -264,10 +264,15 @@ function AdvertisementsPage() {
                                         
                                         <td className="px-8 py-4">
                                           <div className="flex items-center gap-3">
-                                            <img
-                                              src={ad.imageUrl}
-                                              className="w-10 h-10 rounded border border-slate-200 object-cover"
-                                            />
+                                            {ad.imageUrl ? (
+                                              <img
+                                                src={ad.imageUrl}
+                                                alt={ad.title}
+                                                className="w-10 h-10 rounded border border-slate-200 object-cover flex-shrink-0"
+                                              />
+                                            ) : (
+                                              <div className="w-10 h-10 rounded border border-slate-200 bg-slate-100 flex-shrink-0" />
+                                            )}
                                             <div>
                                               <p className="text-sm font-semibold text-slate-800 line-clamp-1">
                                                 {ad.title}
@@ -317,9 +322,9 @@ function AdvertisementsPage() {
                                               className="group relative flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors"
                                             >
                                               <Check size={16}/>
-                                              <span className="pointer-events-none absolute top-full right-0 mt-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-[70]">
+                                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-[90]">
                                                 Duyệt
-                                                <span className="absolute right-3 bottom-full border-[5px] border-transparent border-b-slate-800"></span>
+                                                <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
                                               </span>
                                             </button>
                                             <button
@@ -327,9 +332,9 @@ function AdvertisementsPage() {
                                               className="group relative flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors"
                                             >
                                               <X size={16}/>
-                                              <span className="pointer-events-none absolute top-full right-0 mt-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-[70]">
+                                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-[90]">
                                                 Từ chối
-                                                <span className="absolute right-3 bottom-full border-[5px] border-transparent border-b-slate-800"></span>
+                                                <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
                                               </span>
                                             </button>
                                           </div>

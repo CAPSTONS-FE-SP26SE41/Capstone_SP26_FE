@@ -68,11 +68,10 @@ function StaffPOIsPage() {
     GoogleMapLink: "",
     VisitRecommendation: "",
     IsIndoor: false,
-    PoiPreferences: [] as Array<{ id: string; name: string }>,
+    PoiPreferences: [] as string[],
     POIImgUrl: "",
     LocationId: "",
     DistrictId: "",
-    PoiPreferences: [] as string[],
   })
   const [createImageFile, setCreateImageFile] = useState<File | null>(null)
   const [editingPoiId, setEditingPoiId] = useState("")
@@ -113,11 +112,10 @@ function StaffPOIsPage() {
       GoogleMapLink: "",
       VisitRecommendation: "",
       IsIndoor: false,
-      PoiPreferences: [],
+      PoiPreferences: [] as string[],
       POIImgUrl: "",
       LocationId: "",
       DistrictId: "",
-      PoiPreferences: [] as string[],
     })
     setDistricts([])
     setFormErrors({})
@@ -456,7 +454,6 @@ function StaffPOIsPage() {
           : undefined,
         LocationId: createForm.LocationId.trim(),
         DistrictId: createForm.DistrictId.trim(),
-        PoiPreferences: createForm.PoiPreferences,
       }, createImageFile)
 
       const refreshedData = await getStaffPOIs()
@@ -537,7 +534,6 @@ function StaffPOIsPage() {
         POIImgUrl: editForm.POIImgUrl.trim(),
         LocationId: editForm.LocationId.trim(),
         DistrictId: editForm.DistrictId.trim(),
-      })
         Status: editForm.Status || undefined,
         PartnerId: editForm.PartnerId || undefined,
       }, editImageFile)

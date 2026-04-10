@@ -16,7 +16,6 @@ export default function AppTopbar({
   userAvatarUrl = 'https://i.pravatar.cc/40',
   searchPlaceholder = 'Search...',
   themeColor = 'green',
-  searchPlaceholder = 'Search...',
   showSearch = true,
 }: AppTopbarProps & { showSearch?: boolean }) {
   const location = useLocation()
