@@ -248,7 +248,7 @@ function AccountsPage() {
 
     try {
       if (editing) {
-        await updateAccount(editing.id, { email: form.email.trim(), name: form.fullName.trim(), roleId: ROLE_MAP[form.roleName] })
+        await updateAccount(editing.id, { id: editing.id, email: form.email.trim(), name: form.fullName.trim(), roleId: ROLE_MAP[form.roleName] })
       } else {
         await createAccount({ email: form.email.trim(), password: DEFAULT_PASSWORD, name: form.fullName.trim(), roleId: ROLE_MAP[form.roleName] })
       }
