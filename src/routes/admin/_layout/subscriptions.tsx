@@ -426,7 +426,7 @@ function SubscriptionsPage() {
                     </td>
 
                     <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
-                      {sub.durationDays} days
+                      {sub.durationDays} 
                     </td>
 
                     <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
