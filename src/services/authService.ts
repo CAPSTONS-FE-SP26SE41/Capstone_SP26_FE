@@ -30,3 +30,7 @@ export const logout = () => {
   localStorage.removeItem("user_name")
   localStorage.removeItem("user_role")
 }
+
+export const getMe = async () => {
+  return apiClient("/auth/me")
+}

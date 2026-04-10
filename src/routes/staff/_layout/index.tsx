@@ -169,41 +169,7 @@ function StaffDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 bg-white rounded-2xl border border-emerald-100 shadow-sm p-6">
-          <div className="flex items-start justify-between gap-4 mb-4">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">
-                Kế hoạch tối ưu
-              </h3>
-              <p className="text-sm text-slate-500 mt-1">
-                Tỉ lệ POIs trong nhà hiện tại
-              </p>
-            </div>
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-              {loading ? "..." : `${stats.indoorRatio}%`}
-            </span>
-          </div>
-
-          <div className="mt-2 h-3 bg-emerald-50 rounded-full overflow-hidden border border-emerald-100">
-            <div
-              className="h-full bg-emerald-600 rounded-full transition-all"
-              style={{
-                width: `${loading ? 0 : Math.min(100, stats.indoorRatio)}%`,
-              }}
-            />
-          </div>
-
-          <div className="mt-5 space-y-3">
-            <PlanRow
-              label="Tăng POIs trong nhà"
-              value={loading ? "..." : `${Math.max(0, 70 - stats.indoorRatio)}%`}
-            />
-            <PlanRow label="Giữ chất lượng dữ liệu" value="Ổn định" variant="ok" />
-            <PlanRow label="Kiểm tra giờ mở cửa" value="Định kì" variant="neutral" />
-          </div>
-        </div>
-
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden">
+        <div className="lg:col-span-3 bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-emerald-100 flex items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-slate-900">POIs gần đây</h3>
             <Link
@@ -215,12 +181,11 @@ function StaffDashboard() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full table-fixed border-collapse">
+            <table className="w-full table-auto border-collapse">
               <thead>
                 <tr className="bg-emerald-50 text-emerald-800 text-xs uppercase tracking-wider font-semibold border-b border-emerald-100">
-                  <th className="px-6 py-4 text-left">Tên</th>
-                  <th className="px-6 py-4 text-left">Địa chỉ</th>
-                  <th className="px-6 py-4 text-left">Thành phố</th>
+                  <th className="px-6 py-4 text-left min-w-[200px]">Tên</th>
+                  <th className="px-6 py-4 text-left min-w-[250px]">Địa chỉ</th>
                   <th className="px-6 py-4 text-left">Giờ mở cửa</th>
                   <th className="px-6 py-4 text-left">Loại</th>
                 </tr>
@@ -229,7 +194,7 @@ function StaffDashboard() {
                 {recentPois.length === 0 && !loading ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={4}
                       className="px-6 py-10 text-center text-slate-500"
                     >
                       Chưa có POIs nào
@@ -241,14 +206,11 @@ function StaffDashboard() {
                       key={poi.Id}
                       className="hover:bg-emerald-50 transition-colors"
                     >
-                      <td className="px-6 py-4 font-medium text-slate-900 truncate">
+                      <td className="px-6 py-4 font-medium text-slate-900 break-words">
                         {poi.Name}
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-600 truncate">
+                      <td className="px-6 py-4 text-sm text-slate-600 break-words">
                         {poi.Address}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-600">
-                        {poi.City}
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-600 truncate">
                         {poi.OpeningHours}
@@ -337,26 +299,6 @@ function MiniWalletCard({
       >
         {value}
       </p>
-    </div>
-  )
-}
-
-function PlanRow({
-  label,
-  value,
-  variant = "neutral",
-}: {
-  label: string
-  value: string
-  variant?: "ok" | "neutral"
-}) {
-  const valueClass =
-    variant === "ok" ? "text-emerald-700" : "text-slate-800"
-
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <span className="text-sm text-slate-600">{label}</span>
-      <span className={`text-sm font-semibold ${valueClass}`}>{value}</span>
     </div>
   )
 }

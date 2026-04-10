@@ -189,12 +189,12 @@ function PartnerPOIPage() {
               <table className="w-full min-w-[980px] text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider">Tên POI</th>
+                  <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider min-w-[280px]">Tên POI</th>
                   <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider">Loại hình</th>
                   <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider">Địa chỉ</th>
                   <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider">Giờ mở cửa</th>
                   <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider text-center">Trạng thái</th>
-                  <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider text-center">Thao tác</th>
+                  <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider text-right pr-12">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -213,8 +213,8 @@ function PartnerPOIPage() {
                             <MapPin size={20} />
                           </div>
                         )}
-                        <div>
-                          <span className="font-bold text-slate-800">{poi.name}</span>
+                        <div className="min-w-0">
+                          <span className="font-bold text-slate-800 break-words block">{poi.name}</span>
                           {poi.city && (
                             <p className="text-xs text-slate-400">{poi.city}</p>
                           )}
@@ -237,8 +237,8 @@ function PartnerPOIPage() {
                         {statusLabels[poi.status] || poi.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
+                    <td className="px-6 py-4 text-right pr-6">
+                      <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => setDetailPoi(poi)}
                           className="group relative inline-flex h-9 w-9 items-center justify-center text-slate-400 bg-slate-50 border border-slate-200 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 rounded-lg transition-all"

@@ -199,8 +199,8 @@ function normalizeStaffPOI(p: any): StaffPOI {
 
 export const getStaffPOIs = async (): Promise<StaffPOI[]> => {
   const data = await apiClient("/manager/pois")
-  if (!Array.isArray(data)) return []
-  return data.map(normalizeStaffPOI)
+  const items = Array.isArray(data) ? data : (data?.items || data?.Items || [])
+  return items.map(normalizeStaffPOI)
 }
 
 export type ManagerPendingPOIResult = {

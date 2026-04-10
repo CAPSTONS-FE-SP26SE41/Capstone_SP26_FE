@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Plus, Megaphone } from 'lucide-react';
 import { Ad } from '../../types/ad';
 import { getMyPartnerPOIs } from '../../services/partnerPoiService';
 import { CustomSelect } from '../ui/CustomSelect';
@@ -7,22 +7,24 @@ import { CustomSelect } from '../ui/CustomSelect';
 interface CreateAdModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (ad: Omit<Ad, 'adId' | 'status'>) => void;
+  onSubmit: (ad: Omit<Ad, 'adId' | 'status'>, imageFile?: File | null, videoFile?: File | null) => void;
 }
 
 export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdModalProps) {
   const [newAdForm, setNewAdForm] = useState({
     poiId: '',
     title: '',
-    videoUrl: '',
     content: '',
-    imageUrl: '',
     startDate: '',
     endDate: '',
     promoTitle: '',
     promoDescription: '',
     promoTerms: ''
   });
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const [pois, setPois] = useState<{ value: string, label: string }[]>([]);
   const [loadingPois, setLoadingPois] = useState(false);
@@ -46,6 +48,21 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdMod
 
   if (!isOpen) return null;
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setVideoFile(file);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAdForm.poiId) {
@@ -55,9 +72,7 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdMod
     onSubmit({
       poiId: newAdForm.poiId,
       title: newAdForm.title,
-      videoUrl: newAdForm.videoUrl,
       content: newAdForm.content,
-      imageUrl: newAdForm.imageUrl,
       startDate: newAdForm.startDate,
       endDate: newAdForm.endDate,
       promotion: newAdForm.promoTitle ? {
@@ -65,12 +80,15 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdMod
         description: newAdForm.promoDescription,
         terms: newAdForm.promoTerms
       } : undefined
-    });
+    }, imageFile, videoFile);
 
     // Reset form
     setNewAdForm({
-      poiId: '', title: '', videoUrl: '', content: '', imageUrl: '', startDate: '', endDate: '', promoTitle: '', promoDescription: '', promoTerms: ''
+      poiId: '', title: '', content: '', startDate: '', endDate: '', promoTitle: '', promoDescription: '', promoTerms: ''
     });
+    setImageFile(null);
+    setVideoFile(null);
+    setImagePreview(null);
   };
 
   return (
@@ -112,16 +130,69 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdMod
 
             {/* Media */}
             <div className="space-y-5 pt-8 border-t border-slate-100">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Hình ảnh & Video</h4>
-              <div className="grid grid-cols-2 gap-5">
-                <div className="col-span-2 sm:col-span-1">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Đường dẫn hình ảnh</label>
-                  <input type="url" value={newAdForm.imageUrl} onChange={e => setNewAdForm({ ...newAdForm, imageUrl: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all text-sm font-medium" placeholder="https://..." />
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1 text-[10px]">HÌNH ẢNH & VIDEO</h4>
+              <div className="grid grid-cols-2 gap-6">
+                
+                {/* Image Upload */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-bold text-slate-700">Chọn hình ảnh</label>
+                  <div className="flex flex-col gap-3">
+                    {imagePreview ? (
+                      <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-slate-200 group">
+                        <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
+                        <button 
+                          type="button"
+                          onClick={() => { setImageFile(null); setImagePreview(null); }}
+                          className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full aspect-video rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-[#e28743] transition-all cursor-pointer group">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Plus className="w-8 h-8 text-slate-400 group-hover:text-[#e28743] mb-2" />
+                          <p className="text-xs font-semibold text-slate-500 group-hover:text-[#e28743]">Bấm để tải ảnh</p>
+                        </div>
+                        <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                      </label>
+                    )}
+                  </div>
                 </div>
-                <div className="col-span-2 sm:col-span-1">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Đường dẫn video</label>
-                  <input type="url" value={newAdForm.videoUrl} onChange={e => setNewAdForm({ ...newAdForm, videoUrl: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all text-sm font-medium" placeholder="https://..." />
+
+                {/* Video Upload */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-bold text-slate-700">Chọn video (tối đa 50MB)</label>
+                  <div className="flex flex-col gap-3">
+                    {videoFile ? (
+                      <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                          <Megaphone size={20} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-slate-700 truncate">{videoFile.name}</p>
+                          <p className="text-xs text-slate-500">{(videoFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => videoSetFile(null)}
+                          className="p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-500 rounded-lg transition-colors"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full aspect-video rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-[#e28743] transition-all cursor-pointer group">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Plus className="w-8 h-8 text-slate-400 group-hover:text-[#e28743] mb-2" />
+                          <p className="text-xs font-semibold text-slate-500 group-hover:text-[#e28743]">Bấm để tải video</p>
+                        </div>
+                        <input type="file" className="hidden" accept="video/*" onChange={handleVideoChange} />
+                      </label>
+                    )}
+                  </div>
                 </div>
+
               </div>
             </div>
 

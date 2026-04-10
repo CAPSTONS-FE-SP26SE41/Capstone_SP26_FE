@@ -28,6 +28,10 @@ type Advertisement = {
   endDate: string
   status: string
   createdAt: string
+  poiName?: string
+  poi?: {
+    name: string
+  }
 }
 
 export const Route = createFileRoute("/staff/_layout/advertisements")({
@@ -281,8 +285,8 @@ function AdvertisementsPage() {
                                           </div>
                                         </td>
                                         
-                                        <td className="px-6 py-4 text-sm text-slate-600 truncate max-w-[200px]" title={poiMap[ad.poiId] || ad.poiId}>
-                                          {poiMap[ad.poiId] || ad.poiId}
+                                        <td className="px-6 py-4 text-sm text-slate-600 truncate max-w-[200px]" title={ad.poiName || ad.poi?.name || poiMap[ad.poiId] || ad.poiId}>
+                                          {ad.poiName || ad.poi?.name || poiMap[ad.poiId] || ad.poiId}
                                         </td>
                                         
                                         <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
@@ -295,14 +299,21 @@ function AdvertisementsPage() {
                                         </td>
                                         
                                         <td className="w-[160px] px-8 py-4">
-                                          <a
-                                            href={ad.videoUrl}
-                                            target="_blank"
-                                            className="text-sm text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1 font-medium"
-                                          >
-                                            Xem
-                                            <ExternalLink size={14}/>
-                                          </a>
+                                          {ad.videoUrl && ad.videoUrl !== "string" ? (
+                                            <a
+                                              href={ad.videoUrl}
+                                              target="_blank"
+                                              className="text-sm text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1 font-medium transition-colors"
+                                            >
+                                              Xem
+                                              <ExternalLink size={14}/>
+                                            </a>
+                                          ) : (
+                                            <span className="text-sm text-slate-300 flex items-center gap-1 font-medium cursor-not-allowed select-none">
+                                              Xem
+                                              <ExternalLink size={14} className="opacity-50"/>
+                                            </span>
+                                          )}
                                         </td>
                                         
                                         <td className="px-6 py-4">
@@ -384,7 +395,7 @@ function AdvertisementsPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-200">
-                      <th className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wide">Tên POI</th>
+                      <th className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wide min-w-[280px]">Tên POI</th>
                       <th className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wide">Địa chỉ</th>
                       <th className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wide">Thành phố</th>
                       <th className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wide">Trạng thái</th>
@@ -398,7 +409,7 @@ function AdvertisementsPage() {
                           <div className="font-medium text-slate-800">{poi.Name || "—"}</div>
                         </td>
                         <td className="px-6 py-4 text-sm text-slate-600">{poi.Address || "—"}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{poi.City || "—"}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{poi.LocationName || poi.City || "—"}</td>
                         <td className="px-6 py-4">
                           <span className="px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-amber-100 text-amber-700 border border-amber-200">
                             Chờ xét duyệt
@@ -412,7 +423,7 @@ function AdvertisementsPage() {
                             >
                               <Check size={16} />
                               <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-[90]">
-                                Duyệt POI
+                                Duyệt
                                 <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
                               </span>
                             </button>
@@ -422,7 +433,7 @@ function AdvertisementsPage() {
                             >
                               <X size={16} />
                               <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-[90]">
-                                Từ chối POI
+                                Từ chối
                                 <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
                               </span>
                             </button>

@@ -53,14 +53,12 @@ function PartnerAdvertisementPage() {
     fetchPoiNames()
   }, [])
 
-  const handleCreateAd = async (newAdData: Omit<Ad, 'adId' | 'status'>) => {
+  const handleCreateAd = async (newAdData: Omit<Ad, 'adId' | 'status'>, imageFile?: File | null, videoFile?: File | null) => {
     try {
       await createAdvertisement({
         poiId: newAdData.poiId,
         title: newAdData.title,
         content: newAdData.content,
-        imageUrl: newAdData.imageUrl,
-        videoUrl: newAdData.videoUrl,
         startDate: newAdData.startDate,
         endDate: newAdData.endDate,
         promotion: {
@@ -68,7 +66,7 @@ function PartnerAdvertisementPage() {
           description: newAdData.promotion?.description,
           terms: newAdData.promotion?.terms,
         },
-      })
+      }, imageFile, videoFile)
       setIsModalOpen(false)
       fetchAds()
     } catch (error) {

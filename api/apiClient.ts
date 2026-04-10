@@ -28,11 +28,19 @@ export const apiClient = async (
      console.warn(`[apiClient] No token found for ${endpoint}`)
   }
 
+  const defaultHeaders: Record<string, string> = {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  }
+
+  // Only set application/json if body is NOT FormData
+  if (!(options.body instanceof FormData)) {
+    defaultHeaders["Content-Type"] = "application/json"
+  }
+
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...defaultHeaders,
       ...options.headers,
     },
   })

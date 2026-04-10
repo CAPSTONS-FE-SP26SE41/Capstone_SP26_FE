@@ -99,14 +99,14 @@ function AdminDashboard() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full table-fixed border-collapse">
+          <table className="w-full table-auto border-collapse">
             <thead>
               <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
-                <th className="px-6 py-4 text-left">User</th>
-                <th className="px-6 py-4 text-left">Destination</th>
-                <th className="px-6 py-4 text-left">Date</th>
+                <th className="px-6 py-4 text-left min-w-[200px]">User</th>
+                <th className="px-6 py-4 text-left min-w-[150px]">Destination</th>
+                <th className="px-6 py-4 text-left whitespace-nowrap">Date</th>
                 <th className="px-6 py-4 text-left">Status</th>
-                <th className="px-6 py-4 text-right w-[140px]">
+                <th className="px-6 py-4 text-right pr-12 w-[140px]">
                   Action
                 </th>
               </tr>
@@ -122,24 +122,24 @@ function AdminDashboard() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-9 h-9 rounded-full bg-cover bg-center"
+                        className="w-9 h-9 rounded-full bg-cover bg-center shrink-0"
                         style={{
                           backgroundImage: `url("${row.user.avatarUrl}")`,
                         }}
                       />
-                      <span className="font-medium text-slate-800">
+                      <span className="font-medium text-slate-800 break-words">
                         {row.user.name}
                       </span>
                     </div>
                   </td>
 
                   {/* Destination */}
-                  <td className="px-6 py-4 text-sm font-medium text-slate-800">
+                  <td className="px-6 py-4 text-sm font-medium text-slate-800 break-words">
                     {row.destination}
                   </td>
 
                   {/* Date */}
-                  <td className="px-6 py-4 text-sm text-slate-500">
+                  <td className="px-6 py-4 text-sm text-slate-500 whitespace-nowrap">
                     {row.date}
                   </td>
 

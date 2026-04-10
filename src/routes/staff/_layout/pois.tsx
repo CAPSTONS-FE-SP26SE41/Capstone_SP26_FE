@@ -657,10 +657,10 @@ function StaffPOIsPage() {
                   <thead className="sticky top-0 z-10 bg-slate-100">
                     <tr className="text-slate-700 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
                       <th className="px-6 py-4 text-left w-16">STT</th>
-                      <th className="px-6 py-4 text-left w-40">Tên</th>
+                      <th className="px-6 py-4 text-left min-w-[280px]">Tên</th>
                       <th className="px-6 py-4 text-left">Thành phố</th>
                       <th className="px-6 py-4 text-left">Trong nhà</th>
-                      <th className="px-6 py-4 text-left">Thao tác</th>
+                      <th className="px-6 py-4 text-right pr-12">Thao tác</th>
                     </tr>
                   </thead>
 
@@ -674,8 +674,8 @@ function StaffPOIsPage() {
                           {startIndex + idx + 1}
                         </td>
 
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-medium text-slate-900 max-w-[180px] overflow-x-auto whitespace-nowrap">
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-slate-900 break-words">
                             {p.Name}
                           </div>
                         </td>
@@ -696,8 +696,8 @@ function StaffPOIsPage() {
                           </span>
                         </td>
 
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
+                        <td className="px-6 py-4 text-right pr-6">
+                          <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => void openDetailModal(p.Id)}
                               className="group relative inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-200 transition-colors"

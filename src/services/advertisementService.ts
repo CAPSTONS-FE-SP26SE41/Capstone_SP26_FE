@@ -37,10 +37,26 @@ export const getMyAdvertisements = async () => {
   return apiClient("/advertisements/my-ads")
 }
 
-export const createAdvertisement = async (data: CreateAdRequest) => {
+export const createAdvertisement = async (data: any, imageFile?: File | null, videoFile?: File | null) => {
+  const formData = new FormData()
+  formData.append('PoiId', data.poiId)
+  formData.append('Title', data.title)
+  formData.append('Content', data.content)
+  formData.append('StartDate', data.startDate)
+  formData.append('EndDate', data.endDate)
+  
+  if (imageFile) formData.append('ImageFile', imageFile)
+  if (videoFile) formData.append('VideoFile', videoFile)
+
+  if (data.promotion) {
+    if (data.promotion.title) formData.append('Promotion.Title', data.promotion.title)
+    if (data.promotion.description) formData.append('Promotion.Description', data.promotion.description)
+    if (data.promotion.terms) formData.append('Promotion.Terms', data.promotion.terms)
+  }
+
   return apiClient("/advertisements", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: formData,
   })
 }
 

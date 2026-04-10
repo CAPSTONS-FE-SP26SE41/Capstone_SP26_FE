@@ -1,16 +1,43 @@
+import React, { useState, useEffect } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { User, Store, Settings, Mail, Phone, MapPin } from 'lucide-react'
+import { getMe } from '@/services/authService'
 
 export const Route = createFileRoute('/partner/_layout/profile')({
   component: PartnerProfilePage,
 })
 
 function PartnerProfilePage() {
-  const profile = {
-    name: 'Acme Travel Group',
-    email: 'contact@acmetravel.com',
-    phone: '+84 123 456 789',
-    address: '123 Business Avenue, Tech District, City',
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getMe();
+        setProfile(data);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#e28743]"></div>
+      </div>
+    );
+  }
+
+  const profileData = {
+    name: profile?.name || 'Tên doanh nghiệp',
+    email: profile?.email || 'Chưa có email',
+    phone: profile?.phoneNumber || 'Chưa có số điện thoại',
+    address: profile?.address || 'Chưa có địa chỉ',
     registeredSince: 'January 2026',
     status: 'Active',
     avatar: 'https://i.pravatar.cc/120'
@@ -31,11 +58,11 @@ function PartnerProfilePage() {
           {/* Avatar and Basic info */}
           <div className="flex flex-col items-center justify-center p-6 bg-slate-50 rounded-2xl border border-slate-100 min-w-48">
             <img 
-              src={profile.avatar} 
+              src={profileData.avatar} 
               alt="Profile avatar" 
               className="w-24 h-24 rounded-full border-4 border-white shadow-md mb-4"
             />
-            <h2 className="text-lg font-bold text-slate-800 text-center">{profile.name}</h2>
+            <h2 className="text-lg font-bold text-slate-800 text-center">{profileData.name}</h2>
             <div className="flex items-center gap-1 text-xs font-semibold text-[#e28743] bg-[#faeadd] px-2 py-1 rounded-full mt-2">
               <Store size={12} />
               Partner Account
@@ -54,7 +81,7 @@ function PartnerProfilePage() {
                   <Mail size={16} />
                   <span className="text-sm font-medium">Email Address</span>
                 </div>
-                <p className="font-semibold text-slate-800">{profile.email}</p>
+                <p className="font-semibold text-slate-800">{profileData.email}</p>
               </div>
 
               <div className="space-y-1">
@@ -62,7 +89,7 @@ function PartnerProfilePage() {
                   <Phone size={16} />
                   <span className="text-sm font-medium">Phone Number</span>
                 </div>
-                <p className="font-semibold text-slate-800">{profile.phone}</p>
+                <p className="font-semibold text-slate-800">{profileData.phone}</p>
               </div>
 
               <div className="space-y-1 sm:col-span-2">
@@ -70,19 +97,9 @@ function PartnerProfilePage() {
                   <MapPin size={16} />
                   <span className="text-sm font-medium">Address</span>
                 </div>
-                <p className="font-semibold text-slate-800">{profile.address}</p>
+                <p className="font-semibold text-slate-800">{profileData.address}</p>
               </div>
 
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-slate-500 mb-1">
-                  <User size={16} />
-                  <span className="text-sm font-medium">Account Status</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                  <p className="font-semibold text-slate-800">{profile.status}</p>
-                </div>
-              </div>
             </div>
           </div>
         </div>

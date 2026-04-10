@@ -1,5 +1,6 @@
-import { Bell, Search } from 'lucide-react'
+import { Bell, LogOut, Search } from 'lucide-react'
 import { useLocation, useNavigate } from '@tanstack/react-router'
+import { logout } from '../../services/authService'
 
 
 type AppTopbarProps = {
@@ -20,6 +21,11 @@ export default function AppTopbar({
 }: AppTopbarProps & { showSearch?: boolean }) {
   const location = useLocation()
   const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate({ to: '/' })
+  }
 
   const accentMap = {
     blue: {
@@ -91,13 +97,6 @@ export default function AppTopbar({
       )}
 
       <div className="flex items-center gap-6">
-        <button className={`relative text-slate-500 ${hoverText} transition-colors`}>
-          <Bell size={20} />
-          <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
-        </button>
-
-        <div className="h-6 w-px bg-slate-200" />
-
         <div className="flex items-center gap-3 group">
           <div className="text-right hidden sm:block">
             <p className="text-sm font-semibold text-slate-800">{userName}</p>
@@ -113,7 +112,12 @@ export default function AppTopbar({
 
         <div className="h-6 w-px bg-slate-200" />
 
-       
+        <button
+          onClick={handleLogout}
+          className="flex items-center justify-center w-9 h-9 rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+        >
+          <LogOut size={18} />
+        </button>
       </div>
     </header>
   )
