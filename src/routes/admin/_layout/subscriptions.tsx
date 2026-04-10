@@ -161,6 +161,22 @@ function SubscriptionsPage() {
     currency: "VNĐ"
   })
 
+  const [errors, setErrors] = useState({ title: "" })
+
+  const validateForm = () => {
+    let valid = true
+    const newErrors = { title: "" }
+    if (!form.title.trim()) {
+      newErrors.title = "Package title is required"
+      valid = false
+    } else if (form.title.trim().split(/\s+/).length > 5) {
+      newErrors.title = "Package name cannot exceed 5 words"
+      valid = false
+    }
+    setErrors(newErrors)
+    return valid
+  }
+
   // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -198,16 +214,19 @@ function SubscriptionsPage() {
   const openCreate = () => {
     setEditing(null)
     setForm({ title: "", description: "", price: 0, durationDays: 30, maxAdsPerPeriod: 5, status: "Active", currency: "VNĐ" })
+    setErrors({ title: "" })
     setModalOpen(true)
   }
 
   const openEdit = (sub: Subscription) => {
     setEditing(sub)
     setForm({ title: sub.title, description: sub.description, price: sub.price, durationDays: sub.durationDays, maxAdsPerPeriod: sub.maxAdsPerPeriod, status: sub.status, currency: sub.currency })
+    setErrors({ title: "" })
     setModalOpen(true)
   }
 
   const handleSubmit = async () => {
+    if (!validateForm()) return
     try {
       if (editing) await updateSubscription(editing.packageId, form)
       else await createSubscription(form)
@@ -545,9 +564,10 @@ function SubscriptionsPage() {
                   <input
                     placeholder="e.g. Premium Plan"
                     value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                    onChange={(e) => { setForm({ ...form, title: e.target.value }); setErrors({ ...errors, title: "" }); }}
+                    className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-sm transition-all focus:outline-none focus:ring-2 ${errors.title ? "border-red-500 focus:ring-red-100" : "border-slate-200 focus:ring-[#5ab473]/20 focus:border-[#5ab473]"}`}
                   />
+                  {errors.title && <span className="text-red-500 text-[11px] font-medium">{errors.title}</span>}
                 </div>
 
                 <div className="flex flex-col gap-1.5">

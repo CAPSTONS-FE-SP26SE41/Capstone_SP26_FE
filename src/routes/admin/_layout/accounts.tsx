@@ -220,6 +220,9 @@ function AccountsPage() {
     } else if (form.fullName.trim().length < 2) {
       newErrors.fullName = "Name must be at least 2 characters"
       valid = false
+    } else if (form.fullName.trim().split(/\s+/).length > 5) {
+      newErrors.fullName = "Name cannot exceed 5 words"
+      valid = false
     }
 
     setErrors(newErrors)
