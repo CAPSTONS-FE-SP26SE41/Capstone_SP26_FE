@@ -185,6 +185,11 @@ code {
   box-shadow: 0 0 0 3px rgba(19, 146, 236, 0.2);
 }
 
+.login-input::-ms-reveal,
+.login-input::-ms-clear {
+  display: none !important;
+}
+
 .login-input-wrapper:focus-within .login-input-icon {
   color: var(--login-primary);
 }
@@ -198,6 +203,27 @@ code {
 
 .login-forgot:hover {
   text-decoration: underline;
+}
+
+.login-input-toggle-btn {
+  position: absolute;
+  right: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  transition: color 0.2s;
+}
+
+.login-input-toggle-btn:hover {
+  color: var(--login-primary);
 }
 
 .login-remember {
@@ -293,4 +319,30 @@ code {
 
 .login-footer-links button:hover {
   color: var(--login-primary);
+}
+
+/* Toast Animations */
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(100%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+.animate-toast-in {
+  animation: toast-slide-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-toast-shake {
+  animation: toast-shake 0.4s ease-in-out;
 }

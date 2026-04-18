@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
-import { Package, CreditCard, Loader2, Ban } from 'lucide-react'
+import { Package, CreditCard, Loader2, Ban, X } from 'lucide-react'
 import { getMySubscriptions, getSubscriptions } from '../../../services/subscriptionService'
 import { createPayment, PaymentResponse } from '../../../services/paymentService'
 import PaymentModal from '../../../components/partner/PaymentModal'
@@ -64,6 +64,12 @@ function PartnerPackagePage() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [paymentData, setPaymentData] = useState<PaymentResponse | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null)
+
+  const showToast = (type: "success" | "error", message: string) => {
+    setToast({ type, message })
+    setTimeout(() => setToast(null), 3000)
+  }
 
   const fetchData = async () => {
     setLoading(true)
@@ -97,9 +103,20 @@ function PartnerPackagePage() {
       const res = await createPayment({ packageId: packageId })
       setPaymentData(res)
       setIsPaymentModalOpen(true)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Payment creation failed:", error)
-      alert("Không thể khởi tạo thanh toán. Vui lòng thử lại sau.")
+      let customMsg = ""
+      try {
+        const errorData = JSON.parse(error.message)
+        customMsg = errorData.message || errorData
+      } catch {
+        customMsg = error.message
+      }
+      
+      if (customMsg.includes("đang hoạt động")) {
+        customMsg = "Bạn đã có gói đang hoạt động. Vui lòng sử dụng hết hoặc đợi gói cũ hết hạn trước khi đăng ký mới."
+      }
+      showToast("error", customMsg || "Không thể khởi tạo thanh toán. Vui lòng thử lại sau.")
     } finally {
       setIsProcessing(false)
     }
@@ -224,9 +241,6 @@ function PartnerPackagePage() {
                       </span>
                     </div>
                   </div>
-                  <button className="w-full py-2 bg-slate-50 text-slate-600 rounded-lg text-sm font-semibold hover:bg-slate-100 transition-colors">
-                    Chi tiết
-                  </button>
                 </div>
               ))}
             </div>
@@ -248,20 +262,20 @@ function PartnerPackagePage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
           {availablePkgs.length > 0 ? availablePkgs.map((pkg: any, i: number) => (
-            <div key={i} className={`bg-white rounded-2xl border border-slate-200 p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow`}>
-              <h4 className="text-xl font-bold text-slate-800 mb-1">{pkg.title || pkg.Title}</h4>
+            <div key={i} className={`bg-white rounded-2xl border border-slate-200 p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow h-full`}>
+              <h4 className="text-xl font-bold text-slate-800 mb-1 line-clamp-1 overflow-hidden" title={pkg.title || pkg.Title}>{pkg.title || pkg.Title}</h4>
               <div className="flex items-baseline gap-1 mb-4">
                 <span className="text-2xl font-bold text-[#e28743]">{new Intl.NumberFormat('vi-VN').format(pkg.price || pkg.Price)} VND</span>
                 <span className="text-slate-400 text-sm">/ {pkg.durationDays || pkg.DurationDays} ngày</span>
               </div>
               <p className="text-slate-600 font-medium mb-4">Tối đa {pkg.maxAdsPerPeriod || pkg.MaxAdsPerPeriod} quảng cáo</p>
-              <div className="text-sm border border-slate-100 mb-6 bg-slate-50 p-4 rounded-xl min-h-[90px]">
+              <div className="text-sm border border-slate-100 mb-6 bg-slate-50 p-4 rounded-xl flex-1">
                 <ExpandableDescription text={pkg.description || pkg.Description || ""} />
               </div>
               <button 
                 disabled={isProcessing}
                 onClick={() => handleBuyPackage(pkg.packageId || pkg.PackageId || pkg.id)}
-                className={`w-full py-3 rounded-xl font-bold transition-colors bg-[#e28743] text-white hover:bg-[#cf7632] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+                className={`w-full py-3 rounded-xl font-bold transition-colors bg-[#e28743] text-white hover:bg-[#cf7632] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-auto`}
               >
                 {isProcessing && <Loader2 size={18} className="animate-spin" />}
                 Mua gói
@@ -284,6 +298,35 @@ function PartnerPackagePage() {
           }}
           paymentData={paymentData}
         />
+      )}
+
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-[100] max-w-sm w-full bg-white px-5 py-4 rounded-[8px] border shadow-[0_4px_12px_rgba(0,0,0,0.15)] animate-toast-in ${
+            toast.type === "success"
+              ? "bg-emerald-50 border-emerald-100"
+              : "bg-rose-50 border-rose-100 animate-toast-shake"
+          }`}
+        >
+          <div className="flex gap-3 pr-6">
+            <div className="flex-shrink-0 mt-0.5">
+              {toast.type === "success" ? (
+                <div className="h-5 w-5 rounded-full bg-emerald-500" />
+              ) : (
+                <Ban size={18} className="text-rose-500" />
+              )}
+            </div>
+            <p className={`text-sm font-medium ${toast.type === "success" ? "text-emerald-800" : "text-rose-800"}`}>
+              {toast.message}
+            </p>
+          </div>
+          <button 
+            onClick={() => setToast(null)}
+            className="absolute top-3 right-3 p-1 rounded-md hover:bg-black/5 transition-colors text-slate-400 hover:text-slate-600"
+          >
+            <X size={16} />
+          </button>
+        </div>
       )}
     </div>
   )

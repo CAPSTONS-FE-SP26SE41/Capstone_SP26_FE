@@ -63,6 +63,12 @@ function PartnerPOIPage() {
   const [editingPoi, setEditingPoi] = useState<PartnerPOI | null>(null)
   const [detailPoi, setDetailPoi] = useState<PartnerPOI | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null)
+
+  const showToast = (type: "success" | "error", message: string) => {
+    setToast({ type, message })
+    setTimeout(() => setToast(null), 3000)
+  }
 
   // ── Fetch data ────────────────────────────────────────────────────
   const fetchPois = useCallback(async () => {
@@ -109,10 +115,10 @@ function PartnerPOIPage() {
     if (!confirm(`Bạn có chắc muốn ngừng hoạt động POI "${poi.name}"? Các quảng cáo liên quan cũng sẽ bị ảnh hưởng.`)) return
     try {
       const result = await inactivateMyPartnerPOI(poi.id, true)
-      alert(result.message)
+      showToast("success", result.message)
       fetchPois()
     } catch (error: any) {
-      alert(error?.message || 'Có lỗi xảy ra khi ngừng hoạt động POI.')
+      showToast("error", error?.message || 'Có lỗi xảy ra khi ngừng hoạt động POI.')
     }
   }
 
@@ -189,12 +195,12 @@ function PartnerPOIPage() {
               <table className="w-full min-w-[980px] text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider">Tên POI</th>
+                  <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider min-w-[280px]">Tên POI</th>
                   <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider">Loại hình</th>
                   <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider">Địa chỉ</th>
                   <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider">Giờ mở cửa</th>
                   <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider text-center">Trạng thái</th>
-                  <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider text-center">Thao tác</th>
+                  <th className="px-6 py-4 text-sm font-bold text-slate-600 uppercase tracking-wider text-right pr-12">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -213,8 +219,8 @@ function PartnerPOIPage() {
                             <MapPin size={20} />
                           </div>
                         )}
-                        <div>
-                          <span className="font-bold text-slate-800">{poi.name}</span>
+                        <div className="min-w-0">
+                          <span className="font-bold text-slate-800 break-words block">{poi.name}</span>
                           {poi.city && (
                             <p className="text-xs text-slate-400">{poi.city}</p>
                           )}
@@ -233,12 +239,12 @@ function PartnerPOIPage() {
                           : '—'}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusStyles[poi.status] || 'bg-slate-100 text-slate-500'}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${statusStyles[poi.status] || 'bg-slate-100 text-slate-500'}`}>
                         {statusLabels[poi.status] || poi.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
+                    <td className="px-6 py-4 text-right pr-12">
+                      <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => setDetailPoi(poi)}
                           className="group relative inline-flex h-9 w-9 items-center justify-center text-slate-400 bg-slate-50 border border-slate-200 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 rounded-lg transition-all"
@@ -279,6 +285,35 @@ function PartnerPOIPage() {
             </table>
             </div>
           </div>
+
+          {toast && (
+            <div
+              className={`fixed bottom-6 right-6 z-[100] max-w-sm w-full bg-white px-5 py-4 rounded-[8px] border shadow-[0_4px_12px_rgba(0,0,0,0.15)] animate-toast-in ${
+                toast.type === "success"
+                  ? "bg-emerald-50 border-emerald-100"
+                  : "bg-rose-50 border-rose-100 animate-toast-shake"
+              }`}
+            >
+              <div className="flex gap-3 pr-6">
+                <div className="flex-shrink-0 mt-0.5">
+                  {toast.type === "success" ? (
+                    <div className="h-5 w-5 rounded-full bg-emerald-500" />
+                  ) : (
+                    <Ban size={18} className="text-rose-500" />
+                  )}
+                </div>
+                <p className={`text-sm font-medium ${toast.type === "success" ? "text-emerald-800" : "text-rose-800"}`}>
+                  {toast.message}
+                </p>
+              </div>
+              <button 
+                onClick={() => setToast(null)}
+                className="absolute top-3 right-3 p-1 rounded-md hover:bg-black/5 transition-colors text-slate-400 hover:text-slate-600"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
@@ -328,6 +363,7 @@ function PartnerPOIPage() {
         <POIFormModal
           poi={editingPoi}
           submitting={submitting}
+          showToast={showToast}
           onClose={() => {
             setIsModalOpen(false)
             setEditingPoi(null)
@@ -359,13 +395,14 @@ interface POIFormModalProps {
   poi: PartnerPOI | null
   submitting: boolean
   onClose: () => void
+  showToast: (type: "success" | "error", message: string) => void
   onSubmit: (
     payload: CreatePartnerPOIPayload | UpdatePartnerPOIPayload,
     imageFile?: File | null
   ) => Promise<void>
 }
 
-function POIFormModal({ poi, submitting, onClose, onSubmit }: POIFormModalProps) {
+function POIFormModal({ poi, submitting, onClose, showToast, onSubmit }: POIFormModalProps) {
   const isEditing = !!poi
 
   const [name, setName] = useState(poi?.name ?? '')
@@ -495,7 +532,7 @@ function POIFormModal({ poi, submitting, onClose, onSubmit }: POIFormModalProps)
         await onSubmit(payload, imageFile)
       } else {
         if (!name || !address || !locationId || !districtId) {
-          alert('Vui lòng điền đầy đủ thông tin bắt buộc.')
+          showToast("error", 'Vui lòng điền đầy đủ thông tin bắt buộc.')
           return
         }
         const payload: CreatePartnerPOIPayload = {
@@ -521,7 +558,7 @@ function POIFormModal({ poi, submitting, onClose, onSubmit }: POIFormModalProps)
       if (msg.toLowerCase().includes("district") || msg.toLowerCase().includes("không thuộc")) {
         setFormErrors({ districtId: "District không thuộc City đã chọn" })
       } else {
-        alert(msg || 'Có lỗi xảy ra. Vui lòng thử lại.')
+        showToast("error", msg || 'Có lỗi xảy ra. Vui lòng thử lại.')
       }
     }
   }

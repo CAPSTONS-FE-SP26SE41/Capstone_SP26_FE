@@ -349,9 +349,9 @@ function SubscriptionsPage() {
 
           <thead>
             <tr>
-              <th className="w-[5%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">No.</th>
-              <th className="w-[15%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Package</th>
-              <th className="w-[28%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Description</th>
+              <th className="w-[5%] px-4 py-4 text-text-secondary text-sm font-semibold text-left border-b border-[#e7edf4] bg-[#f8fafc]">No.</th>
+              <th className="w-[18%] px-4 py-4 text-text-secondary text-sm font-semibold text-left border-b border-[#e7edf4] bg-[#f8fafc] min-w-[150px]">Package</th>
+              <th className="w-[25%] px-4 py-4 text-text-secondary text-sm font-semibold text-left border-b border-[#e7edf4] bg-[#f8fafc] min-w-[200px]">Description</th>
               <th className="w-[10%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
                 <FilterDropdown
                   label="Price"
@@ -375,7 +375,7 @@ function SubscriptionsPage() {
                 />
               </th>
               <th
-                className="w-[13%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc] sticky right-0 z-20"
+                className="w-[13%] px-4 py-4 text-text-secondary text-sm font-semibold text-right pr-6 border-b border-[#e7edf4] bg-[#f8fafc] sticky right-0 z-20"
                 style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
               >Actions</th>
             </tr>
@@ -392,15 +392,15 @@ function SubscriptionsPage() {
                   className="hover:bg-[#f8fafc] transition-colors group"
                 >
 
-                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                  <td className="px-4 py-3 text-sm text-text-secondary text-left border-b border-[#e7edf4]">
                     {startIndex + index + 1}
                   </td>
 
-                  <td className="px-4 py-3 font-medium text-text-main text-center border-b border-[#e7edf4] truncate">
+                  <td className="px-4 py-3 font-medium text-text-main text-left border-b border-[#e7edf4] truncate">
                     {sub.title}
                   </td>
 
-                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                  <td className="px-4 py-3 text-sm text-text-secondary text-left border-b border-[#e7edf4]">
                     <ExpandableDescription text={sub.description} />
                   </td>
 
@@ -430,10 +430,10 @@ function SubscriptionsPage() {
                   </td>
 
                   <td
-                    className="px-4 py-3 text-center border-b border-[#e7edf4] sticky right-0 bg-white group-hover:bg-[#f8fafc] z-10 transition-colors"
+                    className="px-4 py-3 text-right pr-4 border-b border-[#e7edf4] sticky right-0 bg-white group-hover:bg-[#f8fafc] z-10 transition-colors"
                     style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
                   >
-                    <div className="inline-flex items-center gap-2">
+                    <div className="inline-flex items-center justify-end gap-2">
 
                       {/* Edit */}
                       <Tooltip text="Edit">

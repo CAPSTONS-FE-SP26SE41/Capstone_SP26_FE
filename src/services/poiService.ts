@@ -169,8 +169,6 @@ function normalizeStaffPOI(p: any): StaffPOI {
     Address: String(p?.Address ?? p?.address ?? ""),
     City: String(p?.City ?? p?.city ?? ""),
     ApproxCost: String(p?.ApproxCost ?? p?.approxCost ?? p?.approx_cost ?? ""),
-    Status: String(p?.Status ?? p?.status ?? ""),
-
     OpenHour: openHour,
     CloseHour: closeHour,
     Is24Hours: Boolean(p?.Is24Hours ?? p?.is24Hours ?? p?.is24hours ?? false),
@@ -201,8 +199,8 @@ function normalizeStaffPOI(p: any): StaffPOI {
 
 export const getStaffPOIs = async (): Promise<StaffPOI[]> => {
   const data = await apiClient("/manager/pois")
-  if (!Array.isArray(data)) return []
-  return data.map(normalizeStaffPOI)
+  const items = Array.isArray(data) ? data : (data?.items || data?.Items || [])
+  return items.map(normalizeStaffPOI)
 }
 
 export type ManagerPendingPOIResult = {

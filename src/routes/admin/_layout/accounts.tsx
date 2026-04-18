@@ -278,10 +278,10 @@ function AccountsPage() {
 
             <thead>
               <tr className="bg-[#F9FAFB] border-b border-[#e7edf4]">
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">No.</th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">Email</th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">Name</th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left w-16">No.</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">Email</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left min-w-[200px]">Name</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">
                   <FilterDropdown
                     label="Role"
                     value={roleFilter}
@@ -291,7 +291,7 @@ function AccountsPage() {
                     onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "role" ? null : "role"); }}
                   />
                 </th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">
                   <FilterDropdown
                     label="Status"
                     value={statusFilter}
@@ -301,7 +301,7 @@ function AccountsPage() {
                     onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "status" ? null : "status"); }}
                   />
                 </th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-center">Actions</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-right pr-6">Actions</th>
               </tr>
             </thead>
 
@@ -313,24 +313,24 @@ function AccountsPage() {
                   <tr key={account.id} className="hover:bg-[#F9FAFB] transition-colors">
 
                     {/* STT */}
-                    <td className="px-6 py-4 text-sm text-text-secondary text-center">
+                    <td className="px-6 py-4 text-sm text-text-secondary text-left">
                       {startIndex + index + 1}
                     </td>
 
                     {/* Email */}
-                    <td className="px-6 py-4 text-sm text-text-secondary text-center">
+                    <td className="px-6 py-4 text-sm text-text-secondary text-left">
                       {account.email}
                     </td>
 
                     {/* Name */}
-                    <td className="px-6 py-4 text-center">
-                      <span className="font-medium text-text-main">
+                    <td className="px-6 py-4 text-left">
+                      <span className="font-medium text-text-main break-words block">
                         {account.name}
                       </span>
                     </td>
 
                     {/* Role */}
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-4 text-left">
                       <span 
                         className="inline-flex items-center px-2.5 py-1 text-[10px] font-bold rounded-full uppercase"
                         style={getRoleStyle(account.role.name)}
@@ -340,7 +340,7 @@ function AccountsPage() {
                     </td>
 
                     {/* Status */}
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-4 text-left">
 
                       <span
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
@@ -356,9 +356,9 @@ function AccountsPage() {
                     </td>
 
                     {/* Actions */}
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-4 text-right pr-6">
 
-                      <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
                         <ToggleSwitch
                           initialState={account.status === "Active"}
                           onChange={(state) => {
