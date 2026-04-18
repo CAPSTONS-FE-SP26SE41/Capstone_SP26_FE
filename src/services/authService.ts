@@ -34,3 +34,21 @@ export const logout = () => {
 export const getMe = async () => {
   return apiClient("/auth/me")
 }
+
+export const updateProfile = async (data: any, avatarFile?: File | null) => {
+  const formData = new FormData();
+  if (data.name) formData.append('Name', data.name);
+  if (data.address) formData.append('Address', data.address);
+  if (data.phoneNumber) formData.append('PhoneNumber', data.phoneNumber);
+  if (data.gender) formData.append('Gender', data.gender);
+  if (data.dateOfBirth) formData.append('DateOfBirth', data.dateOfBirth);
+  
+  if (avatarFile) {
+    formData.append('AvatarUrl', avatarFile);
+  }
+
+  return apiClient("/auth/profile", {
+    method: "PUT",
+    body: formData,
+  })
+}

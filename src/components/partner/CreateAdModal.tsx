@@ -35,7 +35,7 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdMod
         setLoadingPois(true);
         try {
           const res = await getMyPartnerPOIs(1, 1000); // Fetch a large chunk for Dropdown
-          setPois((res.items || []).map(p => ({ value: p.id, label: `${p.name} - ${p.address}` })));
+          setPois((res.items || []).filter(p => p.status === 'Active').map(p => ({ value: p.id, label: `${p.name} - ${p.address}` })));
         } catch (error) {
           console.error("Lỗi khi tải danh sách POI", error);
         } finally {
@@ -108,8 +108,21 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdMod
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Thông tin cơ bản</h4>
               <div className="grid grid-cols-2 gap-5">
                 <div className="col-span-2">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Tiêu đề quảng cáo *</label>
-                  <input required type="text" value={newAdForm.title} onChange={e => setNewAdForm({ ...newAdForm, title: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all font-medium text-slate-800" placeholder="VD: Khuyến mãi mùa hè rực rỡ" />
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-bold text-slate-700">Tiêu đề quảng cáo *</label>
+                    <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                      {newAdForm.title.length}/100
+                    </span>
+                  </div>
+                  <input 
+                    required 
+                    type="text" 
+                    maxLength={100}
+                    value={newAdForm.title} 
+                    onChange={e => setNewAdForm({ ...newAdForm, title: e.target.value })} 
+                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all font-medium text-slate-800" 
+                    placeholder="VD: Khuyến mãi mùa hè rực rỡ" 
+                  />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-bold text-slate-700 mb-2">Điểm tham quan (POI) *</label>
@@ -122,8 +135,21 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdMod
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Nội dung quảng cáo *</label>
-                  <textarea required rows={4} value={newAdForm.content} onChange={e => setNewAdForm({ ...newAdForm, content: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all resize-none font-medium text-slate-800" placeholder="Nhập nội dung chi tiết quảng cáo..." />
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-bold text-slate-700">Nội dung quảng cáo *</label>
+                    <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                      {newAdForm.content.length}/1000
+                    </span>
+                  </div>
+                  <textarea 
+                    required 
+                    rows={4} 
+                    maxLength={1000}
+                    value={newAdForm.content} 
+                    onChange={e => setNewAdForm({ ...newAdForm, content: e.target.value })} 
+                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all resize-none font-medium text-slate-800" 
+                    placeholder="Nhập nội dung chi tiết quảng cáo..." 
+                  />
                 </div>
               </div>
             </div>
@@ -216,16 +242,52 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdMod
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Chương trình khuyến mãi</h4>
               <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 space-y-5">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Tên khuyến mãi</label>
-                  <input type="text" value={newAdForm.promoTitle} onChange={e => setNewAdForm({ ...newAdForm, promoTitle: e.target.value })} className="w-full px-5 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all font-bold placeholder:font-normal" placeholder="VD: Giảm 20% tổng bill" />
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-bold text-slate-700">Tên khuyến mãi</label>
+                    <span className="text-[10px] font-bold text-slate-400 bg-white px-2 py-0.5 rounded-full border border-slate-100">
+                      {newAdForm.promoTitle.length}/100
+                    </span>
+                  </div>
+                  <input 
+                    type="text" 
+                    maxLength={100}
+                    value={newAdForm.promoTitle} 
+                    onChange={e => setNewAdForm({ ...newAdForm, promoTitle: e.target.value })} 
+                    className="w-full px-5 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all font-bold placeholder:font-normal" 
+                    placeholder="VD: Giảm 20% tổng bill" 
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Mô tả chi tiết</label>
-                  <textarea rows={3} value={newAdForm.promoDescription} onChange={e => setNewAdForm({ ...newAdForm, promoDescription: e.target.value })} className="w-full px-5 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all resize-none text-sm font-medium" placeholder="Chi tiết về chương trình..." />
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-bold text-slate-700">Mô tả chi tiết</label>
+                    <span className="text-[10px] font-bold text-slate-400 bg-white px-2 py-0.5 rounded-full border border-slate-100">
+                      {newAdForm.promoDescription.length}/500
+                    </span>
+                  </div>
+                  <textarea 
+                    rows={3} 
+                    maxLength={500}
+                    value={newAdForm.promoDescription} 
+                    onChange={e => setNewAdForm({ ...newAdForm, promoDescription: e.target.value })} 
+                    className="w-full px-5 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all resize-none text-sm font-medium" 
+                    placeholder="Chi tiết về chương trình..." 
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Điều kiện áp dụng</label>
-                  <textarea rows={2} value={newAdForm.promoTerms} onChange={e => setNewAdForm({ ...newAdForm, promoTerms: e.target.value })} className="w-full px-5 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all resize-none text-sm font-medium" placeholder="Điều kiện kèm theo..." />
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-bold text-slate-700">Điều kiện áp dụng</label>
+                    <span className="text-[10px] font-bold text-slate-400 bg-white px-2 py-0.5 rounded-full border border-slate-100">
+                      {newAdForm.promoTerms.length}/500
+                    </span>
+                  </div>
+                  <textarea 
+                    rows={2} 
+                    maxLength={500}
+                    value={newAdForm.promoTerms} 
+                    onChange={e => setNewAdForm({ ...newAdForm, promoTerms: e.target.value })} 
+                    className="w-full px-5 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all resize-none text-sm font-medium" 
+                    placeholder="Điều kiện kèm theo..." 
+                  />
                 </div>
               </div>
             </div>
