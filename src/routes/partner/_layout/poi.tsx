@@ -1,16 +1,19 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Plus, MapPin, Search, Edit2, Eye, EyeOff, Loader2, ChevronLeft, ChevronRight, Image as ImageIcon, X, ExternalLink, Clock, DollarSign, Navigation, Home } from 'lucide-react'
+import { Plus, MapPin, Search, Edit2, Eye, EyeOff, Loader2, ChevronLeft, ChevronRight, Image as ImageIcon, X, ExternalLink, Clock, DollarSign, Navigation, Home, Ban } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
+import { ConfirmModal } from '../../../components/ui/ConfirmModal'
 import {
   getMyPartnerPOIs,
   createPartnerPOI,
   updateMyPartnerPOI,
   inactivateMyPartnerPOI,
+  getPOITypes,
   type PartnerPOI,
   type CreatePartnerPOIPayload,
   type UpdatePartnerPOIPayload,
   type POIType,
   type POIStatus,
+  type POITypeOption,
 } from '../../../services/partnerPoiService'
 
 export const Route = createFileRoute('/partner/_layout/poi')({
@@ -32,9 +35,29 @@ const statusLabels: Record<POIStatus, string> = {
   Inactive: 'Ngừng hoạt động',
 }
 
-const typeLabels: Record<POIType, string> = {
+const fallbackTypeLabels: Record<POIType, string> = {
   Restaurant: 'Nhà hàng',
   Attraction: 'Điểm tham quan',
+  Cafe: 'Quán cà phê',
+  Hotel: 'Khách sạn',
+  Museum: 'Bảo tàng',
+  Park: 'Công viên',
+  Shopping: 'Mua sắm',
+  StreetFood: 'Ẩm thực đường phố',
+  Landmark: 'Biểu tượng nổi bật',
+  Viewpoint: 'Điểm ngắm cảnh',
+  Beach: 'Bãi biển',
+  CulturalSite: 'Di tích văn hóa',
+  HistoricalSite: 'Di tích lịch sử',
+  Temple: 'Chùa/Đền',
+  Church: 'Nhà thờ',
+  Nature: 'Thiên nhiên',
+  Waterfall: 'Thác nước',
+  Market: 'Chợ',
+  NightMarket: 'Chợ đêm',
+  Bar: 'Quán bar',
+  Nightlife: 'Giải trí về đêm',
+  Resort: 'Khu nghỉ dưỡng',
 }
 
 // ── Format time ─────────────────────────────────────────────────────
@@ -62,8 +85,11 @@ function PartnerPOIPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingPoi, setEditingPoi] = useState<PartnerPOI | null>(null)
   const [detailPoi, setDetailPoi] = useState<PartnerPOI | null>(null)
+  const [confirmPoi, setConfirmPoi] = useState<PartnerPOI | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null)
+  const [poiTypeOptions, setPoiTypeOptions] = useState<POITypeOption[]>([])
+  const [loadingPoiTypes, setLoadingPoiTypes] = useState(false)
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message })
@@ -90,6 +116,23 @@ function PartnerPOIPage() {
     fetchPois()
   }, [fetchPois])
 
+  useEffect(() => {
+    const loadPoiTypes = async () => {
+      try {
+        setLoadingPoiTypes(true)
+        const data = await getPOITypes()
+        setPoiTypeOptions(data)
+      } catch (error) {
+        console.error('Error fetching POI types:', error)
+        setPoiTypeOptions([])
+      } finally {
+        setLoadingPoiTypes(false)
+      }
+    }
+
+    loadPoiTypes()
+  }, [])
+
   // ── Filtered list ─────────────────────────────────────────────────
   const filteredPois = pois.filter((poi) => {
     const matchSearch =
@@ -111,14 +154,22 @@ function PartnerPOIPage() {
     setIsModalOpen(true)
   }
 
-  const handleInactivate = async (poi: PartnerPOI) => {
-    if (!confirm(`Bạn có chắc muốn ngừng hoạt động POI "${poi.name}"? Các quảng cáo liên quan cũng sẽ bị ảnh hưởng.`)) return
+  const handleInactivate = (poi: PartnerPOI) => {
+    setConfirmPoi(poi)
+  }
+
+  const confirmInactivate = async () => {
+    if (!confirmPoi) return
     try {
-      const result = await inactivateMyPartnerPOI(poi.id, true)
+      setSubmitting(true)
+      const result = await inactivateMyPartnerPOI(confirmPoi.id, true)
       showToast("success", result.message)
+      setConfirmPoi(null)
       fetchPois()
     } catch (error: any) {
       showToast("error", error?.message || 'Có lỗi xảy ra khi ngừng hoạt động POI.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -177,8 +228,11 @@ function PartnerPOIPage() {
           onChange={(e) => setFilterType(e.target.value)}
         >
           <option value="all">Tất cả loại hình</option>
-          <option value="Restaurant">Nhà hàng</option>
-          <option value="Attraction">Điểm tham quan</option>
+          {poiTypeOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -228,7 +282,7 @@ function PartnerPOIPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-slate-600 font-medium">
-                      {typeLabels[poi.type] || poi.type}
+                      {poiTypeOptions.find((item) => item.value === poi.type)?.label || fallbackTypeLabels[poi.type] || poi.type}
                     </td>
                     <td className="px-6 py-4 text-slate-500 max-w-xs truncate">{poi.address}</td>
                     <td className="px-6 py-4 text-slate-500 text-sm">
@@ -364,6 +418,8 @@ function PartnerPOIPage() {
           poi={editingPoi}
           submitting={submitting}
           showToast={showToast}
+          poiTypeOptions={poiTypeOptions}
+          loadingPoiTypes={loadingPoiTypes}
           onClose={() => {
             setIsModalOpen(false)
             setEditingPoi(null)
@@ -376,6 +432,7 @@ function PartnerPOIPage() {
       {detailPoi && (
         <POIDetailModal
           poi={detailPoi}
+          poiTypeOptions={poiTypeOptions}
           onClose={() => setDetailPoi(null)}
           onEdit={(poi) => {
             setDetailPoi(null)
@@ -383,6 +440,26 @@ function PartnerPOIPage() {
           }}
         />
       )}
+
+      {/* Confirm Inactivate Modal */}
+      <ConfirmModal
+        isOpen={!!confirmPoi}
+        onClose={() => setConfirmPoi(null)}
+        onConfirm={confirmInactivate}
+        loading={submitting}
+        title="Xác nhận ngừng hoạt động"
+        subtitle="POI MANAGEMENT"
+        confirmLabel="Ngừng hoạt động"
+        message={
+          <>
+            Bạn có chắc muốn ngừng hoạt động POI <span className="font-bold text-[#e28743]">'{confirmPoi?.name}'</span>?
+            <div className="flex gap-2 mt-3 text-xs text-slate-500 italic bg-white p-3 rounded-xl border border-slate-100">
+              <X size={14} className="shrink-0 mt-0.5 text-slate-400" />
+              <span>Lưu ý: Các quảng cáo liên quan cũng sẽ bị ảnh hưởng và ngừng hiển thị với người dùng ngay lập tức.</span>
+            </div>
+          </>
+        }
+      />
     </div>
   )
 }
@@ -394,6 +471,8 @@ import { CustomSelect } from '../../../components/ui/CustomSelect'
 interface POIFormModalProps {
   poi: PartnerPOI | null
   submitting: boolean
+  poiTypeOptions: POITypeOption[]
+  loadingPoiTypes: boolean
   onClose: () => void
   showToast: (type: "success" | "error", message: string) => void
   onSubmit: (
@@ -402,7 +481,7 @@ interface POIFormModalProps {
   ) => Promise<void>
 }
 
-function POIFormModal({ poi, submitting, onClose, showToast, onSubmit }: POIFormModalProps) {
+function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClose, showToast, onSubmit }: POIFormModalProps) {
   const isEditing = !!poi
 
   const [name, setName] = useState(poi?.name ?? '')
@@ -609,8 +688,23 @@ function POIFormModal({ poi, submitting, onClose, showToast, onSubmit }: POIForm
             <div>
               <label className={labelClasses}>Loại hình <span className="text-red-400">*</span></label>
               <select value={type} onChange={(e) => setType(e.target.value as POIType)} className={inputClasses}>
-                <option value="Restaurant">Nhà hàng</option>
-                <option value="Attraction">Điểm tham quan</option>
+                {loadingPoiTypes ? (
+                  <option value="">Đang tải...</option>
+                ) : (
+                  poiTypeOptions.length > 0 ? (
+                    poiTypeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))
+                  ) : (
+                    Object.entries(fallbackTypeLabels).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))
+                  )
+                )}
               </select>
             </div>
           </div>
@@ -779,11 +873,12 @@ function POIFormModal({ poi, submitting, onClose, showToast, onSubmit }: POIForm
 // ── Detail Modal Component ──────────────────────────────────────────
 interface POIDetailModalProps {
   poi: PartnerPOI
+  poiTypeOptions: POITypeOption[]
   onClose: () => void
   onEdit: (poi: PartnerPOI) => void
 }
 
-function POIDetailModal({ poi, onClose, onEdit }: POIDetailModalProps) {
+function POIDetailModal({ poi, poiTypeOptions, onClose, onEdit }: POIDetailModalProps) {
   const openingHours = poi.is24Hours
     ? 'Mở 24 giờ'
     : poi.openHour && poi.closeHour
@@ -836,7 +931,7 @@ function POIDetailModal({ poi, onClose, onEdit }: POIDetailModalProps) {
                   {statusLabels[poi.status] || poi.status}
                 </span>
                 <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100">
-                  {typeLabels[poi.type] || poi.type}
+                  {poiTypeOptions.find((item) => item.value === poi.type)?.label || fallbackTypeLabels[poi.type] || poi.type}
                 </span>
               </div>
             </div>

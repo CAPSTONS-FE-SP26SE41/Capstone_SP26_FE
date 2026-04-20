@@ -49,7 +49,7 @@ function PartnerProfilePage() {
         <div />
         <button className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl transition-colors font-medium">
           <Settings size={18} />
-          <span>Edit Details</span>
+          <span>Chỉnh sửa thông tin</span>
         </button>
       </div>
 
@@ -65,21 +65,21 @@ function PartnerProfilePage() {
             <h2 className="text-lg font-bold text-slate-800 text-center">{profileData.name}</h2>
             <div className="flex items-center gap-1 text-xs font-semibold text-[#e28743] bg-[#faeadd] px-2 py-1 rounded-full mt-2">
               <Store size={12} />
-              Partner Account
+              Tài khoản Đối tác
             </div>
           </div>
 
           {/* Contact Details */}
           <div className="flex-1 w-full space-y-6">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">
-              Business Information
+              Thông tin doanh nghiệp
             </h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-slate-500 mb-1">
                   <Mail size={16} />
-                  <span className="text-sm font-medium">Email Address</span>
+                  <span className="text-sm font-medium">Địa chỉ Email</span>
                 </div>
                 <p className="font-semibold text-slate-800">{profileData.email}</p>
               </div>
@@ -87,7 +87,7 @@ function PartnerProfilePage() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-slate-500 mb-1">
                   <Phone size={16} />
-                  <span className="text-sm font-medium">Phone Number</span>
+                  <span className="text-sm font-medium">Số điện thoại</span>
                 </div>
                 <p className="font-semibold text-slate-800">{profileData.phone}</p>
               </div>
@@ -95,7 +95,7 @@ function PartnerProfilePage() {
               <div className="space-y-1 sm:col-span-2">
                 <div className="flex items-center gap-2 text-slate-500 mb-1">
                   <MapPin size={16} />
-                  <span className="text-sm font-medium">Address</span>
+                  <span className="text-sm font-medium">Địa chỉ</span>
                 </div>
                 <p className="font-semibold text-slate-800">{profileData.address}</p>
               </div>

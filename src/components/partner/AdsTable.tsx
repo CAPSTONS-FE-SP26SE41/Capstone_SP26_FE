@@ -56,11 +56,11 @@ export default function AdsTable({ ads, poiNameMap = {} }: AdsTableProps) {
           <table className="w-full min-w-[980px] table-fixed text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-[13px] uppercase tracking-wider">
-                <th className="px-3 py-3 font-bold w-[28%] tracking-tight align-middle">Advertisement</th>
-                <th className="px-3 py-3 font-bold w-[22%] tracking-tight align-middle">Duration</th>
-                <th className="px-3 py-3 font-bold w-[20%] tracking-tight align-middle">Promotion</th>
-                <th className="px-3 py-3 font-bold w-[15%] tracking-tight text-center align-middle">Status</th>
-                <th className="px-3 py-3 font-bold w-[15%] tracking-tight text-center align-middle">Actions</th>
+                <th className="px-3 py-3 font-bold w-[28%] tracking-tight align-middle">Quảng cáo</th>
+                <th className="px-3 py-3 font-bold w-[22%] tracking-tight align-middle">Thời gian</th>
+                <th className="px-3 py-3 font-bold w-[20%] tracking-tight align-middle">Ưu đãi</th>
+                <th className="px-3 py-3 font-bold w-[15%] tracking-tight text-center align-middle">Trạng thái</th>
+                <th className="px-3 py-3 font-bold w-[15%] tracking-tight text-center align-middle">Hành động</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">

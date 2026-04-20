@@ -12,10 +12,10 @@ type AppTopbarProps = {
 }
 
 export default function AppTopbar({
-  userName = 'Profile',
-  userRole = 'User',
+  userName = 'Hồ sơ',
+  userRole = 'Người dùng',
   userAvatarUrl = 'https://i.pravatar.cc/40',
-  searchPlaceholder = 'Search...',
+  searchPlaceholder = 'Tìm kiếm...',
   themeColor = 'green',
   showSearch = true,
 }: AppTopbarProps & { showSearch?: boolean }) {
@@ -56,16 +56,16 @@ export default function AppTopbar({
     if (path.includes('/staff/locations')) return 'Quản lí địa điểm'
     if (path.includes('/staff/pois')) return 'Quản lí POIs'
     if (path === '/staff') return 'Trang chủ'
-    if (path.includes('/accounts')) return 'Account Management'
-    if (path.includes('/analytics')) return 'Analytics'
-    if (path.includes('/subscriptions')) return 'Subscription Packages'
-    if (path.includes('/settings')) return 'System Settings'
-    if (path.includes('/advertisement')) return 'Advertisements'
-    if (path.includes('/poi')) return 'Point of Interest'
-    if (path.includes('/stats')) return 'Analytics & Statistics'
-    if (path.includes('/profile')) return 'Partner Profile'
-    if (path.includes('/partner')) return 'My Packages'
-    return 'Dashboard'
+    if (path.includes('/accounts')) return 'Quản lý tài khoản'
+    if (path.includes('/analytics')) return 'Phân tích'
+    if (path.includes('/subscriptions')) return 'Gói đăng ký'
+    if (path.includes('/settings')) return 'Cài đặt hệ thống'
+    if (path.includes('/advertisement')) return 'Quảng cáo'
+    if (path.includes('/poi')) return 'Điểm tham quan (POI)'
+    if (path.includes('/stats')) return 'Thống kê & Phân tích'
+    if (path.includes('/profile')) return 'Hồ sơ Đối tác'
+    if (path.includes('/partner')) return 'Gói dịch vụ của tôi'
+    return 'Bảng điều khiển'
   }
 
  
