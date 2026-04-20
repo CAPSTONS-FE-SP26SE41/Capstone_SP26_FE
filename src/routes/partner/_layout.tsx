@@ -5,6 +5,7 @@ import {
   ChartBar,
   User,
   Store,
+  History,
   MapPin
 } from "lucide-react"
 
@@ -27,8 +28,8 @@ function PartnerLayout() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setUserName(localStorage.getItem("user_name") ?? "Partner Profile")
-      setUserRole(localStorage.getItem("user_role") ?? "Partner")
+      setUserName(localStorage.getItem("user_name") ?? "Hồ sơ đối tác")
+      setUserRole(localStorage.getItem("user_role") ?? "Đối tác")
     }
   }, [])
 
@@ -36,20 +37,21 @@ function PartnerLayout() {
     <DashboardLayout
       brand={{
         name: "TripPartner",
-        subtitle: "Partner Dashboard",
+        subtitle: "Bảng điều khiển Đối tác",
         icon: Store,
       }}
       navItems={[
-        { to: "/partner/", icon: Package, label: "Package", exact: true },
-        { to: "/partner/advertisement", icon: Megaphone, label: "Advertisement" },
-        { to: "/partner/poi", icon: MapPin, label: "POI" },
-        { to: "/partner/stats", icon: ChartBar, label: "Stats" },
-        { to: "/partner/profile", icon: User, label: "Profile" },
+        { to: "/partner/", icon: Package, label: "Gói dịch vụ", exact: true },
+        { to: "/partner/history", icon: History, label: "Lịch sử mua hàng" },
+        { to: "/partner/advertisement", icon: Megaphone, label: "Quảng cáo" },
+        { to: "/partner/poi", icon: MapPin, label: "Địa điểm (POI)" },
+        { to: "/partner/stats", icon: ChartBar, label: "Thống kê" },
+        { to: "/partner/profile", icon: User, label: "Hồ sơ" },
       ]}
 
       userName={userName}
       userRole={userRole}
-      searchPlaceholder="Search packages, ads..."
+      showSearch={false}
       themeColor="orange"
     />
   )

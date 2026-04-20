@@ -14,7 +14,7 @@ export const Route = createFileRoute('/partner/_layout/stats')({
 function PartnerStatsPage() {
   const stats = [
     {
-      title: 'Total Reach',
+      title: 'Tổng lượt tiếp cận',
       value: '12,450',
       trend: '+15.2%',
       trendUp: true,
@@ -23,7 +23,7 @@ function PartnerStatsPage() {
       bg: 'bg-blue-100',
     },
     {
-      title: 'Saved Promotions',
+      title: 'Ưu đãi đã lưu',
       value: '840',
       trend: '+12.5%',
       trendUp: true,
@@ -32,16 +32,16 @@ function PartnerStatsPage() {
       bg: 'bg-green-100',
     },
     {
-      title: 'Active Ads',
+      title: 'Quảng cáo đang chạy',
       value: '5',
-      trend: 'No change',
+      trend: 'Không thay đổi',
       trendUp: true,
       icon: Activity,
       color: 'text-purple-600',
       bg: 'bg-purple-100',
     },
     {
-      title: 'Engagement Rate',
+      title: 'Tỷ lệ tương tác',
       value: '4.2%',
       trend: '+0.8%',
       trendUp: true,
@@ -86,9 +86,9 @@ function PartnerStatsPage() {
 
       <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center shadow-sm">
         <ChartBar className="mx-auto h-12 w-12 text-slate-300 mb-4" />
-        <h3 className="text-lg font-semibold text-slate-800 mb-2">Detailed Metrics (Coming Soon)</h3>
+        <h3 className="text-lg font-semibold text-slate-800 mb-2">Số liệu chi tiết (Sắp ra mắt)</h3>
         <p className="text-slate-500 max-w-sm mx-auto">
-          Graphical representations of your reach and promotion conversions will be available here.
+          Các biểu đồ thống kê về lượt tiếp cận và chuyển đổi ưu đãi sẽ được hiển thị tại đây.
         </p>
       </div>
     </div>

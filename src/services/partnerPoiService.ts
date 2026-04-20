@@ -1,8 +1,13 @@
 import { apiClient } from "../../api/apiClient"
 
 // ── Enums (match backend Domain.Enums) ──────────────────────────────
-export type POIType = "Restaurant" | "Attraction"
+export type POIType = "Restaurant" | "Attraction" | "Cafe" | "Hotel" | "Museum" | "Park" | "Shopping" | "StreetFood" | "Landmark" | "Viewpoint" | "Beach" | "CulturalSite" | "HistoricalSite" | "Temple" | "Church" | "Nature" | "Waterfall" | "Market" | "NightMarket" | "Bar" | "Nightlife" | "Resort"
 export type POIStatus = "Pending" | "Rejected" | "Active" | "Inactive"
+
+export interface POITypeOption {
+  value: POIType
+  label: string
+}
 
 // ── Response types ──────────────────────────────────────────────────
 export interface District {
@@ -106,6 +111,23 @@ function normalizePOI(p: any): PartnerPOI {
 // ── API BASE URL & Token (for FormData uploads) ─────────────────────
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5131/api"
+
+export const getPOITypes = async (): Promise<POITypeOption[]> => {
+  try {
+    const data = await apiClient("/poi-types")
+    if (!Array.isArray(data)) return []
+
+    return data
+      .map((item: any) => ({
+        value: String(item?.value ?? item?.Value ?? "") as POIType,
+        label: String(item?.label ?? item?.Label ?? ""),
+      }))
+      .filter((item) => item.value && item.label)
+  } catch {
+    return []
+  }
+}
+
 
 const getPartnerToken = () =>
   localStorage.getItem("partner_token") ||

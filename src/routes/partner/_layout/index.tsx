@@ -40,7 +40,7 @@ function ExpandableDescription({ text }: { text: string }) {
           onClick={() => setIsExpanded(!isExpanded)}
           className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors mt-1 font-medium underline underline-offset-2"
         >
-          {isExpanded ? 'View less' : 'View all'}
+          {isExpanded ? 'Thu gọn' : 'Xem tất cả'}
         </button>
       )}
     </div>
