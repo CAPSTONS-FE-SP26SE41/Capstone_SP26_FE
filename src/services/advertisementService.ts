@@ -37,6 +37,18 @@ export const getMyAdvertisements = async () => {
   return apiClient("/advertisements/my-ads")
 }
 
+export const inactivateMyAdvertisement = async (id: string) => {
+  return apiClient(`/advertisements/my-ads/${id}/inactivate`, {
+    method: "PATCH",
+  })
+}
+
+export const activateMyAdvertisement = async (id: string) => {
+  return apiClient(`/advertisements/my-ads/${id}/activate`, {
+    method: "PATCH",
+  })
+}
+
 export const createAdvertisement = async (data: any, imageFile?: File | null, videoFile?: File | null) => {
   const formData = new FormData()
   formData.append('PoiId', data.poiId)

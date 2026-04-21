@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Plus, MapPin, Search, Edit2, Eye, EyeOff, Loader2, ChevronLeft, ChevronRight, Image as ImageIcon, X, ExternalLink, Clock, DollarSign, Navigation, Home, Ban, RotateCw } from 'lucide-react'
+import { HubConnectionBuilder } from '@microsoft/signalr'
 import { useState, useEffect, useCallback } from 'react'
 import { ConfirmModal } from '../../../components/ui/ConfirmModal'
 import {
@@ -98,9 +99,9 @@ function PartnerPOIPage() {
   }
 
   // ── Fetch data ────────────────────────────────────────────────────
-  const fetchPois = useCallback(async () => {
+  const fetchPois = useCallback(async (showLoading: boolean = true) => {
     try {
-      setLoading(true)
+      if (showLoading) setLoading(true)
       const result = await getMyPartnerPOIs(page, pageSize)
       setPois(result.items)
       setTotalPages(result.totalPages)
@@ -109,12 +110,34 @@ function PartnerPOIPage() {
       console.error('Error fetching POIs:', error)
       setPois([])
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
   }, [page, pageSize])
 
   useEffect(() => {
     fetchPois()
+
+    const token = localStorage.getItem("partner_token")
+    if (token) {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5246/api'
+      const hubUrl = baseUrl.replace('/api', '') + '/hubs/notification'
+      const connection = new HubConnectionBuilder()
+        .withUrl(hubUrl, { accessTokenFactory: () => token })
+        .withAutomaticReconnect()
+        .build()
+
+      connection.on("ReceiveNotification", (notification) => {
+        if (notification?.Type === "POI_UPDATED" || notification?.type === "POI_UPDATED") {
+          fetchPois(false)
+        }
+      })
+
+      connection.start().catch(err => console.error("SignalR POI Error: ", err))
+
+      return () => {
+        connection.stop()
+      }
+    }
   }, [fetchPois])
 
   useEffect(() => {
@@ -164,7 +187,7 @@ function PartnerPOIPage() {
       setSubmitting(true)
       const updated = await requestReactivationMyPartnerPOI(poi.id)
       showToast("success", `Đã gửi POI \"${updated.name || poi.name}\" để Manager duyệt lại.`)
-      fetchPois()
+      fetchPois(false)
     } catch (error: any) {
       showToast("error", error?.message || 'Có lỗi xảy ra khi gửi request mở lại POI.')
     } finally {
@@ -179,7 +202,7 @@ function PartnerPOIPage() {
       const result = await inactivateMyPartnerPOI(confirmPoi.id, true)
       showToast("success", result.message)
       setConfirmPoi(null)
-      fetchPois()
+      fetchPois(false)
     } catch (error: any) {
       showToast("error", error?.message || 'Có lỗi xảy ra khi ngừng hoạt động POI.')
     } finally {
@@ -200,7 +223,7 @@ function PartnerPOIPage() {
       }
       setIsModalOpen(false)
       setEditingPoi(null)
-      fetchPois()
+      fetchPois(false)
     } catch (error: any) {
       throw error // Let the modal handle it to show inline errors
     } finally {
@@ -675,9 +698,10 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4 flex flex-col">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden mx-4 flex flex-col">
+        <div className="max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 rounded-t-2xl flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
           <h2 className="text-lg font-bold text-slate-800">
             {isEditing ? 'Chỉnh sửa POI' : 'Thêm POI mới'}
           </h2>
@@ -892,6 +916,7 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   )
@@ -932,9 +957,10 @@ function POIDetailModal({ poi, poiTypeOptions, onClose, onEdit }: POIDetailModal
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto mx-4">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden mx-4">
+        <div className="max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 rounded-t-2xl flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
           <h2 className="text-lg font-bold text-slate-800">Chi tiết POI</h2>
           <button onClick={onClose} className="group p-2 hover:bg-red-100 rounded-lg transition-all">
             <X size={20} className="text-slate-400 transition-colors" />
@@ -1009,6 +1035,7 @@ function POIDetailModal({ poi, poiTypeOptions, onClose, onEdit }: POIDetailModal
               Chỉnh sửa
             </button>
           </div>
+        </div>
         </div>
       </div>
     </div>
