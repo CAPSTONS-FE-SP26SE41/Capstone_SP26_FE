@@ -51,6 +51,6 @@ export interface PaymentHistoryItem {
   accountId: string;
 }
 
-export const getPaymentHistory = async (): Promise<PaymentHistoryItem[]> => {
-  return apiClient("/payments/history");
+export const getPaymentHistory = async (page: number = 1, pageSize: number = 10) => {
+  return apiClient(`/payments/history?page=${page}&pageSize=${pageSize}`);
 }

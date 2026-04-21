@@ -64,6 +64,7 @@ export default function AppTopbar({
     if (path.includes('/poi')) return 'Điểm tham quan (POI)'
     if (path.includes('/stats')) return 'Thống kê & Phân tích'
     if (path.includes('/profile')) return 'Hồ sơ Đối tác'
+    if (path.includes('/history')) return 'Lịch sử giao dịch'
     if (path.includes('/partner')) return 'Gói dịch vụ của tôi'
     return 'Bảng điều khiển'
   }

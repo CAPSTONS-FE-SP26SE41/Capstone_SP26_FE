@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Plus, MapPin, Search, Edit2, Eye, EyeOff, Loader2, ChevronLeft, ChevronRight, Image as ImageIcon, X, ExternalLink, Clock, DollarSign, Navigation, Home, Ban } from 'lucide-react'
+import { Plus, MapPin, Search, Edit2, Eye, EyeOff, Loader2, ChevronLeft, ChevronRight, Image as ImageIcon, X, ExternalLink, Clock, DollarSign, Navigation, Home, Ban, RotateCw } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
 import { ConfirmModal } from '../../../components/ui/ConfirmModal'
 import {
@@ -7,6 +7,7 @@ import {
   createPartnerPOI,
   updateMyPartnerPOI,
   inactivateMyPartnerPOI,
+  requestReactivationMyPartnerPOI,
   getPOITypes,
   type PartnerPOI,
   type CreatePartnerPOIPayload,
@@ -156,6 +157,19 @@ function PartnerPOIPage() {
 
   const handleInactivate = (poi: PartnerPOI) => {
     setConfirmPoi(poi)
+  }
+
+  const handleRequestReactivation = async (poi: PartnerPOI) => {
+    try {
+      setSubmitting(true)
+      const updated = await requestReactivationMyPartnerPOI(poi.id)
+      showToast("success", `Đã gửi POI \"${updated.name || poi.name}\" để Manager duyệt lại.`)
+      fetchPois()
+    } catch (error: any) {
+      showToast("error", error?.message || 'Có lỗi xảy ra khi gửi request mở lại POI.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const confirmInactivate = async () => {
@@ -327,6 +341,19 @@ function PartnerPOIPage() {
                             <EyeOff size={16} />
                             <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
                               Ngừng hoạt động
+                              <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                            </span>
+                          </button>
+                        )}
+                        {poi.status === 'Inactive' && (
+                          <button
+                            onClick={() => handleRequestReactivation(poi)}
+                            disabled={submitting}
+                            className="group relative inline-flex h-9 w-9 items-center justify-center text-slate-400 bg-slate-50 border border-slate-200 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 rounded-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                          >
+                            <RotateCw size={16} className={submitting ? 'animate-spin' : ''} />
+                            <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
+                              Gửi request mở lại
                               <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
                             </span>
                           </button>
