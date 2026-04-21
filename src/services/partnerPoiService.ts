@@ -361,3 +361,14 @@ export const inactivateMyPartnerPOI = async (
     message: String(data?.message ?? "POI đã inactive thành công."),
   }
 }
+
+export const requestReactivationMyPartnerPOI = async (
+  id: string
+): Promise<PartnerPOI> => {
+  const data = await apiClient(
+    `/partner/pois/my/${encodeURIComponent(id)}/request-reactivation`,
+    { method: "POST" }
+  )
+
+  return normalizePOI(data?.poi ?? data)
+}
