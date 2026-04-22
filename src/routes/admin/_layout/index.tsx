@@ -1,192 +1,186 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
 import StatCard from '../../../components/admin/StatCard'
+import { getAdminDashboardStats, AdminDashboardResponse } from '../../../services/adminStatisticService'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
 
 export const Route = createFileRoute('/admin/_layout/')({
   component: AdminDashboard,
 })
 
-type Activity = {
-  id: string
-  user: {
-    name: string
-    avatarUrl: string
-  }
-  destination: string
-  date: string
-  status: 'Confirmed' | 'Pending' | 'Cancelled'
-}
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 function AdminDashboard() {
-  const recentActivity: Activity[] = [
-    {
-      id: '1',
-      user: {
-        name: 'John Doe',
-        avatarUrl: 'https://i.pravatar.cc/100?img=1',
-      },
-      destination: 'Paris',
-      date: '12 Feb 2026',
-      status: 'Confirmed',
-    },
-    {
-      id: '2',
-      user: {
-        name: 'Anna Smith',
-        avatarUrl: 'https://i.pravatar.cc/100?img=2',
-      },
-      destination: 'Tokyo',
-      date: '15 Feb 2026',
-      status: 'Pending',
-    },
-    {
-      id: '3',
-      user: {
-        name: 'David Lee',
-        avatarUrl: 'https://i.pravatar.cc/100?img=3',
-      },
-      destination: 'Seoul',
-      date: '20 Feb 2026',
-      status: 'Cancelled',
-    },
-  ]
+  const [period, setPeriod] = useState<string>('daily')
+  const [stats, setStats] = useState<AdminDashboardResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setIsLoading(true)
+      try {
+        const data = await getAdminDashboardStats(period)
+        setStats(data)
+      } catch (error) {
+        console.error("Failed to fetch admin stats", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchStats()
+  }, [period])
+
+  if (isLoading || !stats) {
+    return (
+      <div className="min-h-screen bg-white p-8 flex items-center justify-center">
+        <div className="text-slate-500 font-medium">Loading statistics...</div>
+      </div>
+    )
+  }
+
+  // Format data for Role Pie Chart
+  const roleData = [
+    { name: 'Users', value: stats.accountRoles.userCount },
+    { name: 'Partners', value: stats.accountRoles.partnerCount },
+    { name: 'Managers', value: stats.accountRoles.managerCount },
+    { name: 'Staff', value: stats.accountRoles.staffCount },
+  ].filter(r => r.value > 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
+    <div className="min-h-screen bg-white p-8">
 
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800">
-          Dashboard Overview
-        </h1>
-        <p className="text-slate-500 mt-1 text-sm">
-          Monitor your platform performance and growth.
-        </p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800">
+            Dashboard Overview
+          </h1>
+          <p className="text-slate-500 mt-1 text-sm">
+            Monitor your platform performance and growth.
+          </p>
+        </div>
+        <div>
+          <select 
+            value={period} 
+            onChange={(e) => setPeriod(e.target.value)}
+            className="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none font-medium shadow-sm transition-all"
+          >
+            <option value="daily">Daily Growth (Last 30 Days)</option>
+            <option value="monthly">Monthly Growth</option>
+          </select>
+        </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Users" value="12,345" />
-        <StatCard title="Active Trips" value="432" />
-        <StatCard title="Revenue" value="$45,290" />
-        <StatCard title="Pending" value="18" />
+        <StatCard title="Total Accounts" value={stats.totalAccounts.toString()} />
+        <StatCard title="Total POIs" value={stats.totalPois.toString()} />
+        <StatCard title="Total Ads" value={stats.totalAds.toString()} />
+        <StatCard title="New Accounts (Chart)" value={stats.accountGrowth.reduce((acc, curr) => acc + curr.newAccounts, 0).toString()} />
       </div>
 
-      {/* Chart */}
+      {/* Main Chart */}
       <div className="mt-8 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-slate-800">
-            User Growth Trends
+            Account Growth Trends
           </h2>
           <span className="text-sm text-slate-400">
-            Last 30 days
+            {period === 'daily' ? 'Last 30 days' : 'By Month'}
           </span>
         </div>
 
-        <div className="h-56 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-dashed border-slate-200">
-          (Chart placeholder)
+        <div className="h-80 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={stats.accountGrowth} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+              <XAxis dataKey="date" tick={{ fill: '#64748b', fontSize: 12 }} tickMargin={10} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#64748b', fontSize: 12 }} tickMargin={10} axisLine={false} tickLine={false} />
+              <Tooltip 
+                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
+                labelStyle={{ fontWeight: 'bold', color: '#334155' }}
+              />
+              <Line type="monotone" dataKey="newAccounts" name="New Accounts" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Recent Activity Table */}
-      <div className="mt-8 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-slate-800">
-            Recent Trip Activity
+      {/* Secondary Charts: Roles & Packages */}
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* Role Breakdown */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+          <h3 className="text-lg font-semibold text-slate-800 mb-6">
+            Account Roles Distribution
           </h3>
-          <button className="text-sm font-semibold text-blue-600 hover:text-blue-700">
-            View All
-          </button>
+          {roleData.length > 0 ? (
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={roleData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {roleData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-64 flex items-center justify-center text-slate-400">
+              No role data available
+            </div>
+          )}
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full table-fixed border-collapse">
-            <thead>
-              <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
-                <th className="px-6 py-4 text-left">User</th>
-                <th className="px-6 py-4 text-left">Destination</th>
-                <th className="px-6 py-4 text-left">Date</th>
-                <th className="px-6 py-4 text-left">Status</th>
-                <th className="px-6 py-4 text-right w-[140px]">
-                  Action
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-slate-200">
-              {recentActivity.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-slate-50 transition-colors"
-                >
-                  {/* User */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-9 h-9 rounded-full bg-cover bg-center"
-                        style={{
-                          backgroundImage: `url("${row.user.avatarUrl}")`,
-                        }}
-                      />
-                      <span className="font-medium text-slate-800">
-                        {row.user.name}
-                      </span>
-                    </div>
-                  </td>
-
-                  {/* Destination */}
-                  <td className="px-6 py-4 text-sm font-medium text-slate-800">
-                    {row.destination}
-                  </td>
-
-                  {/* Date */}
-                  <td className="px-6 py-4 text-sm text-slate-500">
-                    {row.date}
-                  </td>
-
-                  {/* Status */}
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
-                      ${
-                        row.status === 'Confirmed'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : row.status === 'Pending'
-                          ? 'bg-amber-100 text-amber-700'
-                          : 'bg-rose-100 text-rose-700'
-                      }`}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                      {row.status}
-                    </span>
-                  </td>
-
-                  {/* Action */}
-                  <td className="px-6 py-4 w-[140px]">
-                    <div className="flex justify-end">
-                      <button
-                        className={`
-                          inline-flex items-center justify-center
-                          h-9 min-w-[90px]
-                          px-3
-                          text-sm font-semibold
-                          rounded-lg
-                          transition-colors
-                          ${
-                            row.status === 'Pending'
-                              ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
-                              : 'text-slate-600 bg-slate-100 hover:bg-slate-200'
-                          }
-                        `}
-                      >
-                        {row.status === 'Pending' ? 'Review' : 'View'}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Package Popularity */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+          <h3 className="text-lg font-semibold text-slate-800 mb-6">
+            Active Packages Popularity
+          </h3>
+          {stats.packagePopularity.length > 0 ? (
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={stats.packagePopularity}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={0}
+                    outerRadius={80}
+                    dataKey="userCount"
+                    nameKey="packageName"
+                  >
+                    {stats.packagePopularity.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-64 flex items-center justify-center text-slate-400 text-sm text-center border border-dashed border-slate-200 rounded-xl">
+              No active subscription packages found.
+            </div>
+          )}
         </div>
+
       </div>
 
     </div>

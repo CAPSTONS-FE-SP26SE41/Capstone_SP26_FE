@@ -15,7 +15,9 @@ const config = defineConfig({
     },
   },
   plugins: [
-    devtools(),
+    // Devtools event-bus mặc định dùng port 42069; nếu port này đang bị chiếm
+    // thì Vite dev sẽ crash với EADDRINUSE.
+    devtools({ eventBusConfig: { port: 42070 } }),
     nitro(),
     // this is the plugin that enables path aliases
     viteTsConfigPaths({

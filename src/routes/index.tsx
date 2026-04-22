@@ -1,118 +1,192 @@
-import { createFileRoute } from '@tanstack/react-router'
-import {
-  Zap,
-  Server,
-  Route as RouteIcon,
-  Shield,
-  Waves,
-  Sparkles,
-} from 'lucide-react'
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { PlaneTakeoff, Eye, EyeOff } from "lucide-react"
+import { useState, useEffect } from "react"
+import { jwtDecode } from "jwt-decode"
 
-export const Route = createFileRoute('/')({ component: App })
+import { login } from "../services/authService"
 
-function App() {
-  const features = [
-    {
-      icon: <Zap className="w-12 h-12 text-cyan-400" />,
-      title: 'Powerful Server Functions',
-      description:
-        'Write server-side code that seamlessly integrates with your client components. Type-safe, secure, and simple.',
-    },
-    {
-      icon: <Server className="w-12 h-12 text-cyan-400" />,
-      title: 'Flexible Server Side Rendering',
-      description:
-        'Full-document SSR, streaming, and progressive enhancement out of the box. Control exactly what renders where.',
-    },
-    {
-      icon: <RouteIcon className="w-12 h-12 text-cyan-400" />,
-      title: 'API Routes',
-      description:
-        'Build type-safe API endpoints alongside your application. No separate backend needed.',
-    },
-    {
-      icon: <Shield className="w-12 h-12 text-cyan-400" />,
-      title: 'Strongly Typed Everything',
-      description:
-        'End-to-end type safety from server to client. Catch errors before they reach production.',
-    },
-    {
-      icon: <Waves className="w-12 h-12 text-cyan-400" />,
-      title: 'Full Streaming Support',
-      description:
-        'Stream data from server to client progressively. Perfect for AI applications and real-time updates.',
-    },
-    {
-      icon: <Sparkles className="w-12 h-12 text-cyan-400" />,
-      title: 'Next Generation Ready',
-      description:
-        'Built from the ground up for modern web applications. Deploy anywhere JavaScript runs.',
-    },
-  ]
+export const Route = createFileRoute("/")({
+  component: LoginPortalPage,
+})
+
+function LoginPortalPage() {
+
+  const navigate = useNavigate()
+
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [errorMessage, setErrorMessage] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
+
+  useEffect(() => {
+    const saved = localStorage.getItem("login_remember_me")
+    if (saved === "true") {
+      setEmail(localStorage.getItem("login_saved_email") || "")
+      setPassword(localStorage.getItem("login_saved_password") || "")
+      setRememberMe(true)
+    }
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setErrorMessage("")
+
+    try {
+      if (rememberMe) {
+        localStorage.setItem("login_remember_me", "true")
+        localStorage.setItem("login_saved_email", email)
+        localStorage.setItem("login_saved_password", password)
+      } else {
+        localStorage.removeItem("login_remember_me")
+        localStorage.removeItem("login_saved_email")
+        localStorage.removeItem("login_saved_password")
+      }
+
+      const data = await login(email, password)
+
+      const token = data.token.replace("Bearer ", "")
+
+      const decoded: any = jwtDecode(token)
+
+      const role =
+        decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
+
+      const name =
+        decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] ||
+        decoded.name ||
+        decoded.unique_name ||
+        data?.name ||
+        data?.fullName ||
+        data?.username ||
+        data?.user?.name ||
+        data?.user?.fullName ||
+        data?.user?.username ||
+        decoded.email ||
+        email
+
+      console.log("[Login] JWT decoded role:", JSON.stringify(role), "| All claims:", decoded)
+
+      const normalizedRole = role?.toString().trim().toLowerCase()
+
+      if (normalizedRole === "manager") {
+        localStorage.setItem("manager_token", token)
+        localStorage.setItem("role", role)
+        localStorage.setItem("user_name", name)
+        localStorage.setItem("user_role", "Manager")
+        navigate({ to: "/staff" })
+        return
+      }
+
+      if (normalizedRole === "admin" || normalizedRole === "superadmin") {
+        localStorage.setItem("admin_token", token)
+        localStorage.setItem("role", role)
+        localStorage.setItem("user_name", name)
+        localStorage.setItem("user_role", role)
+        navigate({ to: "/admin/analytics" })
+        return
+      }
+
+      if (normalizedRole === "partner") {
+        localStorage.setItem("partner_token", token)
+        localStorage.setItem("role", role)
+        localStorage.setItem("user_name", name)
+        localStorage.setItem("user_role", role)
+        navigate({ to: "/partner", search: { tab: "my-packages" } })
+        return
+      }
+
+      console.warn("[Login] Role không hợp lệ hoặc không được hỗ trợ:", JSON.stringify(role))
+      setErrorMessage(`Tài khoản không có quyền truy cập (role: ${role || "không xác định"})`)
+
+    } catch (error) {
+      console.log(error)
+      setErrorMessage("Email hoặc mật khẩu không đúng")
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      <section className="relative py-20 px-6 text-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10"></div>
-        <div className="relative max-w-5xl mx-auto">
-          <div className="flex items-center justify-center gap-6 mb-6">
-            <img
-              src="/tanstack-circle-logo.png"
-              alt="TanStack Logo"
-              className="w-24 h-24 md:w-32 md:h-32"
-            />
-            <h1 className="text-6xl md:text-7xl font-black text-white [letter-spacing:-0.08em]">
-              <span className="text-gray-300">TANSTACK</span>{' '}
-              <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                START
-              </span>
-            </h1>
-          </div>
-          <p className="text-2xl md:text-3xl text-gray-300 mb-4 font-light">
-            The framework for next generation AI applications
-          </p>
-          <p className="text-lg text-gray-400 max-w-3xl mx-auto mb-8">
-            Full-stack framework powered by TanStack Router for React and Solid.
-            Build modern applications with server functions, streaming, and type
-            safety.
-          </p>
-          <div className="flex flex-col items-center gap-4">
-            <a
-              href="https://tanstack.com/start"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-8 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-cyan-500/50"
-            >
-              Documentation
-            </a>
-            <p className="text-gray-400 text-sm mt-2">
-              Begin your TanStack Start journey by editing{' '}
-              <code className="px-2 py-1 bg-slate-700 rounded text-cyan-400">
-                /src/routes/index.tsx
-              </code>
-            </p>
-          </div>
-        </div>
-      </section>
+    <div className="login-page">
+      <div className="login-background" data-alt="Scenic mountain lake landscape with a boat">
+        <div className="login-background-overlay" />
+      </div>
 
-      <section className="py-16 px-6 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10"
-            >
-              <div className="mb-4">{feature.icon}</div>
-              <h3 className="text-xl font-semibold text-white mb-3">
-                {feature.title}
-              </h3>
-              <p className="text-gray-400 leading-relaxed">
-                {feature.description}
-              </p>
+      <div className="login-panel">
+        <div className="login-card">
+          <div className="login-brand">
+            <div className="login-brand-icon">
+              <PlaneTakeoff size={32} className="text-[var(--login-primary)]" />
             </div>
-          ))}
+            <h1 className="login-title">Travel Planner</h1>
+          </div>
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="login-field">
+              <label className="login-label">Email</label>
+              <div className="login-input-wrapper">
+                <input
+                  className="login-input login-input-no-icon"
+                  placeholder="Enter your email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="login-field">
+              <label className="login-label">Password</label>
+              <div className="login-input-wrapper">
+                <input
+                  className="login-input login-input-no-icon"
+                  style={{ paddingRight: '3rem' }}
+                  placeholder="Enter your password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="login-input-toggle-btn"
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="login-meta">
+              <div className="login-remember">
+                <input
+                  className="w-4 h-4 rounded text-[var(--login-primary)] focus:ring-[var(--login-primary)] border-slate-300"
+                  id="remember"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <label className="text-sm text-slate-600" htmlFor="remember">
+                  Remember me
+                </label>
+              </div>
+              <button type="button" className="login-forgot">
+                Forgot password?
+              </button>
+            </div>
+
+            {errorMessage && (
+              <div className="login-error">
+                <p>{errorMessage}</p>
+              </div>
+            )}
+
+            <button className="login-button" type="submit">
+              Sign In
+            </button>
+          </form>
         </div>
-      </section>
+      </div>
     </div>
   )
 }

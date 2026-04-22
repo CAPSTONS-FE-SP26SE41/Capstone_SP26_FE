@@ -1,10 +1,22 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
-import AdminSidebar from '../../components/AdminSidebar'
-import AdminTopbar from '../../components/AdminTopbar'
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import {
+  LayoutDashboard,
+  Users,
+  Calendar,
+  Map,
+  BarChart2,
+  PlaneTakeoff,
+  UserCog,
+  CreditCard,
+} from 'lucide-react'
+import { useState, useEffect } from 'react'
+import DashboardLayout from '../../components/layouts/DashboardLayout'
+import { getMe } from '../../services/authService'
+
 
 export const Route = createFileRoute('/admin/_layout')({
   beforeLoad: () => {
-    if (!localStorage.getItem('admin_token')) {
+    if (typeof window !== 'undefined' && !localStorage.getItem('admin_token')) {
       throw redirect({ to: '/admin/login' })
     }
   },
@@ -12,19 +24,78 @@ export const Route = createFileRoute('/admin/_layout')({
 })
 
 function AdminLayout() {
-  return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <AdminSidebar />
+  const [isMounted, setIsMounted] = useState(false)
+  const [userName, setUserName] = useState("")
+  const [userRole, setUserRole] = useState("")
+  const [userAvatar, setUserAvatar] = useState<string | undefined>(undefined)
 
-      {/* Main Area */}
-      <div className="flex-1 flex flex-col">
-        <AdminTopbar />
+  useEffect(() => {
+    setIsMounted(true)
+    
+    // Lấy dữ liệu từ localStorage ngay khi mount
+    const storedName = localStorage.getItem('user_name')
+    const storedRole = localStorage.getItem('user_role')
+    const storedAvatar = localStorage.getItem('user_avatar')
+    
+    if (storedName) setUserName(storedName)
+    else setUserName("Hồ sơ Admin")
+    
+    if (storedRole) setUserRole(storedRole)
+    else setUserRole("Quản trị viên")
+    
+    if (storedAvatar) setUserAvatar(storedAvatar)
 
-        <main className="flex-1 p-6 overflow-auto">
-          <Outlet />
-        </main>
+    // Gọi API để cập nhật tên thật (nếu cần)
+    const fetchProfile = async () => {
+      try {
+        const data = await getMe()
+        const name = data?.name || data?.profile?.name || localStorage.getItem('user_name')
+        if (name) setUserName(name)
+      } catch (error) {
+        console.error("Failed to sync profile name:", error)
+      }
+    }
+    fetchProfile()
+  }, [])
+
+  // Nếu chưa mount, hiển thị layout trống hoặc skeleton để tránh flash
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="h-10 w-10 bg-slate-200 rounded-full"></div>
+          <div className="h-4 w-32 bg-slate-200 rounded"></div>
+        </div>
       </div>
-    </div>
+    )
+  }
+
+
+
+
+
+  return (
+    <DashboardLayout
+      brand={{
+        name: 'TripAdmin',
+        subtitle: 'Bảng điều khiển quản trị',
+        icon: PlaneTakeoff,
+      }}
+      navItems={[
+        { to: '/admin/analytics', icon: BarChart2, label: 'Thống kê' },
+        { to: '/admin/accounts', icon: UserCog, label: 'Quản lý tài khoản', exact: true },
+        { to: '/admin/subscriptions', icon: CreditCard, label: 'Gói dịch vụ' },
+        { to: '/admin/profile', icon: Users, label: 'Hồ sơ' },
+      ]}
+
+      userName={userName}
+      userRole={userRole}
+      userAvatarUrl={userAvatar}
+      searchPlaceholder="Tìm kiếm tài khoản, gói dịch vụ..."
+      themeColor="green"
+
+    />
+
   )
 }
+
