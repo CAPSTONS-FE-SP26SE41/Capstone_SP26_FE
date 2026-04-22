@@ -153,7 +153,7 @@ export default function AdsTable({ ads, poiNameMap = {}, onRefresh }: AdsTablePr
 
                       {ad.status === 'Active' && (
                         <button
-                          onClick={() => handleToggleStatus(ad.adId, ad.status)}
+                          onClick={() => handleToggleStatus(ad.adId || '', ad.status || '')}
                           disabled={actionLoadingId === ad.adId}
                           className="group relative inline-flex h-9 w-9 items-center justify-center text-slate-400 bg-slate-50 border border-slate-200 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-200 rounded-lg transition-all disabled:opacity-50"
                         >
@@ -167,10 +167,11 @@ export default function AdsTable({ ads, poiNameMap = {}, onRefresh }: AdsTablePr
 
                       {ad.status === 'Paused' && (
                         <button
-                          onClick={() => handleToggleStatus(ad.adId, ad.status)}
+                          onClick={() => handleToggleStatus(ad.adId || '', ad.status || '')}
                           disabled={actionLoadingId === ad.adId}
                           className="group relative inline-flex h-9 w-9 items-center justify-center text-slate-400 bg-slate-50 border border-slate-200 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 rounded-lg transition-all disabled:opacity-50"
                         >
+
                           {actionLoadingId === ad.adId ? <Loader2 size={18} className="animate-spin" /> : <Play size={18} />}
                           <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-[70]">
                             Bật hoạt động

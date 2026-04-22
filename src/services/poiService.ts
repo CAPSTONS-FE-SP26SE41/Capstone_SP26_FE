@@ -10,7 +10,7 @@ export type StaffPOI = {
   Address: string
 
   ApproxCost: string
-  Status?: string
+
 
   // Thời gian mở cửa
   OpenHour: string
@@ -349,12 +349,12 @@ export type CreateStaffPOIPayload = {
   IsIndoor: boolean
   LocationId: string
   DistrictId: string
-  PoiPreferences?: string[]
   Status?: string | number
   PartnerId?: string
   VisitRecommendation?: string
-  // Backend đang map sang Dictionary/Map, nên có thể truyền array object {id,name}
+  // Backend đang map sang Dictionary/Map, nên có thể truyền array object {id,name} hoặc array string
   PoiPreferences?: Array<string | { id: string; name: string }>
+
 }
 
 export const createStaffPOI = async (
