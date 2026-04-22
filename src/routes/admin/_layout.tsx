@@ -5,7 +5,6 @@ import {
   Calendar,
   Map,
   BarChart2,
-  Settings,
   PlaneTakeoff,
   UserCog,
   CreditCard,
@@ -87,7 +86,6 @@ function AdminLayout() {
         { to: '/admin/accounts', icon: UserCog, label: 'Quản lý tài khoản', exact: true },
         { to: '/admin/subscriptions', icon: CreditCard, label: 'Gói dịch vụ' },
         { to: '/admin/profile', icon: Users, label: 'Hồ sơ' },
-        { to: "/admin/settings", icon: Settings, label: "Hệ thống" },
       ]}
 
       userName={userName}

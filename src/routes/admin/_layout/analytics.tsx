@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   BarChart,
   Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -13,209 +15,239 @@ import {
   Pie,
   Cell,
 } from 'recharts'
+import { getAdminDashboardStats, AdminDashboardResponse } from '../../../services/adminStatisticService'
 
 export const Route = createFileRoute('/admin/_layout/analytics')({
   component: AdminAnalytics,
 })
 
-type Revenue = {
-  name: string
-  income: number
-  expense: number
-}
-
-type Device = {
-  name: string
-  value: number
-}
-
-type PageMetric = {
-  page: string
-  views: number
-  bounce: string
-  conv: string
-}
-
-const COLORS = ['#258cf4', '#10b981', '#f59e0b', '#ef4444']
+const COLORS = ['#258cf4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
 
 function AdminAnalytics() {
-  const [revenueData] = useState<Revenue[]>([
-    { name: 'Jan', income: 4000, expense: 2400 },
-    { name: 'Feb', income: 3000, expense: 1398 },
-    { name: 'Mar', income: 5000, expense: 2800 },
-    { name: 'Apr', income: 4200, expense: 2100 },
-  ])
+  const [period, setPeriod] = useState<string>('daily')
+  const [dateRange, setDateRange] = useState({
+    start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    end: new Date().toISOString().split('T')[0]
+  })
+  const [stats, setStats] = useState<AdminDashboardResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const [deviceData] = useState<Device[]>([
-    { name: 'Máy tính', value: 400 },
-    { name: 'Di động', value: 300 },
-    { name: 'Máy tính bảng', value: 200 },
-  ])
+  useEffect(() => {
+    const fetchStats = async () => {
+      setIsLoading(true)
+      try {
+        const data = await getAdminDashboardStats(
+          period, 
+          dateRange.start || undefined, 
+          dateRange.end || undefined
+        )
+        setStats(data)
+      } catch (error) {
+        console.error("Failed to fetch admin stats", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchStats()
+  }, [period, dateRange])
 
+  if (!stats) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-text-secondary font-medium">Đang tải dữ liệu thống kê...</div>
+      </div>
+    )
+  }
 
-  const [topPages] = useState<PageMetric[]>([
-    { page: '/home', views: 1200, bounce: '45%', conv: '12%' },
-    { page: '/booking', views: 850, bounce: '38%', conv: '18%' },
-    { page: '/destinations', views: 620, bounce: '52%', conv: '9%' },
-  ])
+  // Format data for Role Pie Chart
+  const roleData = [
+    { name: 'Người dùng', value: stats.accountRoles.userCount },
+    { name: 'Đối tác', value: stats.accountRoles.partnerCount },
+    { name: 'Quản lý', value: stats.accountRoles.managerCount },
+    { name: 'Nhân viên', value: stats.accountRoles.staffCount },
+  ].filter(r => r.value > 0);
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
-          <p className="text-text-secondary text-sm font-medium">
-            Tổng doanh thu
-          </p>
-          <p className="text-2xl font-bold text-text-main mt-2">
-            18,200,000 ₫
-          </p>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-text-main">Thống kê hệ thống</h2>
+          <p className="text-text-secondary mt-1">Giám sát hiệu suất và tốc độ tăng trưởng của nền tảng.</p>
         </div>
-
-        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
-          <p className="text-text-secondary text-sm font-medium">
-            Tổng lượt đặt
-          </p>
-          <p className="text-2xl font-bold text-text-main mt-2">
-            540
-          </p>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
-          <p className="text-text-secondary text-sm font-medium">
-            Người dùng hoạt động
-          </p>
-          <p className="text-2xl font-bold text-text-main mt-2">
-            126
-          </p>
+        <div className="flex flex-col sm:flex-row gap-3 items-center">
+          <div className="flex items-center gap-2">
+            <input 
+              type="date" 
+              value={dateRange.start}
+              onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+              className="bg-white border border-[#e7edf4] text-text-main text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none shadow-sm transition-all"
+            />
+            <span className="text-text-secondary">-</span>
+            <input 
+              type="date" 
+              value={dateRange.end}
+              onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+              className="bg-white border border-[#e7edf4] text-text-main text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none shadow-sm transition-all"
+            />
+          </div>
+          
+          <select 
+            value={period} 
+            onChange={(e) => setPeriod(e.target.value)}
+            className="bg-white border border-[#e7edf4] text-text-main text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full sm:w-auto p-2.5 outline-none font-medium shadow-sm transition-all"
+          >
+            <option value="daily">Kiểu xem: Theo ngày</option>
+            <option value="monthly">Kiểu xem: Theo tháng</option>
+          </select>
         </div>
       </div>
 
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
+          <p className="text-text-secondary text-sm font-medium">
+            Tổng tài khoản
+          </p>
+          <p className="text-2xl font-bold text-text-main mt-2">
+            {stats.totalAccounts}
+          </p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
+          <p className="text-text-secondary text-sm font-medium">
+            Tổng địa điểm (POI)
+          </p>
+          <p className="text-2xl font-bold text-text-main mt-2">
+            {stats.totalPois}
+          </p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
+          <p className="text-text-secondary text-sm font-medium">
+            Tổng quảng cáo
+          </p>
+          <p className="text-2xl font-bold text-text-main mt-2">
+            {stats.totalAds}
+          </p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
+          <p className="text-text-secondary text-sm font-medium">
+            Tài khoản mới
+          </p>
+          <p className="text-2xl font-bold text-emerald-600 mt-2">
+            +{stats.accountGrowth.reduce((sum, item) => sum + item.newAccounts, 0)}
+          </p>
+        </div>
+      </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Chart */}
-        <div className="bg-white p-6 rounded-xl border border-[#e7edf4] shadow-sm">
-          <h3 className="text-lg font-bold text-text-main mb-4">
-            Doanh thu và Chi phí
-          </h3>
+      <div className="bg-white p-6 rounded-xl border border-[#e7edf4] shadow-sm">
+        <h3 className="text-lg font-bold text-text-main mb-6">
+          Tốc độ tăng trưởng tài khoản
+        </h3>
 
-
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} />
-                <Tooltip
-                  cursor={{ fill: '#f1f5f9' }}
-                  contentStyle={{
-                    borderRadius: '12px',
-                    border: 'none',
-                    boxShadow:
-                      '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-                  }}
-                />
-                <Legend />
-                <Bar
-                  dataKey="income"
-                  name="Thu nhập"
-                  fill="#10b981"
-                  radius={[6, 6, 0, 0]}
-                />
-                <Bar
-                  dataKey="expense"
-                  name="Chi phí"
-                  fill="#cbd5e1"
-                  radius={[6, 6, 0, 0]}
-                />
-
-
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Device Pie */}
-        <div className="bg-white p-6 rounded-xl border border-[#e7edf4] shadow-sm">
-          <h3 className="text-lg font-bold text-text-main mb-4">
-            Lưu lượng theo thiết bị
-          </h3>
-
-
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={deviceData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={70}
-                  outerRadius={100}
-                  paddingAngle={4}
-                >
-                  {deviceData.map((_, index) => (
-                    <Cell
-                      key={index}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend verticalAlign="middle" align="right" layout="vertical" />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+        <div className={`h-[300px] [&_.recharts-wrapper]:!outline-none [&_.recharts-surface]:!outline-none transition-opacity duration-300 ${isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={stats.accountGrowth} style={{ outline: 'none' }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e7edf4" />
+              <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} tickMargin={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} tickMargin={10} />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: '12px',
+                  border: 'none',
+                  boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="newAccounts" 
+                name="Tài khoản mới" 
+                stroke="#258cf4" 
+                strokeWidth={3} 
+                dot={{ r: 4, strokeWidth: 2 }} 
+                activeDot={{ r: 6 }} 
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Top Pages Table */}
-      <div className="bg-white p-6 rounded-xl border border-[#e7edf4] shadow-sm">
-        <h3 className="text-lg font-bold text-text-main mb-4">
-          Trang hoạt động hiệu quả nhất
-        </h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Role Breakdown */}
+        <div className="bg-white p-6 rounded-xl border border-[#e7edf4] shadow-sm">
+          <h3 className="text-lg font-bold text-text-main mb-4">
+            Phân bổ vai trò tài khoản
+          </h3>
 
+          <div className="h-[300px] [&_.recharts-wrapper]:!outline-none [&_.recharts-surface]:!outline-none">
+            {roleData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart style={{ outline: 'none' }}>
+                  <Pie
+                    data={roleData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={70}
+                    outerRadius={100}
+                    paddingAngle={4}
+                  >
+                    {roleData.map((_, index) => (
+                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Legend verticalAlign="middle" align="right" layout="vertical" />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-text-secondary">
+                Không có dữ liệu
+              </div>
+            )}
+          </div>
+        </div>
 
-        <table className="w-full table-fixed text-left">
-          <thead>
-            <tr className="border-b border-[#e7edf4] text-text-secondary text-sm">
-              <th className="pb-3 font-medium w-[40%]">
-                Tên trang
-              </th>
-              <th className="pb-3 font-medium w-[20%]">
-                Lượt xem
-              </th>
-              <th className="pb-3 font-medium w-[20%]">
-                Tỷ lệ thoát
-              </th>
-              <th className="pb-3 font-medium text-right w-[20%]">
-                Chuyển đổi
-              </th>
-            </tr>
+        {/* Package Popularity */}
+        <div className="bg-white p-6 rounded-xl border border-[#e7edf4] shadow-sm">
+          <h3 className="text-lg font-bold text-text-main mb-4">
+            Độ phổ biến của gói dịch vụ
+          </h3>
 
-          </thead>
-
-          <tbody className="divide-y divide-[#e7edf4]">
-            {topPages.map((row, i) => (
-              <tr key={i} className="hover:bg-slate-50 transition">
-                <td className="py-4 font-medium text-text-main">
-                  {row.page}
-                </td>
-                <td className="py-4 text-text-secondary">
-                  {row.views}
-                </td>
-                <td className="py-4 text-text-secondary">
-                  {row.bounce}
-                </td>
-                <td className="py-4 text-right text-emerald-600 font-bold">
-                  {row.conv}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          <div className="h-[300px] [&_.recharts-wrapper]:!outline-none [&_.recharts-surface]:!outline-none">
+            {stats.packagePopularity.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.packagePopularity} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }} style={{ outline: 'none' }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e7edf4" />
+                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
+                  <YAxis type="category" dataKey="packageName" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} width={120} />
+                  <Tooltip
+                    cursor={{ fill: '#f1f5f9' }}
+                    contentStyle={{
+                      borderRadius: '12px',
+                      border: 'none',
+                      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                    }}
+                  />
+                  <Bar dataKey="userCount" name="Người sử dụng" fill="#10b981" radius={[0, 6, 6, 0]}>
+                    {stats.packagePopularity.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[(index + 1) % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-text-secondary">
+                Không có gói dịch vụ nào đang hoạt động
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )

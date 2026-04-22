@@ -46,9 +46,6 @@ function AdminProfile() {
     <div className="max-w-2xl mx-auto flex flex-col gap-8 pb-10">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Hồ sơ cá nhân</h2>
-        <p className="text-sm text-slate-500 mt-1">
-          Thông tin tài khoản quản trị viên của bạn
-        </p>
       </div>
 
       <div className="flex justify-center">
