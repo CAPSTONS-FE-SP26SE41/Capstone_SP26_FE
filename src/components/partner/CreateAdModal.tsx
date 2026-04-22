@@ -8,9 +8,10 @@ interface CreateAdModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (ad: Omit<Ad, 'adId' | 'status'>, imageFile?: File | null, videoFile?: File | null) => void;
+  initialData?: Ad | null;
 }
 
-export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdModalProps) {
+export default function CreateAdModal({ isOpen, onClose, onSubmit, initialData }: CreateAdModalProps) {
   const [newAdForm, setNewAdForm] = useState({
     poiId: '',
     title: '',
@@ -25,6 +26,31 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdMod
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        setNewAdForm({
+          poiId: initialData.poiId || '',
+          title: initialData.title || '',
+          content: initialData.content || '',
+          startDate: initialData.startDate ? initialData.startDate.slice(0, 16) : '',
+          endDate: initialData.endDate ? initialData.endDate.slice(0, 16) : '',
+          promoTitle: initialData.promotion?.title || '',
+          promoDescription: initialData.promotion?.description || '',
+          promoTerms: initialData.promotion?.terms || ''
+        });
+        setImagePreview(initialData.imageUrl || null);
+      } else {
+        setNewAdForm({
+          poiId: '', title: '', content: '', startDate: '', endDate: '', promoTitle: '', promoDescription: '', promoTerms: ''
+        });
+        setImageFile(null);
+        setVideoFile(null);
+        setImagePreview(null);
+      }
+    }
+  }, [isOpen, initialData]);
 
   const [pois, setPois] = useState<{ value: string, label: string }[]>([]);
   const [loadingPois, setLoadingPois] = useState(false);
@@ -95,7 +121,7 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdMod
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100">
         <div className="flex items-center justify-between p-6 border-b border-slate-100 shrink-0">
-          <h3 className="text-xl font-bold text-slate-800">Tạo quảng cáo mới</h3>
+          <h3 className="text-xl font-bold text-slate-800">{initialData ? "Cập nhật quảng cáo" : "Tạo quảng cáo mới"}</h3>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all rounded-xl">
             <X size={20} />
           </button>
@@ -201,7 +227,7 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdMod
                         </div>
                         <button 
                           type="button"
-                          onClick={() => videoSetFile(null)}
+                          onClick={() => setVideoFile(null)}
                           className="p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-500 rounded-lg transition-colors"
                         >
                           <X size={16} />
@@ -307,7 +333,7 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit }: CreateAdMod
             form="create-ad-form"
             className="bg-[#e28743] hover:bg-[#cf7632] text-white px-8 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-[#e28743]/20"
           >
-            Tạo quảng cáo
+            {initialData ? "Cập nhật" : "Tạo quảng cáo"}
           </button>
         </div>
       </div>

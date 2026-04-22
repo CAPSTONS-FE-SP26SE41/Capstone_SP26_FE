@@ -37,7 +37,7 @@ function ManagerLayout() {
         subtitle: "Bảng điều khiển quản lý",
         icon: PlaneTakeoff,
       }}
-      themeColor="orange" // Dùng đúng tên prop từ dev_2
+      themeColor="emerald" // Dùng đúng tên prop từ dev_2
       navItems={[
         { to: "/staff", icon: LayoutDashboard, label: "Thống kê", exact: true },
         { to: "/staff/pois", icon: MapPin, label: "Quản lí POIs" },

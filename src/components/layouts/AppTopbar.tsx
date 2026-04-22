@@ -36,9 +36,9 @@ export default function AppTopbar({
       focusRing: "focus:ring-blue-500/20",
     },
     emerald: {
-      text: "text-[#5ab473]",
-      hoverText: "hover:text-[#5ab473]",
-      ring: "ring-[#5ab473]/30",
+      text: "text-[#009a63]",
+      hoverText: "hover:text-[#009a63]",
+      ring: "ring-[#009a63]/30",
       focusRing: "focus:ring-emerald-500/20",
     },
     orange: {

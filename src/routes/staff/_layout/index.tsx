@@ -28,7 +28,7 @@ export const Route = createFileRoute("/staff/_layout/")({
   component: StaffDashboard,
 })
 
-const COLORS = ["#e28743", "#eb9e61", "#f2b179", "#f9c591", "#fce4cc"]
+const COLORS = ["#009a63", "#00b374", "#20c997", "#5fe3c0", "#a1f1db"]
 
 function StaffDashboard() {
   const [period, setPeriod] = useState<string>("daily")
@@ -79,21 +79,21 @@ function StaffDashboard() {
               type="date"
               value={dateRange.start}
               onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
-              className="bg-white border border-orange-100 text-slate-700 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2.5 outline-none shadow-sm transition-all"
+              className="bg-white border border-emerald-100 text-slate-700 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block p-2.5 outline-none shadow-sm transition-all"
             />
             <span className="text-slate-400">-</span>
             <input
               type="date"
               value={dateRange.end}
               onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
-              className="bg-white border border-orange-100 text-slate-700 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2.5 outline-none shadow-sm transition-all"
+              className="bg-white border border-emerald-100 text-slate-700 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block p-2.5 outline-none shadow-sm transition-all"
             />
           </div>
 
           <select
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            className="bg-white border border-orange-100 text-slate-700 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full sm:w-auto p-2.5 outline-none font-medium shadow-sm transition-all"
+            className="bg-white border border-emerald-100 text-slate-700 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full sm:w-auto p-2.5 outline-none font-medium shadow-sm transition-all"
           >
             <option value="daily">Kiểu xem: Theo ngày</option>
             <option value="monthly">Kiểu xem: Theo tháng</option>
@@ -122,23 +122,23 @@ function StaffDashboard() {
         <SummaryCard
           title="Đối tác mới"
           value={String(stats.newPartnersGrowth.reduce((acc, curr) => acc + curr.newPartners, 0))}
-          icon={<Users size={18} className="text-orange-700" />}
-          bgColor="bg-orange-50"
-          borderColor="border-orange-100"
+          icon={<Users size={18} className="text-emerald-700" />}
+          bgColor="bg-emerald-50"
+          borderColor="border-emerald-100"
         />
         <SummaryCard
           title="Doanh thu kỳ này"
           value={formatCurrency(stats.packageRevenue.reduce((acc, curr) => acc + curr.totalRevenue, 0))}
-          icon={<TrendingUp size={18} className="text-orange-700" />}
-          bgColor="bg-orange-50"
-          borderColor="border-orange-100"
+          icon={<TrendingUp size={18} className="text-emerald-700" />}
+          bgColor="bg-emerald-50"
+          borderColor="border-emerald-100"
         />
       </div>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Partner Growth */}
-        <div className="bg-white rounded-2xl border border-orange-100 shadow-sm p-6">
+        <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm p-6">
           <h3 className="text-lg font-bold text-slate-900 mb-6">Tăng trưởng đối tác</h3>
           <div className={`h-64 transition-opacity duration-300 [&_.recharts-wrapper]:!outline-none [&_.recharts-surface]:!outline-none ${isLoading ? "opacity-50" : "opacity-100"}`}>
             <ResponsiveContainer width="100%" height="100%">
@@ -157,7 +157,7 @@ function StaffDashboard() {
                   type="monotone"
                   dataKey="newPartners"
                   name="Đối tác mới"
-                  stroke="#e28743"
+                  stroke="#009a63"
                   strokeWidth={3}
                   dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
                   activeDot={{ r: 6 }}
@@ -168,7 +168,7 @@ function StaffDashboard() {
         </div>
 
         {/* Top Categories */}
-        <div className="bg-white rounded-2xl border border-orange-100 shadow-sm p-6">
+        <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm p-6">
           <h3 className="text-lg font-bold text-slate-900 mb-6">Phân bổ danh mục POI</h3>
           <div className={`h-64 transition-opacity duration-300 [&_.recharts-wrapper]:!outline-none [&_.recharts-surface]:!outline-none ${isLoading ? "opacity-50" : "opacity-100"}`}>
             <ResponsiveContainer width="100%" height="100%">
@@ -184,7 +184,7 @@ function StaffDashboard() {
                     boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
                   }}
                 />
-                <Bar dataKey="count" name="Số lượng" fill="#e28743" radius={[0, 4, 4, 0]}>
+                <Bar dataKey="count" name="Số lượng" fill="#009a63" radius={[0, 4, 4, 0]}>
                   {stats.topPoiCategories.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
@@ -197,7 +197,7 @@ function StaffDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Approval Ratios */}
-        <div className="lg:col-span-1 bg-white rounded-2xl border border-orange-100 shadow-sm p-6">
+        <div className="lg:col-span-1 bg-white rounded-2xl border border-emerald-100 shadow-sm p-6">
           <h3 className="text-lg font-bold text-slate-900 mb-6">Tỷ lệ phê duyệt</h3>
           <div className="space-y-6">
             <ApprovalIndicator
@@ -205,21 +205,21 @@ function StaffDashboard() {
               approved={stats.poiApprovalRatio.approvedPercentage}
               rejected={stats.poiApprovalRatio.rejectedPercentage}
               total={stats.poiApprovalRatio.totalProcessed}
-              color="bg-orange-500"
+              color="bg-emerald-500"
             />
             <ApprovalIndicator
               label="Quảng cáo (Ads)"
               approved={stats.adApprovalRatio.approvedPercentage}
               rejected={stats.adApprovalRatio.rejectedPercentage}
               total={stats.adApprovalRatio.totalProcessed}
-              color="bg-orange-500"
+              color="bg-emerald-500"
             />
           </div>
           
           <div className="mt-8 pt-6 border-t border-slate-100">
              <h4 className="text-sm font-semibold text-slate-700 mb-4">Trạng thái quảng cáo</h4>
              <div className="grid grid-cols-2 gap-3">
-                <StatusSmallCard label="Đang chạy" value={stats.adStatusBreakdown.active} color="bg-orange-500" />
+                <StatusSmallCard label="Đang chạy" value={stats.adStatusBreakdown.active} color="bg-emerald-500" />
                 <StatusSmallCard label="Tạm dừng" value={stats.adStatusBreakdown.paused} color="bg-amber-500" />
                 <StatusSmallCard label="Hết hạn" value={stats.adStatusBreakdown.expired} color="bg-slate-400" />
                 <StatusSmallCard label="Từ chối" value={stats.adStatusBreakdown.rejected} color="bg-rose-500" />
@@ -228,7 +228,7 @@ function StaffDashboard() {
         </div>
 
         {/* Revenue Chart */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-orange-100 shadow-sm p-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-emerald-100 shadow-sm p-6">
           <h3 className="text-lg font-bold text-slate-900 mb-6">Doanh thu theo gói dịch vụ</h3>
           <div className={`h-[350px] transition-opacity duration-300 [&_.recharts-wrapper]:!outline-none [&_.recharts-surface]:!outline-none ${isLoading ? "opacity-50" : "opacity-100"}`}>
             <ResponsiveContainer width="100%" height="100%">
@@ -262,8 +262,8 @@ function SummaryCard({
   title,
   value,
   icon,
-  bgColor = "bg-orange-50",
-  borderColor = "border-orange-100",
+  bgColor = "bg-emerald-50",
+  borderColor = "border-emerald-100",
   isWarning = false,
 }: {
   title: string
@@ -288,7 +288,7 @@ function SummaryCard({
   )
 }
 
-function ApprovalIndicator({ label, approved, rejected, total, color = "bg-orange-500" }: { label: string, approved: number, rejected: number, total: number, color?: string }) {
+function ApprovalIndicator({ label, approved, rejected, total, color = "bg-emerald-500" }: { label: string, approved: number, rejected: number, total: number, color?: string }) {
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center text-sm">
@@ -300,7 +300,7 @@ function ApprovalIndicator({ label, approved, rejected, total, color = "bg-orang
         <div className="h-full bg-rose-400" style={{ width: `${rejected}%` }} />
       </div>
       <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
-        <span className="text-orange-600">Được duyệt: {approved}%</span>
+        <span className="text-emerald-600">Được duyệt: {approved}%</span>
         <span className="text-rose-500">Từ chối: {rejected}%</span>
       </div>
     </div>

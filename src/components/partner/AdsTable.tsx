@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ImageIcon, MapPin, Calendar, Tag, Eye, X, ExternalLink, Clock, FileText, Play, Pause, Loader2 } from 'lucide-react';
+import { ImageIcon, MapPin, Calendar, Tag, Eye, X, ExternalLink, Clock, FileText, Play, Pause, Loader2, Edit3 } from 'lucide-react';
 import { Ad } from '../../types/ad';
 import { activateMyAdvertisement, inactivateMyAdvertisement } from '../../services/advertisementService';
 
@@ -7,6 +7,7 @@ interface AdsTableProps {
   ads: Ad[];
   poiNameMap?: Record<string, string>;
   onRefresh?: () => void;
+  onEdit?: (ad: Ad) => void;
 }
 
 const statusStyles: Record<string, string> = {
@@ -38,7 +39,7 @@ const isValidImageUrl = (url?: string) => {
   return /^(https?:\/\/|data:|blob:|\/)/i.test(value);
 };
 
-export default function AdsTable({ ads, poiNameMap = {}, onRefresh }: AdsTableProps) {
+export default function AdsTable({ ads, poiNameMap = {}, onRefresh, onEdit }: AdsTableProps) {
   const [detailAd, setDetailAd] = useState<Ad | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
@@ -140,6 +141,17 @@ export default function AdsTable({ ads, poiNameMap = {}, onRefresh }: AdsTablePr
                   </td>
                   <td className="px-3 py-3 text-center align-middle">
                     <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => onEdit?.(ad)}
+                        className="group relative inline-flex h-9 w-9 items-center justify-center text-slate-400 bg-slate-50 border border-slate-200 hover:text-[#e28743] hover:bg-[#faeadd]/30 hover:border-[#e28743]/30 rounded-lg transition-all"
+                      >
+                        <Edit3 size={18} />
+                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-[70]">
+                          Chỉnh sửa
+                          <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                        </span>
+                      </button>
+
                       <button
                         onClick={() => setDetailAd(ad)}
                         className="group relative inline-flex h-9 w-9 items-center justify-center text-slate-400 bg-slate-50 border border-slate-200 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 rounded-lg transition-all"
@@ -293,7 +305,7 @@ function AdDetailModal({ ad, onClose, formatDate, poiNameMap }: AdDetailModalPro
               </div>
             )}
             <div className="min-w-0 flex-1 overflow-hidden">
-              <h3 className="text-xl font-bold text-slate-800 mb-1 break-all">{ad.title}</h3>
+              <h3 className="text-xl font-bold text-slate-800 mb-1 break-words">{ad.title}</h3>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusStyles[ad.status || ''] || 'bg-slate-100 text-slate-500'}`}>
                   {statusLabels[ad.status || ''] || ad.status || '—'}
@@ -309,7 +321,7 @@ function AdDetailModal({ ad, onClose, formatDate, poiNameMap }: AdDetailModalPro
                 <div className="text-slate-400 mt-0.5 flex-shrink-0">{row.icon}</div>
                 <div className="min-w-0 flex-1 overflow-hidden">
                   <p className="text-xs text-slate-400 font-medium mb-0.5">{row.label}</p>
-                  <div className="text-sm text-slate-700 font-medium break-all">{row.value}</div>
+                  <div className="text-sm text-slate-700 font-medium break-words">{row.value}</div>
                 </div>
               </div>
             ))}
@@ -320,13 +332,13 @@ function AdDetailModal({ ad, onClose, formatDate, poiNameMap }: AdDetailModalPro
             <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
               <div className="flex items-start gap-1.5 mb-1">
                 <Tag size={14} className="text-amber-600 mt-0.5 shrink-0" />
-                <p className="text-sm text-amber-700 font-bold break-all">{ad.promotion.title}</p>
+                <p className="text-sm text-amber-700 font-bold break-words">{ad.promotion.title}</p>
               </div>
               {ad.promotion.description && (
-                <p className="text-sm text-amber-800 break-all">{ad.promotion.description}</p>
+                <p className="text-sm text-amber-800 break-words">{ad.promotion.description}</p>
               )}
               {ad.promotion.terms && (
-                <p className="text-xs text-amber-600 mt-1 italic break-all">Điều kiện: {ad.promotion.terms}</p>
+                <p className="text-xs text-amber-600 mt-1 italic break-words">Điều kiện: {ad.promotion.terms}</p>
               )}
             </div>
           )}

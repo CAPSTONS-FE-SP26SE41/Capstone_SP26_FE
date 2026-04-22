@@ -36,11 +36,11 @@ export default function AppSidebar({
       hoverText: "hover:text-white",
     },
     emerald: {
-      logoBg: "bg-[#e9f5ed]",
-      logoText: "text-[#5ab473]",
-      activeBg: "bg-[#5ab473]",
-      activeHoverBg: "hover:bg-[#68bc80]",
-      hoverBg: "hover:bg-[#5ab473]",
+      logoBg: "bg-[#e6f5ef]",
+      logoText: "text-[#009a63]",
+      activeBg: "bg-[#009a63]",
+      activeHoverBg: "hover:bg-[#008a58]",
+      hoverBg: "hover:bg-[#009a63]",
       hoverText: "hover:text-white",
     },
     orange: {

@@ -6,7 +6,7 @@ import { getMyPartnerPOIs } from '../../../services/partnerPoiService'
 import AdsTable from '../../../components/partner/AdsTable'
 import CreateAdModal from '../../../components/partner/CreateAdModal'
 import { Ad } from '../../../types/ad'
-import { getMyAdvertisements, createAdvertisement } from '../../../services/advertisementService'
+import { getMyAdvertisements, createAdvertisement, updateAdvertisement } from '../../../services/advertisementService'
 import { getMyActiveSubscription } from '../../../services/subscriptionService'
 
 export const Route = createFileRoute('/partner/_layout/advertisement')({
@@ -15,6 +15,7 @@ export const Route = createFileRoute('/partner/_layout/advertisement')({
 
 function PartnerAdvertisementPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingAd, setEditingAd] = useState<Ad | null>(null)
   const [ads, setAds] = useState<Ad[]>([])
   const [loading, setLoading] = useState(true)
   const [poiNameMap, setPoiNameMap] = useState<Record<string, string>>({})
@@ -76,26 +77,46 @@ function PartnerAdvertisementPage() {
     }
   }, [])
 
-  const handleCreateAd = async (newAdData: Omit<Ad, 'adId' | 'status'>, imageFile?: File | null, videoFile?: File | null) => {
+  const handleAdSubmit = async (formData: Omit<Ad, 'adId' | 'status'>, imageFile?: File | null, videoFile?: File | null) => {
     try {
-      await createAdvertisement({
-        poiId: newAdData.poiId,
-        title: newAdData.title,
-        content: newAdData.content,
-        startDate: newAdData.startDate,
-        endDate: newAdData.endDate,
-        promotion: {
-          title: newAdData.promotion?.title ?? "",
-          description: newAdData.promotion?.description,
-          terms: newAdData.promotion?.terms,
-        },
-      }, imageFile, videoFile)
+      if (editingAd && editingAd.adId) {
+        await updateAdvertisement(editingAd.adId, {
+          title: formData.title,
+          content: formData.content,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+          promotion: {
+            title: formData.promotion?.title ?? "",
+            description: formData.promotion?.description,
+            terms: formData.promotion?.terms,
+          },
+        }, imageFile, videoFile)
+      } else {
+        await createAdvertisement({
+          poiId: formData.poiId,
+          title: formData.title,
+          content: formData.content,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+          promotion: {
+            title: formData.promotion?.title ?? "",
+            description: formData.promotion?.description,
+            terms: formData.promotion?.terms,
+          },
+        }, imageFile, videoFile)
+      }
       setIsModalOpen(false)
+      setEditingAd(null)
       fetchAds()
     } catch (error) {
-      console.error("Error creating ad:", error)
-      alert("Có lỗi xảy ra khi tạo quảng cáo. Vui lòng thử lại.")
+      console.error("Error submitting ad:", error)
+      alert("Có lỗi xảy ra khi xử lý quảng cáo. Vui lòng thử lại.")
     }
+  }
+
+  const handleEditClick = (ad: Ad) => {
+    setEditingAd(ad)
+    setIsModalOpen(true)
   }
 
   const handleOpenCreateAdModal = async () => {
@@ -132,7 +153,12 @@ function PartnerAdvertisementPage() {
           <p className="font-medium">Đang tải danh sách quảng cáo...</p>
         </div>
       ) : ads.length > 0 ? (
-        <AdsTable ads={ads} poiNameMap={poiNameMap} onRefresh={() => fetchAds(false)} />
+        <AdsTable 
+          ads={ads} 
+          poiNameMap={poiNameMap} 
+          onRefresh={() => fetchAds(false)} 
+          onEdit={handleEditClick}
+        />
       ) : (
         <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm p-16 text-center">
           <div className="bg-[#faeadd] h-20 w-20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -151,8 +177,12 @@ function PartnerAdvertisementPage() {
 
       <CreateAdModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleCreateAd}
+        onClose={() => {
+          setIsModalOpen(false)
+          setEditingAd(null)
+        }}
+        onSubmit={handleAdSubmit}
+        initialData={editingAd}
       />
 
       {/* Modal cảnh báo chưa có gói Active */}

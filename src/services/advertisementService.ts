@@ -72,6 +72,28 @@ export const createAdvertisement = async (data: any, imageFile?: File | null, vi
   })
 }
 
+export const updateAdvertisement = async (id: string, data: any, imageFile?: File | null, videoFile?: File | null) => {
+  const formData = new FormData()
+  if (data.title) formData.append('Title', data.title)
+  if (data.content) formData.append('Content', data.content)
+  if (data.startDate) formData.append('StartDate', data.startDate)
+  if (data.endDate) formData.append('EndDate', data.endDate)
+  
+  if (imageFile) formData.append('ImageFile', imageFile)
+  if (videoFile) formData.append('VideoFile', videoFile)
+
+  if (data.promotion) {
+    if (data.promotion.title) formData.append('Promotion.Title', data.promotion.title)
+    if (data.promotion.description) formData.append('Promotion.Description', data.promotion.description)
+    if (data.promotion.terms) formData.append('Promotion.Terms', data.promotion.terms)
+  }
+
+  return apiClient(`/advertisements/${id}`, {
+    method: "PUT",
+    body: formData,
+  })
+}
+
 // GET /api/advertisements/{id} (public)
 export const getAdvertisementById = async (id: string): Promise<AdvertisementDetail | null> => {
   try {
