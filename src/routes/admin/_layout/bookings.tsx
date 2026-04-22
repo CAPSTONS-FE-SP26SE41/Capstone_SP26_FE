@@ -28,10 +28,10 @@ function AdminBookings() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-semibold text-text-main">
-            Bookings
+            Đơn đặt chỗ
           </h2>
           <p className="text-sm text-text-secondary mt-1">
-            Track and manage travel reservations
+            Theo dõi và quản lý các lượt đặt chỗ du lịch
           </p>
         </div>
 
@@ -47,7 +47,7 @@ function AdminBookings() {
   border border-[#e7edf4]
   transition-all duration-200"
           >
-            Filter
+            Lọc
           </button>
 
 
@@ -59,7 +59,7 @@ function AdminBookings() {
   shadow-lg hover:shadow-xl
   transition-all duration-200">
             <Plus size={18} />
-            Add Booking
+            Thêm đơn đặt chỗ
           </button>
 
         </div>
@@ -74,7 +74,7 @@ function AdminBookings() {
           >
             <div>
               <p className="text-text-secondary text-sm font-medium">
-                Total {status}
+                Tổng {status === 'Confirmed' ? 'Đã xác nhận' : status === 'Pending' ? 'Chờ xử lý' : 'Đã hủy'}
               </p>
               <p className="text-2xl font-bold text-text-main mt-1">
                 0
@@ -125,7 +125,7 @@ function AdminBookings() {
               <div className="w-full md:w-1/3 grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-text-secondary uppercase font-bold">
-                    Date
+                    Ngày đặt
                   </p>
                   <p className="text-sm font-medium text-text-main">
                     {booking.date}
@@ -134,7 +134,7 @@ function AdminBookings() {
 
                 <div>
                   <p className="text-xs text-text-secondary uppercase font-bold">
-                    Amount
+                    Tổng tiền
                   </p>
                   <p className="text-sm font-medium text-text-main">
                     {booking.amount}
@@ -151,11 +151,11 @@ function AdminBookings() {
                         : 'bg-rose-100 text-rose-700'
                     }`}
                 >
-                  {booking.status}
+                  {booking.status === 'Confirmed' ? 'Đã xác nhận' : booking.status === 'Pending' ? 'Chờ xử lý' : 'Đã hủy'}
                 </span>
 
                 <button className="text-text-secondary hover:text-primary font-medium text-sm">
-                  View Details
+                  Xem chi tiết
                 </button>
               </div>
             </div>
@@ -166,7 +166,7 @@ function AdminBookings() {
               📅
             </div>
             <p className="font-medium">
-              No bookings available
+              Không có đơn đặt chỗ nào
             </p>
           </div>
         )}

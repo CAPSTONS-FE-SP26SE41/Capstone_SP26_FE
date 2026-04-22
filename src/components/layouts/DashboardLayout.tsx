@@ -20,9 +20,10 @@ export default function DashboardLayout({
   userRole,
   userAvatarUrl,
   searchPlaceholder,
-  showSearch = true,
+  showSearch = false,
   themeColor = 'green',
 }: DashboardLayoutProps) {
+
   return (
     <div className="flex min-h-screen bg-white">
       <AppSidebar

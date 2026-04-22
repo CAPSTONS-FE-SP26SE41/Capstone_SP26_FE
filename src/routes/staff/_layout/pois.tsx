@@ -35,6 +35,8 @@ const POI_PREFERENCES_OPTIONS: Array<{ id: string; name: string }> = [
   { id: "ab4509fd-4b2c-4705-bed3-afed9f51af78", name: "Shopping" },
 ]
 
+const MAX_PREFERENCES = 4
+
 function StaffPOIsPage() {
   const navigate = useNavigate()
   const [pois, setPois] = useState<StaffPOI[]>([])
@@ -61,7 +63,6 @@ function StaffPOIsPage() {
   const [createForm, setCreateForm] = useState({
     Name: "",
     Address: "",
-    City: "",
     ApproxCost: "",
     OpenHour: "",
     CloseHour: "",
@@ -73,12 +74,12 @@ function StaffPOIsPage() {
     LocationId: "",
     DistrictId: "",
   })
+
   const [createImageFile, setCreateImageFile] = useState<File | null>(null)
   const [editingPoiId, setEditingPoiId] = useState("")
   const [editForm, setEditForm] = useState({
     Name: "",
     Address: "",
-    City: "",
     ApproxCost: "",
     OpenHour: "",
     CloseHour: "",
@@ -92,6 +93,7 @@ function StaffPOIsPage() {
     Status: "",
     PartnerId: "",
   })
+
   
   const [districts, setDistricts] = useState<District[]>([])
   const [loadingDistricts, setLoadingDistricts] = useState(false)
@@ -105,7 +107,6 @@ function StaffPOIsPage() {
     setCreateForm({
       Name: "",
       Address: "",
-      City: "",
       ApproxCost: "",
       OpenHour: "",
       CloseHour: "",
@@ -117,6 +118,7 @@ function StaffPOIsPage() {
       LocationId: "",
       DistrictId: "",
     })
+
     setDistricts([])
     setFormErrors({})
     setCreateImageFile(null)
@@ -173,8 +175,9 @@ function StaffPOIsPage() {
       const haystack = [
         p.Id,
         p.Name,
-        p.City,
+        p.LocationName,
         p.ApproxCost,
+
         p.Address,
         String(p.Latitude),
         String(p.Longitude),
@@ -378,7 +381,6 @@ function StaffPOIsPage() {
       setEditForm({
         Name: detail.Name ?? "",
         Address: detail.Address ?? "",
-        City: detail.City ?? "",
         ApproxCost: detail.ApproxCost ?? "",
         OpenHour: detail.OpenHour ?? "",
         CloseHour: detail.CloseHour ?? "",
@@ -392,6 +394,7 @@ function StaffPOIsPage() {
         Status: detail.Status !== undefined ? String(detail.Status) : "",
         PartnerId: detail.PartnerId ?? "",
       })
+
       setEditImageFile(null)
       setShowEditModal(true)
     } catch (e) {
@@ -437,12 +440,16 @@ function StaffPOIsPage() {
       return
     }
 
+    if (createForm.PoiPreferences.length > MAX_PREFERENCES) {
+      showToast("error", `Mỗi user chỉ được chọn tối đa ${MAX_PREFERENCES} preference`)
+      return
+    }
+
     try {
       setCreating(true)
       await createStaffPOI({
         Name: createForm.Name.trim(),
         Address: createForm.Address.trim(),
-        City: createForm.City.trim(),
         ApproxCost: createForm.ApproxCost.trim(),
         OpenHour: createForm.OpenHour.trim(),
         CloseHour: createForm.CloseHour.trim(),
@@ -455,6 +462,7 @@ function StaffPOIsPage() {
         LocationId: createForm.LocationId.trim(),
         DistrictId: createForm.DistrictId.trim(),
       }, createImageFile)
+
 
       const refreshedData = await getStaffPOIs()
       setPois(refreshedData)
@@ -518,12 +526,16 @@ function StaffPOIsPage() {
       return
     }
 
+    if (editForm.PoiPreferences.length > MAX_PREFERENCES) {
+      showToast("error", `Mỗi user chỉ được chọn tối đa ${MAX_PREFERENCES} preference`)
+      return
+    }
+
     try {
       setEditing(true)
       await updateStaffPOI(editingPoiId, {
         Name: editForm.Name.trim(),
         Address: editForm.Address.trim(),
-        City: editForm.City.trim(),
         ApproxCost: editForm.ApproxCost.trim(),
         OpenHour: editForm.OpenHour.trim(),
         CloseHour: editForm.CloseHour.trim(),
@@ -537,6 +549,7 @@ function StaffPOIsPage() {
         Status: editForm.Status || undefined,
         PartnerId: editForm.PartnerId || undefined,
       }, editImageFile)
+
 
       const refreshedData = await getStaffPOIs()
       // Nếu backend lưu ảnh tại cùng 1 URL, browser có thể cache -> thêm query để luôn thấy ảnh mới
@@ -681,8 +694,9 @@ function StaffPOIsPage() {
                         </td>
 
                         <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-                          {p.LocationName || p.City || "—"}
+                          {p.LocationName || "—"}
                         </td>
+
 
                         <td className="px-6 py-4">
                           <span
@@ -1058,11 +1072,15 @@ function StaffPOIsPage() {
                   <div className="flex flex-wrap gap-2">
                     {preferencesList.map((pref) => {
                       const isSelected = createForm.PoiPreferences.includes(pref.id)
+                      const canSelectMore = createForm.PoiPreferences.length < MAX_PREFERENCES
+                      const isDisabled = !isSelected && !canSelectMore
                       return (
                         <button
                           type="button"
                           key={pref.id}
+                          disabled={isDisabled}
                           onClick={() => {
+                            if (isDisabled) return
                             setCreateForm((prev) => ({
                               ...prev,
                               PoiPreferences: isSelected
@@ -1073,7 +1091,9 @@ function StaffPOIsPage() {
                           className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
                             isSelected
                               ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                              : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-600 hover:text-emerald-600'
+                              : isDisabled
+                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-600 hover:text-emerald-600'
                           }`}
                         >
                           {pref.name}
@@ -1300,18 +1320,27 @@ function StaffPOIsPage() {
               </div>
 
               <div className="space-y-2">
-                <div className="text-sm font-medium text-slate-700">PoiPreferences</div>
+                <div className="text-sm font-medium text-slate-700">
+                  PoiPreferences <span className="text-slate-400">(tối đa {MAX_PREFERENCES})</span>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {POI_PREFERENCES_OPTIONS.map((opt) => {
                     const checked = editForm.PoiPreferences.some((p) => p.id === opt.id)
+                    const canSelectMore = editForm.PoiPreferences.length < MAX_PREFERENCES
+                    const isDisabled = !checked && !canSelectMore
                     return (
                       <label
                         key={opt.id}
-                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 cursor-pointer hover:bg-slate-50"
+                        className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer ${
+                          isDisabled
+                            ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'
+                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                        }`}
                       >
                         <input
                           type="checkbox"
                           checked={checked}
+                          disabled={isDisabled}
                           onChange={(e) => {
                             const nextChecked = e.target.checked
                             setEditForm((prev) => {

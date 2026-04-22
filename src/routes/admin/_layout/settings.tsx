@@ -37,81 +37,88 @@ function AdminSettings() {
 
   const handleSubmit = () => {
     console.log('Saved settings:', form)
-    alert('Settings saved!')
+    alert('Đã lưu cài đặt!')
   }
+
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-8">
       <div>
-        <h2 className="text-2xl font-semibold text-text-main">Settings</h2>
+        <h2 className="text-2xl font-semibold text-text-main">Cài đặt</h2>
         <p className="text-sm text-text-secondary mt-1">
-          Manage your account preferences and system configuration
+          Quản lý các tùy chọn tài khoản và cấu hình hệ thống
         </p>
       </div>
+
 
       {/* Profile Section */}
       <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm overflow-hidden">
         <div className="p-6 border-b border-[#e7edf4]">
           <h3 className="text-lg font-bold text-text-main">
-            Profile Information
+            Thông tin cá nhân
           </h3>
           <p className="text-sm text-text-secondary mt-1">
-            Update your account's profile information and email address.
+            Cập nhật thông tin hồ sơ và địa chỉ email của bạn.
           </p>
         </div>
+
 
         <div className="p-6 grid gap-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-text-main mb-2">
-                First Name
+                Tên
               </label>
               <input
                 type="text"
                 name="firstName"
                 value={form.firstName}
                 onChange={handleChange}
-                placeholder="Enter first name"
+                placeholder="Nhập tên"
                 className="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary placeholder:text-slate-400"
               />
             </div>
 
+
             <div>
               <label className="block text-sm font-medium text-text-main mb-2">
-                Last Name
+                Họ
               </label>
               <input
                 type="text"
                 name="lastName"
                 value={form.lastName}
                 onChange={handleChange}
-                placeholder="Enter last name"
+                placeholder="Nhập họ"
                 className="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary placeholder:text-slate-400"
               />
             </div>
+
           </div>
 
           <div>
             <label className="block text-sm font-medium text-text-main mb-2">
-              Email Address
+              Địa chỉ Email
             </label>
             <input
               type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
-              placeholder="Enter email address"
+              placeholder="Nhập địa chỉ email"
               className="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary placeholder:text-slate-400"
             />
           </div>
+
 
           <div className="flex justify-end">
             <button
               onClick={handleSubmit}
               className="bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors"
             >
-              Save Changes
+              Lưu thay đổi
             </button>
+
           </div>
         </div>
       </div>
@@ -120,12 +127,13 @@ function AdminSettings() {
       <div className="bg-white rounded-xl border border-[#e7edf4] shadow-sm overflow-hidden">
         <div className="p-6 border-b border-[#e7edf4]">
           <h3 className="text-lg font-bold text-text-main">
-            Notifications
+            Thông báo
           </h3>
           <p className="text-sm text-text-secondary mt-1">
-            Control which notifications you receive.
+            Kiểm soát các thông báo bạn nhận được.
           </p>
         </div>
+
 
         <div className="p-6 flex flex-col gap-4">
           <label className="flex items-center gap-3 cursor-pointer">
@@ -136,9 +144,10 @@ function AdminSettings() {
               className="w-5 h-5 rounded text-primary focus:ring-primary border-gray-300"
             />
             <span className="text-text-main">
-              Email me when a new booking is created
+              Gửi email cho tôi khi có đơn đặt chỗ mới
             </span>
           </label>
+
 
           <label className="flex items-center gap-3 cursor-pointer">
             <input
@@ -148,9 +157,10 @@ function AdminSettings() {
               className="w-5 h-5 rounded text-primary focus:ring-primary border-gray-300"
             />
             <span className="text-text-main">
-              Email me when a user signs up
+              Gửi email cho tôi khi có người dùng đăng ký
             </span>
           </label>
+
 
           <label className="flex items-center gap-3 cursor-pointer">
             <input
@@ -160,9 +170,10 @@ function AdminSettings() {
               className="w-5 h-5 rounded text-primary focus:ring-primary border-gray-300"
             />
             <span className="text-text-main">
-              Browser notifications for daily reports
+              Thông báo trình duyệt cho các báo cáo hàng ngày
             </span>
           </label>
+
         </div>
       </div>
     </div>

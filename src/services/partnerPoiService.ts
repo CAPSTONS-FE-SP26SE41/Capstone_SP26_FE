@@ -18,8 +18,8 @@ export interface PartnerPOI {
   id: string
   name: string
   address: string
-  city: string
   approxCost: string
+
   openHour: string | null
   closeHour: string | null
   is24Hours: boolean
@@ -49,8 +49,8 @@ export interface PagedResult<T> {
 export interface CreatePartnerPOIPayload {
   Name: string
   Address: string
-  City: string
   ApproxCost: string
+
   OpenHour: string
   CloseHour: string
   Is24Hours: boolean
@@ -66,8 +66,8 @@ export interface CreatePartnerPOIPayload {
 export interface UpdatePartnerPOIPayload {
   Name?: string
   Address?: string
-  City?: string
   ApproxCost?: string
+
   OpenHour?: string
   CloseHour?: string
   Is24Hours?: boolean
@@ -86,8 +86,8 @@ function normalizePOI(p: any): PartnerPOI {
     id: String(p?.Id ?? p?.id ?? ""),
     name: String(p?.Name ?? p?.name ?? ""),
     address: String(p?.Address ?? p?.address ?? ""),
-    city: String(p?.City ?? p?.city ?? ""),
     approxCost: String(p?.ApproxCost ?? p?.approxCost ?? ""),
+
     openHour: p?.OpenHour ?? p?.openHour ?? null,
     closeHour: p?.CloseHour ?? p?.closeHour ?? null,
     is24Hours: Boolean(p?.Is24Hours ?? p?.is24Hours ?? false),
@@ -188,8 +188,8 @@ export const createPartnerPOI = async (
   const formData = new FormData()
   formData.append("Name", payload.Name)
   formData.append("Address", payload.Address)
-  formData.append("City", payload.City)
   formData.append("ApproxCost", payload.ApproxCost)
+
   formData.append("OpenHour", payload.OpenHour)
   formData.append("CloseHour", payload.CloseHour)
   formData.append("Is24Hours", String(payload.Is24Hours))
@@ -288,8 +288,8 @@ export const updateMyPartnerPOI = async (
 
   if (payload.Name !== undefined) formData.append("Name", payload.Name)
   if (payload.Address !== undefined) formData.append("Address", payload.Address)
-  if (payload.City !== undefined) formData.append("City", payload.City)
   if (payload.ApproxCost !== undefined) formData.append("ApproxCost", payload.ApproxCost)
+
   if (payload.OpenHour !== undefined) formData.append("OpenHour", payload.OpenHour)
   if (payload.CloseHour !== undefined) formData.append("CloseHour", payload.CloseHour)
   if (payload.Is24Hours !== undefined) formData.append("Is24Hours", String(payload.Is24Hours))

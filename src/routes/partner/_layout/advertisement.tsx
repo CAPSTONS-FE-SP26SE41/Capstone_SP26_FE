@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Megaphone, Plus, Loader2, PackageX } from 'lucide-react'
+import { HubConnectionBuilder } from '@microsoft/signalr'
 import { useState, useEffect } from 'react'
 import { getMyPartnerPOIs } from '../../../services/partnerPoiService'
 import AdsTable from '../../../components/partner/AdsTable'
@@ -20,16 +21,16 @@ function PartnerAdvertisementPage() {
   const [checkingSubscription, setCheckingSubscription] = useState(false)
   const [showNoSubWarning, setShowNoSubWarning] = useState(false)
 
-  const fetchAds = async () => {
+  const fetchAds = async (showLoading = true) => {
     try {
-      setLoading(true)
+      if (showLoading) setLoading(true)
       const data = await getMyAdvertisements()
       setAds(Array.isArray(data) ? data : data?.data || [])
     } catch (error) {
       console.error("Error fetching ads:", error)
       setAds([])
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
   }
 
@@ -51,6 +52,28 @@ function PartnerAdvertisementPage() {
     }
 
     fetchPoiNames()
+
+    const token = localStorage.getItem("partner_token")
+    if (token) {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5246/api'
+      const hubUrl = baseUrl.replace('/api', '') + '/hubs/notification'
+      const connection = new HubConnectionBuilder()
+        .withUrl(hubUrl, { accessTokenFactory: () => token })
+        .withAutomaticReconnect()
+        .build()
+
+      connection.on("ReceiveNotification", (notification) => {
+        if (notification?.Type === "AD_UPDATED" || notification?.type === "AD_UPDATED") {
+          fetchAds(false)
+        }
+      })
+
+      connection.start().catch(err => console.error("SignalR Ad Error: ", err))
+
+      return () => {
+        connection.stop()
+      }
+    }
   }, [])
 
   const handleCreateAd = async (newAdData: Omit<Ad, 'adId' | 'status'>, imageFile?: File | null, videoFile?: File | null) => {
@@ -109,7 +132,7 @@ function PartnerAdvertisementPage() {
           <p className="font-medium">Đang tải danh sách quảng cáo...</p>
         </div>
       ) : ads.length > 0 ? (
-        <AdsTable ads={ads} poiNameMap={poiNameMap} />
+        <AdsTable ads={ads} poiNameMap={poiNameMap} onRefresh={() => fetchAds(false)} />
       ) : (
         <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm p-16 text-center">
           <div className="bg-[#faeadd] h-20 w-20 rounded-full flex items-center justify-center mx-auto mb-6">

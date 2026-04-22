@@ -25,6 +25,7 @@ import { Route as StaffLayoutAdvertisementsRouteImport } from './routes/staff/_l
 import { Route as PartnerLayoutStatsRouteImport } from './routes/partner/_layout/stats'
 import { Route as PartnerLayoutProfileRouteImport } from './routes/partner/_layout/profile'
 import { Route as PartnerLayoutPoiRouteImport } from './routes/partner/_layout/poi'
+import { Route as PartnerLayoutPackagesRouteImport } from './routes/partner/_layout/packages'
 import { Route as PartnerLayoutHistoryRouteImport } from './routes/partner/_layout/history'
 import { Route as PartnerLayoutAdvertisementRouteImport } from './routes/partner/_layout/advertisement'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
@@ -32,6 +33,7 @@ import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
 import { Route as AdminLayoutSubscriptionsRouteImport } from './routes/admin/_layout/subscriptions'
 import { Route as AdminLayoutSettingsRouteImport } from './routes/admin/_layout/settings'
+import { Route as AdminLayoutProfileRouteImport } from './routes/admin/_layout/profile'
 import { Route as AdminLayoutDestinationsRouteImport } from './routes/admin/_layout/destinations'
 import { Route as AdminLayoutBookingsRouteImport } from './routes/admin/_layout/bookings'
 import { Route as AdminLayoutAnalyticsRouteImport } from './routes/admin/_layout/analytics'
@@ -123,6 +125,11 @@ const PartnerLayoutPoiRoute = PartnerLayoutPoiRouteImport.update({
   path: '/poi',
   getParentRoute: () => PartnerLayoutRoute,
 } as any)
+const PartnerLayoutPackagesRoute = PartnerLayoutPackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
+  getParentRoute: () => PartnerLayoutRoute,
+} as any)
 const PartnerLayoutHistoryRoute = PartnerLayoutHistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -158,6 +165,11 @@ const AdminLayoutSubscriptionsRoute =
 const AdminLayoutSettingsRoute = AdminLayoutSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AdminLayoutRoute,
+} as any)
+const AdminLayoutProfileRoute = AdminLayoutProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AdminLayoutRoute,
 } as any)
 const AdminLayoutDestinationsRoute = AdminLayoutDestinationsRouteImport.update({
@@ -218,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/bookings': typeof AdminLayoutBookingsRoute
   '/admin/destinations': typeof AdminLayoutDestinationsRoute
+  '/admin/profile': typeof AdminLayoutProfileRoute
   '/admin/settings': typeof AdminLayoutSettingsRoute
   '/admin/subscriptions': typeof AdminLayoutSubscriptionsRoute
   '/demo/api/names': typeof DemoApiNamesRoute
@@ -225,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/partner/advertisement': typeof PartnerLayoutAdvertisementRoute
   '/partner/history': typeof PartnerLayoutHistoryRoute
+  '/partner/packages': typeof PartnerLayoutPackagesRoute
   '/partner/poi': typeof PartnerLayoutPoiRoute
   '/partner/profile': typeof PartnerLayoutProfileRoute
   '/partner/stats': typeof PartnerLayoutStatsRoute
@@ -249,6 +263,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/bookings': typeof AdminLayoutBookingsRoute
   '/admin/destinations': typeof AdminLayoutDestinationsRoute
+  '/admin/profile': typeof AdminLayoutProfileRoute
   '/admin/settings': typeof AdminLayoutSettingsRoute
   '/admin/subscriptions': typeof AdminLayoutSubscriptionsRoute
   '/demo/api/names': typeof DemoApiNamesRoute
@@ -256,6 +271,7 @@ export interface FileRoutesByTo {
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/partner/advertisement': typeof PartnerLayoutAdvertisementRoute
   '/partner/history': typeof PartnerLayoutHistoryRoute
+  '/partner/packages': typeof PartnerLayoutPackagesRoute
   '/partner/poi': typeof PartnerLayoutPoiRoute
   '/partner/profile': typeof PartnerLayoutProfileRoute
   '/partner/stats': typeof PartnerLayoutStatsRoute
@@ -284,6 +300,7 @@ export interface FileRoutesById {
   '/admin/_layout/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/_layout/bookings': typeof AdminLayoutBookingsRoute
   '/admin/_layout/destinations': typeof AdminLayoutDestinationsRoute
+  '/admin/_layout/profile': typeof AdminLayoutProfileRoute
   '/admin/_layout/settings': typeof AdminLayoutSettingsRoute
   '/admin/_layout/subscriptions': typeof AdminLayoutSubscriptionsRoute
   '/demo/api/names': typeof DemoApiNamesRoute
@@ -291,6 +308,7 @@ export interface FileRoutesById {
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/partner/_layout/advertisement': typeof PartnerLayoutAdvertisementRoute
   '/partner/_layout/history': typeof PartnerLayoutHistoryRoute
+  '/partner/_layout/packages': typeof PartnerLayoutPackagesRoute
   '/partner/_layout/poi': typeof PartnerLayoutPoiRoute
   '/partner/_layout/profile': typeof PartnerLayoutProfileRoute
   '/partner/_layout/stats': typeof PartnerLayoutStatsRoute
@@ -320,6 +338,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/bookings'
     | '/admin/destinations'
+    | '/admin/profile'
     | '/admin/settings'
     | '/admin/subscriptions'
     | '/demo/api/names'
@@ -327,6 +346,7 @@ export interface FileRouteTypes {
     | '/demo/start/server-funcs'
     | '/partner/advertisement'
     | '/partner/history'
+    | '/partner/packages'
     | '/partner/poi'
     | '/partner/profile'
     | '/partner/stats'
@@ -351,6 +371,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/bookings'
     | '/admin/destinations'
+    | '/admin/profile'
     | '/admin/settings'
     | '/admin/subscriptions'
     | '/demo/api/names'
@@ -358,6 +379,7 @@ export interface FileRouteTypes {
     | '/demo/start/server-funcs'
     | '/partner/advertisement'
     | '/partner/history'
+    | '/partner/packages'
     | '/partner/poi'
     | '/partner/profile'
     | '/partner/stats'
@@ -385,6 +407,7 @@ export interface FileRouteTypes {
     | '/admin/_layout/analytics'
     | '/admin/_layout/bookings'
     | '/admin/_layout/destinations'
+    | '/admin/_layout/profile'
     | '/admin/_layout/settings'
     | '/admin/_layout/subscriptions'
     | '/demo/api/names'
@@ -392,6 +415,7 @@ export interface FileRouteTypes {
     | '/demo/start/server-funcs'
     | '/partner/_layout/advertisement'
     | '/partner/_layout/history'
+    | '/partner/_layout/packages'
     | '/partner/_layout/poi'
     | '/partner/_layout/profile'
     | '/partner/_layout/stats'
@@ -539,6 +563,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PartnerLayoutPoiRouteImport
       parentRoute: typeof PartnerLayoutRoute
     }
+    '/partner/_layout/packages': {
+      id: '/partner/_layout/packages'
+      path: '/packages'
+      fullPath: '/partner/packages'
+      preLoaderRoute: typeof PartnerLayoutPackagesRouteImport
+      parentRoute: typeof PartnerLayoutRoute
+    }
     '/partner/_layout/history': {
       id: '/partner/_layout/history'
       path: '/history'
@@ -586,6 +617,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/admin/settings'
       preLoaderRoute: typeof AdminLayoutSettingsRouteImport
+      parentRoute: typeof AdminLayoutRoute
+    }
+    '/admin/_layout/profile': {
+      id: '/admin/_layout/profile'
+      path: '/profile'
+      fullPath: '/admin/profile'
+      preLoaderRoute: typeof AdminLayoutProfileRouteImport
       parentRoute: typeof AdminLayoutRoute
     }
     '/admin/_layout/destinations': {
@@ -659,6 +697,7 @@ interface AdminLayoutRouteChildren {
   AdminLayoutAnalyticsRoute: typeof AdminLayoutAnalyticsRoute
   AdminLayoutBookingsRoute: typeof AdminLayoutBookingsRoute
   AdminLayoutDestinationsRoute: typeof AdminLayoutDestinationsRoute
+  AdminLayoutProfileRoute: typeof AdminLayoutProfileRoute
   AdminLayoutSettingsRoute: typeof AdminLayoutSettingsRoute
   AdminLayoutSubscriptionsRoute: typeof AdminLayoutSubscriptionsRoute
   AdminLayoutIndexRoute: typeof AdminLayoutIndexRoute
@@ -669,6 +708,7 @@ const AdminLayoutRouteChildren: AdminLayoutRouteChildren = {
   AdminLayoutAnalyticsRoute: AdminLayoutAnalyticsRoute,
   AdminLayoutBookingsRoute: AdminLayoutBookingsRoute,
   AdminLayoutDestinationsRoute: AdminLayoutDestinationsRoute,
+  AdminLayoutProfileRoute: AdminLayoutProfileRoute,
   AdminLayoutSettingsRoute: AdminLayoutSettingsRoute,
   AdminLayoutSubscriptionsRoute: AdminLayoutSubscriptionsRoute,
   AdminLayoutIndexRoute: AdminLayoutIndexRoute,
@@ -681,6 +721,7 @@ const AdminLayoutRouteWithChildren = AdminLayoutRoute._addFileChildren(
 interface PartnerLayoutRouteChildren {
   PartnerLayoutAdvertisementRoute: typeof PartnerLayoutAdvertisementRoute
   PartnerLayoutHistoryRoute: typeof PartnerLayoutHistoryRoute
+  PartnerLayoutPackagesRoute: typeof PartnerLayoutPackagesRoute
   PartnerLayoutPoiRoute: typeof PartnerLayoutPoiRoute
   PartnerLayoutProfileRoute: typeof PartnerLayoutProfileRoute
   PartnerLayoutStatsRoute: typeof PartnerLayoutStatsRoute
@@ -690,6 +731,7 @@ interface PartnerLayoutRouteChildren {
 const PartnerLayoutRouteChildren: PartnerLayoutRouteChildren = {
   PartnerLayoutAdvertisementRoute: PartnerLayoutAdvertisementRoute,
   PartnerLayoutHistoryRoute: PartnerLayoutHistoryRoute,
+  PartnerLayoutPackagesRoute: PartnerLayoutPackagesRoute,
   PartnerLayoutPoiRoute: PartnerLayoutPoiRoute,
   PartnerLayoutProfileRoute: PartnerLayoutProfileRoute,
   PartnerLayoutStatsRoute: PartnerLayoutStatsRoute,

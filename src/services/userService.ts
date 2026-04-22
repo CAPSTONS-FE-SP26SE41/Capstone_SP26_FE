@@ -8,9 +8,9 @@ export const getUserById = (id: string) => {
   return apiClient(`/user/${id}`)
 }
 
-export const updateUser = (data: any) => {
+export const updateUser = (formData: FormData) => {
   return apiClient("/user/update", {
     method: "PUT",
-    body: JSON.stringify(data),
+    body: formData,
   })
 }

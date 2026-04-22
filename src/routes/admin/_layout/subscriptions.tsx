@@ -111,11 +111,11 @@ function FilterDropdown({
 function ExpandableDescription({ text }: { text: string }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
-  if (!text) return <span className="text-slate-400 italic text-xs">No description</span>
+  if (!text) return <span className="text-slate-400 italic text-xs">Không có mô tả</span>
 
   return (
-    <div className="flex flex-col items-center justify-center gap-0.5 text-center max-w-full min-h-[40px]">
-      <div className={`w-full text-sm ${isExpanded ? "" : "line-clamp-1"} break-words text-center`}>
+    <div className="flex flex-col items-start justify-start gap-0.5 text-left max-w-full min-h-[40px]">
+      <div className={`w-full text-sm ${isExpanded ? "" : "line-clamp-1"} break-words text-left`}>
         {text}
       </div>
       {text.length > 50 && (
@@ -123,12 +123,13 @@ function ExpandableDescription({ text }: { text: string }) {
           onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
           className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors shrink-0"
         >
-          {isExpanded ? "View less" : "View all"}
+          {isExpanded ? "Thu gọn" : "Xem thêm"}
         </button>
       )}
     </div>
   )
 }
+
 
 function SubscriptionsPage() {
 
@@ -136,8 +137,8 @@ function SubscriptionsPage() {
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [openFilter, setOpenFilter] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState("Status")
-  const [priceSort, setPriceSort] = useState("Price")
+  const [statusFilter, setStatusFilter] = useState("Trạng thái")
+  const [priceSort, setPriceSort] = useState("Giá")
   const [searchKeyword, setSearchKeyword] = useState("")
   const [debouncedKeyword, setDebouncedKeyword] = useState("")
   const itemsPerPage = 10
@@ -167,26 +168,30 @@ function SubscriptionsPage() {
 
   const fetchSubscriptions = async () => {
     try {
-      const isFiltering = debouncedKeyword.trim().length > 0 || statusFilter !== "Status" || priceSort !== "Price"
+      const isFiltering = debouncedKeyword.trim().length > 0 || statusFilter !== "Trạng thái" || priceSort !== "Giá"
       let data
 
       if (isFiltering) {
         data = await filterSubscriptions({
           title: debouncedKeyword.trim(),
-          status: statusFilter,
-          sortPrice: priceSort === "Price" ? undefined : (priceSort === "High to Low" ? "desc" : "asc")
+          status: statusFilter === "Trạng thái" ? undefined : (statusFilter === "Đang hoạt động" ? "active" : "inactive"),
+          sortPrice: priceSort === "Giá" ? undefined : (priceSort === "Cao đến Thấp" ? "desc" : "asc")
         })
       } else {
+
+
         data = await getSubscriptions()
       }
 
-      setSubscriptions(data)
+      console.log("Subscriptions API Response:", data)
+      setSubscriptions(data || [])
     } catch (err) {
       console.error(err)
     } finally {
       setLoading(false)
     }
   }
+
 
   useEffect(() => {
     fetchSubscriptions()
@@ -299,7 +304,7 @@ function SubscriptionsPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-20 text-sm text-slate-500">
-        Loading subscriptions...
+        Đang tải danh sách gói dịch vụ...
       </div>
     )
   }
@@ -322,7 +327,7 @@ function SubscriptionsPage() {
               <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                placeholder="Search packages..."
+                placeholder="Tìm kiếm gói dịch vụ..."
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
               />
@@ -335,7 +340,7 @@ function SubscriptionsPage() {
             className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors"
           >
             <Plus size={18} />
-            <span className="text-sm">Add Package</span>
+            <span className="text-sm">Thêm gói</span>
           </button>
 
         </div>
@@ -345,39 +350,43 @@ function SubscriptionsPage() {
       <div
         className="bg-white rounded-2xl border border-[#e7edf4] shadow-sm overflow-x-auto"
       >
-        <table className="w-full text-center table-fixed min-w-[900px] border-separate border-spacing-0">
+        <table className="w-full text-left table-fixed min-w-[1100px] border-separate border-spacing-0">
+
 
           <thead>
             <tr>
-              <th className="w-[5%] px-4 py-4 text-text-secondary text-sm font-semibold text-left border-b border-[#e7edf4] bg-[#f8fafc]">No.</th>
-              <th className="w-[18%] px-4 py-4 text-text-secondary text-sm font-semibold text-left border-b border-[#e7edf4] bg-[#f8fafc] min-w-[150px]">Package</th>
-              <th className="w-[25%] px-4 py-4 text-text-secondary text-sm font-semibold text-left border-b border-[#e7edf4] bg-[#f8fafc] min-w-[200px]">Description</th>
-              <th className="w-[10%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+              <th className="w-[5%] px-4 py-4 text-text-secondary text-sm font-semibold text-left border-b border-[#e7edf4] bg-[#f8fafc]">STT</th>
+              <th className="w-[18%] px-4 py-4 text-text-secondary text-sm font-semibold text-left border-b border-[#e7edf4] bg-[#f8fafc] min-w-[150px]">Gói dịch vụ</th>
+              <th className="w-[22%] px-4 py-4 text-text-secondary text-sm font-semibold text-left border-b border-[#e7edf4] bg-[#f8fafc] min-w-[200px]">Mô tả</th>
+              <th className="w-[10%] px-4 py-4 text-text-secondary text-sm font-semibold text-left border-b border-[#e7edf4] bg-[#f8fafc]">
                 <FilterDropdown
-                  label="Price"
+                  label="Giá"
                   value={priceSort}
-                  options={["Price", "Low to High", "High to Low"]}
+                  options={["Giá", "Thấp đến Cao", "Cao đến Thấp"]}
                   isOpen={openFilter === "price"}
                   onChange={(val) => { setPriceSort(val); setOpenFilter(null); }}
                   onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "price" ? null : "price"); }}
                 />
               </th>
-              <th className="w-[10%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Duration</th>
-              <th className="w-[9%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">Max Ads</th>
-              <th className="w-[10%] px-4 py-4 text-text-secondary text-sm font-semibold text-center border-b border-[#e7edf4] bg-[#f8fafc]">
+              <th className="w-[10%] px-4 py-4 text-text-secondary text-sm font-semibold text-left border-b border-[#e7edf4] bg-[#f8fafc]">Thời hạn</th>
+              <th className="w-[9%] px-4 py-4 text-text-secondary text-sm font-semibold text-left border-b border-[#e7edf4] bg-[#f8fafc]">QC tối đa</th>
+              <th className="w-[13%] px-4 py-4 text-text-secondary text-sm font-semibold text-left border-b border-[#e7edf4] bg-[#f8fafc]">
                 <FilterDropdown
-                  label="Status"
+                  label="Trạng thái"
                   value={statusFilter}
-                  options={["Status", "Active", "Inactive"]}
+                  options={["Trạng thái", "Đang hoạt động", "Ngừng hoạt động"]}
+
                   isOpen={openFilter === "status"}
                   onChange={(val) => { setStatusFilter(val); setOpenFilter(null); }}
                   onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "status" ? null : "status"); }}
                 />
               </th>
               <th
-                className="w-[13%] px-4 py-4 text-text-secondary text-sm font-semibold text-right pr-6 border-b border-[#e7edf4] bg-[#f8fafc] sticky right-0 z-20"
+                className="w-[13%] px-4 py-4 text-text-secondary text-sm font-semibold text-left pr-6 border-b border-[#e7edf4] bg-[#f8fafc] sticky right-0 z-20"
+
+
                 style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
-              >Actions</th>
+              >Hành động</th>
             </tr>
           </thead>
 
@@ -404,39 +413,42 @@ function SubscriptionsPage() {
                     <ExpandableDescription text={sub.description} />
                   </td>
 
-                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                  <td className="px-4 py-3 text-sm text-text-secondary text-left border-b border-[#e7edf4]">
                     {sub.price} {sub.currency}
                   </td>
 
-                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
-                    {sub.durationDays} days
+                  <td className="px-4 py-3 text-sm text-text-secondary text-left border-b border-[#e7edf4]">
+                    {sub.durationDays} ngày
                   </td>
 
-                  <td className="px-4 py-3 text-sm text-text-secondary text-center border-b border-[#e7edf4]">
+                  <td className="px-4 py-3 text-sm text-text-secondary text-left border-b border-[#e7edf4]">
                     {sub.maxAdsPerPeriod}
                   </td>
 
-                  <td className="px-4 py-3 text-center border-b border-[#e7edf4]">
+                  <td className="px-4 py-3 text-left border-b border-[#e7edf4]">
                     <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap
                       ${sub.status?.toLowerCase() === "active"
                           ? "bg-emerald-100 text-emerald-700"
                           : "bg-red-100 text-red-600"
                         }`}
                     >
                       <span className="size-1.5 rounded-full bg-current"></span>
-                      {sub.status?.toLowerCase() === "active" ? "Active" : "Inactive"}
+                      {sub.status?.toLowerCase() === "active" ? "Đang hoạt động" : "Ngừng hoạt động"}
                     </span>
                   </td>
 
+
                   <td
-                    className="px-4 py-3 text-right pr-4 border-b border-[#e7edf4] sticky right-0 bg-white group-hover:bg-[#f8fafc] z-10 transition-colors"
+                    className="px-4 py-3 text-left pr-4 border-b border-[#e7edf4] sticky right-0 bg-white group-hover:bg-[#f8fafc] z-10 transition-colors"
+
                     style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
                   >
-                    <div className="inline-flex items-center justify-end gap-2">
+                    <div className="inline-flex items-center justify-start gap-2">
+
 
                       {/* Edit */}
-                      <Tooltip text="Edit">
+                      <Tooltip text="Chỉnh sửa">
                         <button
                           onClick={(e) => { e.stopPropagation(); openEdit(sub); }}
                           className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -446,7 +458,7 @@ function SubscriptionsPage() {
                       </Tooltip>
 
                       {/* Delete */}
-                      <Tooltip text="Delete">
+                      <Tooltip text="Xóa">
                         <button
                           onClick={(e) => { e.stopPropagation(); setDeleteId(sub.packageId); }}
                           className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -482,8 +494,8 @@ function SubscriptionsPage() {
                 <td colSpan={8} className="px-6 py-12 text-center text-text-secondary">
                   <div className="flex flex-col items-center gap-2">
                     <span className="text-4xl text-slate-300">📦</span>
-                    <p className="font-medium">No subscription packages</p>
-                    <p className="text-xs">Create your first subscription plan</p>
+                    <p className="font-medium">Chưa có gói dịch vụ nào</p>
+                    <p className="text-xs">Tạo gói dịch vụ đầu tiên của bạn</p>
                   </div>
                 </td>
               </tr>
@@ -496,7 +508,7 @@ function SubscriptionsPage() {
 
         <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-white">
           <span className="text-sm text-text-secondary">
-            Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, subscriptions.length)} of {subscriptions.length} packages
+            Hiển thị {startIndex + 1} - {Math.min(startIndex + itemsPerPage, subscriptions.length)} trong tổng số {subscriptions.length} gói
           </span>
           <div className="flex gap-2">
             <button
@@ -505,10 +517,10 @@ function SubscriptionsPage() {
               className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50
               ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              Previous
+              Trước
             </button>
             <span className="px-3 py-1 text-sm">
-              Page {currentPage} / {totalPages || 1}
+              Trang {currentPage} / {totalPages || 1}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
@@ -516,7 +528,7 @@ function SubscriptionsPage() {
               className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50
               ${currentPage === totalPages || totalPages === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              Next
+              Sau
             </button>
           </div>
         </div>
@@ -545,7 +557,7 @@ function SubscriptionsPage() {
             {/* Header */}
             <div className="flex justify-between items-center">
               <h3 className="font-bold text-xl text-slate-800">
-                {editing ? "Edit Package" : "Create Package"}
+                {editing ? "Chỉnh sửa gói" : "Tạo gói mới"}
               </h3>
               <button 
                 onClick={() => setModalOpen(false)}
@@ -558,9 +570,9 @@ function SubscriptionsPage() {
             {/* Form */}
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-slate-700">Package Title</label>
+                <label className="text-sm font-semibold text-slate-700">Tên gói dịch vụ</label>
                 <input
-                  placeholder="e.g. Premium Plan"
+                  placeholder="Ví dụ: Gói Cao Cấp"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
@@ -569,11 +581,11 @@ function SubscriptionsPage() {
 
               <div className="flex flex-col gap-1.5">
                 <div className="flex justify-between items-center">
-                  <label className="text-sm font-semibold text-slate-700">Description</label>
+                  <label className="text-sm font-semibold text-slate-700">Mô tả</label>
                   <span className="text-xs text-slate-400 font-medium">{form.description?.length || 0}/500</span>
                 </div>
                 <textarea
-                  placeholder="Describe this package's features..."
+                  placeholder="Mô tả các tính năng của gói này..."
                   value={form.description}
                   maxLength={500}
                   rows={3}
@@ -584,7 +596,7 @@ function SubscriptionsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Price (VNĐ)</label>
+                  <label className="text-sm font-semibold text-slate-700">Giá (VNĐ)</label>
                   <input
                     type="number"
                     placeholder="0"
@@ -595,7 +607,7 @@ function SubscriptionsPage() {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Duration (Days)</label>
+                  <label className="text-sm font-semibold text-slate-700">Thời hạn (Ngày)</label>
                   <input
                     type="number"
                     placeholder="30"
@@ -607,7 +619,7 @@ function SubscriptionsPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-slate-700">Max Ads Allowed</label>
+                <label className="text-sm font-semibold text-slate-700">Số lượng quảng cáo tối đa</label>
                 <input
                   type="number"
                   placeholder="10"
@@ -624,13 +636,13 @@ function SubscriptionsPage() {
                 onClick={() => setModalOpen(false)}
                 className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
               >
-                Cancel
+                Hủy
               </button>
               <button
                 onClick={handleSubmit}
                 className="px-5 py-2.5 text-sm font-semibold text-white bg-[#5ab473] hover:bg-[#499A60] rounded-xl shadow-sm transition-colors"
               >
-                {editing ? "Save Changes" : "Create Package"}
+                {editing ? "Lưu thay đổi" : "Tạo gói mới"}
               </button>
             </div>
 
@@ -662,9 +674,9 @@ function SubscriptionsPage() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <h3 className="font-bold text-xl text-slate-800">Delete Package?</h3>
+              <h3 className="font-bold text-xl text-slate-800">Xóa gói dịch vụ?</h3>
               <p className="text-sm text-slate-500 font-medium">
-                Are you sure you want to delete this subscription package? This action cannot be undone.
+                Bạn có chắc chắn muốn xóa gói dịch vụ này không? Hành động này không thể hoàn tác.
               </p>
             </div>
 
@@ -673,13 +685,13 @@ function SubscriptionsPage() {
                 onClick={() => setDeleteId(null)}
                 className="flex-1 px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
               >
-                Cancel
+                Hủy
               </button>
               <button
                 onClick={() => handleDelete(deleteId)}
                 className="flex-1 px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl shadow-sm transition-colors"
               >
-                Delete
+                Xóa
               </button>
             </div>
             </motion.div>

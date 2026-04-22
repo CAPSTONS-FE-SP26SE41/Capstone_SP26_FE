@@ -44,10 +44,10 @@ function AdminDestinations() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-semibold text-text-main">
-            Popular Destinations
+            Điểm đến phổ biến
           </h2>
           <p className="text-sm text-text-secondary mt-1">
-            Trending locations for this season
+            Các địa điểm thịnh hành mùa này
           </p>
         </div>
 
@@ -60,7 +60,8 @@ function AdminDestinations() {
           transition-all duration-200">
 
           <Plus size={18} />
-          Add Destination
+          Thêm điểm đến
+
 
         </button>
       </div>
@@ -68,7 +69,7 @@ function AdminDestinations() {
       {/* Loading */}
       {loading && (
         <div className="text-center py-20 text-text-secondary">
-          Loading destinations...
+          Đang tải danh sách điểm đến...
         </div>
       )}
 
@@ -113,7 +114,7 @@ function AdminDestinations() {
                   </div>
 
                   <div className="bg-blue-50 text-primary px-2 py-1 rounded text-xs font-bold">
-                    Trend
+                    Xu hướng
                   </div>
 
                 </div>
@@ -121,11 +122,11 @@ function AdminDestinations() {
                 <div className="mt-4 flex items-center justify-between text-sm">
 
                   <span className="text-text-secondary">
-                    👥 {dest.visitors} visitors
+                    👥 {dest.visitors} lượt khách
                   </span>
 
                   <button className="text-primary font-semibold hover:underline">
-                    Manage
+                    Quản lý
                   </button>
 
                 </div>
@@ -147,11 +148,11 @@ function AdminDestinations() {
           </div>
 
           <p className="font-medium text-lg">
-            No destinations added yet
+            Chưa có điểm đến nào được thêm
           </p>
 
           <p className="text-sm">
-            Create a new destination to see it here
+            Tạo điểm đến mới để xem tại đây
           </p>
 
         </div>

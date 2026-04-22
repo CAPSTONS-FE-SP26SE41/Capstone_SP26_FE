@@ -9,6 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@microsoft/signalr": "^10.0.0",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-devtools": "^0.7.0",
     "@tanstack/react-router": "^1.168.3",
