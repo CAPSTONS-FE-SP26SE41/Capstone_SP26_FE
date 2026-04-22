@@ -98,7 +98,10 @@ export default function AppTopbar({
       )}
 
       <div className="flex items-center gap-6">
-        <div className="flex items-center gap-3 group">
+        <button 
+          onClick={() => navigate({ to: location.href.includes('/partner') ? '/partner/profile' : '/profile' })}
+          className="flex items-center gap-3 group transition-opacity hover:opacity-80"
+        >
           <div className="text-right hidden sm:block">
             <p className="text-sm font-semibold text-slate-800">{userName}</p>
             <p className="text-xs text-slate-500">{userRole}</p>
@@ -106,10 +109,11 @@ export default function AppTopbar({
 
           <img
             src={userAvatarUrl}
-            className={`h-10 w-10 rounded-full border-2 border-white shadow-sm group-hover:ring-2 ${ringColor} transition-all`}
+            className={`h-10 w-10 rounded-full border-2 border-white shadow-sm group-hover:ring-2 ${ringColor} transition-all object-cover`}
             alt={userName}
           />
-        </div>
+        </button>
+
 
         <div className="h-6 w-px bg-slate-200" />
 

@@ -403,9 +403,10 @@ function AdvertisementsPage() {
                         <td className="px-6 py-4 text-sm text-slate-600 truncate" title={poi.Address}>
                           {poi.Address || "—"}
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-600 truncate" title={poi.LocationName || poi.City}>
-                          {poi.LocationName || poi.City || "—"}
+                        <td className="px-6 py-4 text-sm text-slate-600 truncate" title={poi.LocationName}>
+                          {poi.LocationName || "—"}
                         </td>
+
                         <td className="px-6 py-4">
                           <span className="px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-amber-100 text-amber-700 border border-amber-200">
                             Chờ xét duyệt

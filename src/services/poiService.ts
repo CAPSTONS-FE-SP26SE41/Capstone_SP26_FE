@@ -8,7 +8,7 @@ export type StaffPOI = {
   Id: string
   Name: string
   Address: string
-  City: string
+
   ApproxCost: string
   Status?: string
 
@@ -167,7 +167,6 @@ function normalizeStaffPOI(p: any): StaffPOI {
     Id: String(p?.Id ?? p?.id ?? ""),
     Name: String(p?.Name ?? p?.name ?? ""),
     Address: String(p?.Address ?? p?.address ?? ""),
-    City: String(p?.City ?? p?.city ?? ""),
     ApproxCost: String(p?.ApproxCost ?? p?.approxCost ?? p?.approx_cost ?? ""),
     OpenHour: openHour,
     CloseHour: closeHour,
@@ -342,7 +341,7 @@ export const getStaffLocations = async (): Promise<StaffLocationOption[]> => {
 export type CreateStaffPOIPayload = {
   Name: string
   Address: string
-  City: string
+
   ApproxCost: string
   OpenHour: string
   CloseHour: string
@@ -372,7 +371,7 @@ export const createStaffPOI = async (
   const formData = new FormData()
   formData.append("Name", payload.Name)
   formData.append("Address", payload.Address)
-  formData.append("City", payload.City)
+
   formData.append("ApproxCost", payload.ApproxCost)
   formData.append("OpenHour", normalizeTimeOnly(payload.OpenHour))
   formData.append("CloseHour", normalizeTimeOnly(payload.CloseHour))
@@ -435,7 +434,7 @@ if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0
 export type UpdateStaffPOIPayload = {
   Name: string
   Address: string
-  City: string
+
   ApproxCost: string
   OpenHour: string
   CloseHour: string
@@ -472,7 +471,7 @@ export const updateStaffPOI = async (
   const paramsObj: Record<string, string> = {
     Name: payload.Name ?? "",
     Address: payload.Address ?? "",
-    City: payload.City ?? "",
+
     ApproxCost: payload.ApproxCost ?? "",
     OpenHour: normalizeTimeOnly(payload.OpenHour ?? ""),
     CloseHour: normalizeTimeOnly(payload.CloseHour ?? ""),

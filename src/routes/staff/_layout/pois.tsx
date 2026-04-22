@@ -63,7 +63,6 @@ function StaffPOIsPage() {
   const [createForm, setCreateForm] = useState({
     Name: "",
     Address: "",
-    City: "",
     ApproxCost: "",
     OpenHour: "",
     CloseHour: "",
@@ -75,12 +74,12 @@ function StaffPOIsPage() {
     LocationId: "",
     DistrictId: "",
   })
+
   const [createImageFile, setCreateImageFile] = useState<File | null>(null)
   const [editingPoiId, setEditingPoiId] = useState("")
   const [editForm, setEditForm] = useState({
     Name: "",
     Address: "",
-    City: "",
     ApproxCost: "",
     OpenHour: "",
     CloseHour: "",
@@ -94,6 +93,7 @@ function StaffPOIsPage() {
     Status: "",
     PartnerId: "",
   })
+
   
   const [districts, setDistricts] = useState<District[]>([])
   const [loadingDistricts, setLoadingDistricts] = useState(false)
@@ -107,7 +107,6 @@ function StaffPOIsPage() {
     setCreateForm({
       Name: "",
       Address: "",
-      City: "",
       ApproxCost: "",
       OpenHour: "",
       CloseHour: "",
@@ -119,6 +118,7 @@ function StaffPOIsPage() {
       LocationId: "",
       DistrictId: "",
     })
+
     setDistricts([])
     setFormErrors({})
     setCreateImageFile(null)
@@ -175,8 +175,9 @@ function StaffPOIsPage() {
       const haystack = [
         p.Id,
         p.Name,
-        p.City,
+        p.LocationName,
         p.ApproxCost,
+
         p.Address,
         String(p.Latitude),
         String(p.Longitude),
@@ -380,7 +381,6 @@ function StaffPOIsPage() {
       setEditForm({
         Name: detail.Name ?? "",
         Address: detail.Address ?? "",
-        City: detail.City ?? "",
         ApproxCost: detail.ApproxCost ?? "",
         OpenHour: detail.OpenHour ?? "",
         CloseHour: detail.CloseHour ?? "",
@@ -394,6 +394,7 @@ function StaffPOIsPage() {
         Status: detail.Status !== undefined ? String(detail.Status) : "",
         PartnerId: detail.PartnerId ?? "",
       })
+
       setEditImageFile(null)
       setShowEditModal(true)
     } catch (e) {
@@ -449,7 +450,6 @@ function StaffPOIsPage() {
       await createStaffPOI({
         Name: createForm.Name.trim(),
         Address: createForm.Address.trim(),
-        City: createForm.City.trim(),
         ApproxCost: createForm.ApproxCost.trim(),
         OpenHour: createForm.OpenHour.trim(),
         CloseHour: createForm.CloseHour.trim(),
@@ -462,6 +462,7 @@ function StaffPOIsPage() {
         LocationId: createForm.LocationId.trim(),
         DistrictId: createForm.DistrictId.trim(),
       }, createImageFile)
+
 
       const refreshedData = await getStaffPOIs()
       setPois(refreshedData)
@@ -535,7 +536,6 @@ function StaffPOIsPage() {
       await updateStaffPOI(editingPoiId, {
         Name: editForm.Name.trim(),
         Address: editForm.Address.trim(),
-        City: editForm.City.trim(),
         ApproxCost: editForm.ApproxCost.trim(),
         OpenHour: editForm.OpenHour.trim(),
         CloseHour: editForm.CloseHour.trim(),
@@ -549,6 +549,7 @@ function StaffPOIsPage() {
         Status: editForm.Status || undefined,
         PartnerId: editForm.PartnerId || undefined,
       }, editImageFile)
+
 
       const refreshedData = await getStaffPOIs()
       // Nếu backend lưu ảnh tại cùng 1 URL, browser có thể cache -> thêm query để luôn thấy ảnh mới
@@ -693,8 +694,9 @@ function StaffPOIsPage() {
                         </td>
 
                         <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-                          {p.LocationName || p.City || "—"}
+                          {p.LocationName || "—"}
                         </td>
+
 
                         <td className="px-6 py-4">
                           <span

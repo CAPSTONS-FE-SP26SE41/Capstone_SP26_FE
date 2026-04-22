@@ -1,7 +1,10 @@
 export interface Promotion {
+  promotionId?: string;
   title: string;
   description: string;
   terms?: string;
+  saveCount?: number;
+  status?: string;
 }
 
 export interface Ad {
@@ -15,4 +18,6 @@ export interface Ad {
   endDate: string;
   promotion?: Promotion;
   status?: string;
+  createdAt?: string;
 }
+

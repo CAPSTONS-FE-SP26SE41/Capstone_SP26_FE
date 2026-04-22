@@ -234,10 +234,8 @@ function PartnerPOIPage() {
   return (
     <div className="space-y-6">
       {/* Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="text-sm text-slate-500 font-medium">
-          {totalItems > 0 && `Tổng: ${totalItems} POI`}
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-4">
+
         <button
           onClick={handleCreate}
           className="flex items-center gap-2 bg-[#e28743] hover:bg-[#cf7632] text-white px-5 py-2.5 rounded-xl transition-all font-semibold shadow-sm hover:shadow-md"
@@ -312,9 +310,10 @@ function PartnerPOIPage() {
                         )}
                         <div className="min-w-0">
                           <span className="font-bold text-slate-800 break-words block">{poi.name}</span>
-                          {poi.city && (
-                            <p className="text-xs text-slate-400">{poi.city}</p>
+                          {poi.locationName && (
+                            <p className="text-xs text-slate-400">{poi.locationName}</p>
                           )}
+
                         </div>
                       </div>
                     </td>
@@ -645,7 +644,6 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
         const payload: UpdatePartnerPOIPayload = {
           Name: name,
           Address: address,
-          City: locName,
           ApproxCost: approxCost,
           OpenHour: is24Hours ? '00:00' : openHour,
           CloseHour: is24Hours ? '23:59' : closeHour,
@@ -658,6 +656,7 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
           DistrictId: districtId,
           PoiPreferences: poiPreferences,
         }
+
         await onSubmit(payload, imageFile)
       } else {
         if (!name || !address || !locationId || !districtId) {
@@ -667,7 +666,6 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
         const payload: CreatePartnerPOIPayload = {
           Name: name,
           Address: address,
-          City: locName,
           ApproxCost: approxCost,
           OpenHour: is24Hours ? '00:00' : openHour,
           CloseHour: is24Hours ? '23:59' : closeHour,
@@ -680,6 +678,7 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
           DistrictId: districtId,
           PoiPreferences: poiPreferences,
         }
+
         await onSubmit(payload, imageFile)
       }
     } catch (error: any) {
@@ -939,7 +938,8 @@ function POIDetailModal({ poi, poiTypeOptions, onClose, onEdit }: POIDetailModal
 
   const infoRows: { icon: React.ReactNode; label: string; value: React.ReactNode }[] = [
     { icon: <MapPin size={16} />, label: 'Địa chỉ', value: poi.address || '—' },
-    { icon: <Navigation size={16} />, label: 'Thành phố', value: poi.city || '—' },
+    { icon: <Navigation size={16} />, label: 'Thành phố', value: poi.locationName || '—' },
+
     { icon: <Clock size={16} />, label: 'Giờ mở cửa', value: openingHours },
     { icon: <DollarSign size={16} />, label: 'Chi phí ước tính', value: poi.approxCost || '—' },
     { icon: <Home size={16} />, label: 'Trong nhà / Ngoài trời', value: poi.isIndoor ? 'Trong nhà' : 'Ngoài trời' },
