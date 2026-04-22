@@ -97,10 +97,11 @@ function PartnerStatsPage() {
       title: 'Ưu đãi đã lưu',
       value: statsData?.totalPromotionSaveCount || 0,
       icon: Bookmark,
-      color: 'text-sky-600',
-      bg: 'bg-sky-100',
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-100',
       description: 'Tổng lượt lưu toàn bộ'
     },
+
     {
       title: 'Quảng cáo đang chạy',
       value: statsData?.adStatusStats.active || 0,
@@ -191,9 +192,10 @@ function PartnerStatsPage() {
         {/* Interaction Top POIs - Bar Chart */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm lg:col-span-2">
           <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <TrendingUp size={20} className="text-sky-500" />
+            <TrendingUp size={20} className="text-emerald-500" />
             Top tương tác theo địa điểm
           </h3>
+
           <div className="h-64 min-h-[250px] outline-none">
             <ResponsiveContainer width="100%" height="100%" className="outline-none">
               <BarChart data={interactionData} style={{ outline: 'none' }}>
@@ -216,7 +218,8 @@ function PartnerStatsPage() {
                   cursor={{ fill: '#f8fafc' }}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                 />
-                <Bar dataKey="Lượt lưu" fill="#0ea5e9" radius={[4, 4, 0, 0]} barSize={40} style={{ outline: 'none' }} />
+                <Bar dataKey="Lượt lưu" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} style={{ outline: 'none' }} />
+
               </BarChart>
             </ResponsiveContainer>
           </div>

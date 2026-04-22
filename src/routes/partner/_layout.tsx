@@ -85,7 +85,8 @@ function PartnerLayout() {
       userAvatarUrl={userAvatar}
       showSearch={false}
 
-      themeColor="orange"
+      themeColor="green"
+
     />
   )
 }

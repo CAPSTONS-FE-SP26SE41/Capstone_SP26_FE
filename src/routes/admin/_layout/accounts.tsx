@@ -103,8 +103,8 @@ function AccountsPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [totalAccounts, setTotalAccounts] = useState(0)
   const [openFilter, setOpenFilter] = useState<string | null>(null)
-  const [roleFilter, setRoleFilter] = useState("Role")
-  const [statusFilter, setStatusFilter] = useState("Status")
+  const [roleFilter, setRoleFilter] = useState("Vai trò")
+  const [statusFilter, setStatusFilter] = useState("Trạng thái")
   const [searchKeyword, setSearchKeyword] = useState("")
   const [debouncedKeyword, setDebouncedKeyword] = useState("")
   const itemsPerPage = 10
@@ -126,7 +126,7 @@ function AccountsPage() {
       try {
         const trimmedKeyword = debouncedKeyword.trim()
         const hasSearch = trimmedKeyword.length >= 2
-        const isFiltering = hasSearch || roleFilter !== "Role" || statusFilter !== "Status"
+        const isFiltering = hasSearch || roleFilter !== "Vai trò" || statusFilter !== "Trạng thái"
         let data
 
         if (isFiltering) {
@@ -134,9 +134,10 @@ function AccountsPage() {
             page: currentPage,
             pageSize: itemsPerPage,
             keyword: hasSearch ? trimmedKeyword : "",
-            role: roleFilter,
-            status: statusFilter
+            role: roleFilter === "Vai trò" ? undefined : roleFilter,
+            status: statusFilter === "Trạng thái" ? undefined : (statusFilter === "Đang hoạt động" ? "Active" : "Inactive")
           })
+
         } else {
           data = await getAccounts(currentPage, itemsPerPage)
         }
@@ -217,7 +218,7 @@ function AccountsPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-20 text-sm text-slate-500">
-        Loading accounts...
+        Đang tải danh sách tài khoản...
       </div>
     )
   }
@@ -232,13 +233,14 @@ function AccountsPage() {
         return { backgroundColor: "#F5EEF8", color: "#8E44AD" }
       case "USER":
         return { backgroundColor: "#EBF5FB", color: "#3498DB" }
-      case "STAFF":
+      case "MANAGER":
         return { backgroundColor: "#FEF5E7", color: "#F39C12" }
       case "PARTNER":
         return { backgroundColor: "#EAFAF1", color: "#2ECC71" }
       default:
         return { backgroundColor: "#f8fafc", color: "#475569" }
     }
+
   }
 
   return (
@@ -254,7 +256,7 @@ function AccountsPage() {
               <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                placeholder="Search by name or email..."
+                placeholder="Tìm kiếm theo tên hoặc email..."
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
               />
@@ -264,7 +266,7 @@ function AccountsPage() {
           {/* Action Button */}
           <button className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors">
             <Plus size={18} />
-            <span className="text-sm">Create New Account</span>
+            <span className="text-sm">Tạo tài khoản mới</span>
           </button>
 
         </div>
@@ -278,14 +280,16 @@ function AccountsPage() {
 
             <thead>
               <tr className="bg-[#F9FAFB] border-b border-[#e7edf4]">
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left w-16">No.</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left w-16">STT</th>
                 <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">Email</th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left min-w-[200px]">Name</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left min-w-[200px]">Họ tên</th>
                 <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">
                   <FilterDropdown
-                    label="Role"
+                    label="Vai trò"
                     value={roleFilter}
-                    options={["Role", "Admin", "User", "Staff", "Partner"]}
+                    options={["Vai trò", "Admin", "User", "Manager", "Partner"]}
+
+
                     isOpen={openFilter === "role"}
                     onChange={(val) => { setRoleFilter(val); setOpenFilter(null); setCurrentPage(1); }}
                     onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "role" ? null : "role"); }}
@@ -293,15 +297,16 @@ function AccountsPage() {
                 </th>
                 <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-left">
                   <FilterDropdown
-                    label="Status"
+                    label="Trạng thái"
                     value={statusFilter}
-                    options={["Status", "Active", "Inactive"]}
+                    options={["Trạng thái", "Đang hoạt động", "Ngừng hoạt động"]}
+
                     isOpen={openFilter === "status"}
                     onChange={(val) => { setStatusFilter(val); setOpenFilter(null); setCurrentPage(1); }}
                     onToggle={(e) => { e.stopPropagation(); setOpenFilter(openFilter === "status" ? null : "status"); }}
                   />
                 </th>
-                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-right pr-6">Actions</th>
+                <th className="px-6 py-4 text-text-secondary text-sm tracking-wider font-semibold text-right pr-6">Hành động</th>
               </tr>
             </thead>
 
@@ -350,7 +355,7 @@ function AccountsPage() {
                           }`}
                       >
                         <span className="size-1.5 rounded-full bg-current"></span>
-                        {account.status}
+                        {account.status === "Active" ? "Đang hoạt động" : "Ngừng hoạt động"}
                       </span>
 
                     </td>
@@ -388,12 +393,13 @@ function AccountsPage() {
                       </span>
 
                       <p className="font-medium">
-                        No accounts found
+                        Không tìm thấy tài khoản nào
                       </p>
 
                       <p className="text-xs">
-                        Add a new account to get started
+                        Tạo tài khoản mới để bắt đầu
                       </p>
+
 
                     </div>
 
@@ -409,7 +415,7 @@ function AccountsPage() {
         <div className="px-6 py-4 border-t border-[#e7edf4] flex justify-between items-center bg-white">
 
           <span className="text-sm text-text-secondary">
-            Showing {accounts.length > 0 ? startIndex + 1 : 0} - {startIndex + accounts.length} of {totalAccounts} accounts
+            Hiển thị {accounts.length > 0 ? startIndex + 1 : 0} - {startIndex + accounts.length} trong tổng số {totalAccounts} tài khoản
           </span>
 
           <div className="flex gap-2">
@@ -420,11 +426,11 @@ function AccountsPage() {
               className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50
               ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              Previous
+              Trước
             </button>
 
             <span className="px-3 py-1 text-sm">
-              Page {currentPage} / {totalPages || 1}
+              Trang {currentPage} / {totalPages || 1}
             </span>
 
             <button
@@ -433,8 +439,9 @@ function AccountsPage() {
               className={`px-3 py-1 text-sm border border-[#e7edf4] bg-white rounded hover:bg-slate-50
               ${currentPage === totalPages || totalPages === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              Next
+              Sau
             </button>
+
 
           </div>
 

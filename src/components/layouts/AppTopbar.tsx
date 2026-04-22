@@ -14,7 +14,8 @@ type AppTopbarProps = {
 export default function AppTopbar({
   userName = 'Hồ sơ',
   userRole = 'Người dùng',
-  userAvatarUrl = 'https://i.pravatar.cc/40',
+  userAvatarUrl = 'https://ui-avatars.com/api/?name=Admin&background=E2E8F0&color=475569',
+
   searchPlaceholder = 'Tìm kiếm...',
   themeColor = 'green',
   showSearch = true,
@@ -52,22 +53,33 @@ export default function AppTopbar({
   const accentClasses = accentMap[accent] || accentMap.emerald
 
   const getPageTitle = (path: string) => {
+    // Staff
     if (path.includes('/staff/advertisements')) return 'Yêu cầu xét duyệt'
-    if (path.includes('/staff/locations')) return 'Quản lí địa điểm'
-    if (path.includes('/staff/pois')) return 'Quản lí POIs'
+    if (path.includes('/staff/locations')) return 'Quản lý địa điểm'
+    if (path.includes('/staff/pois')) return 'Quản lý POIs'
     if (path === '/staff') return 'Trang chủ'
-    if (path.includes('/accounts')) return 'Quản lý tài khoản'
-    if (path.includes('/analytics')) return 'Phân tích'
-    if (path.includes('/subscriptions')) return 'Gói đăng ký'
-    if (path.includes('/settings')) return 'Cài đặt hệ thống'
-    if (path.includes('/advertisement')) return 'Quảng cáo'
-    if (path.includes('/poi')) return 'Điểm tham quan (POI)'
-    if (path.includes('/stats')) return 'Thống kê & Phân tích'
-    if (path.includes('/profile')) return 'Hồ sơ Đối tác'
-    if (path.includes('/history')) return 'Lịch sử giao dịch'
-    if (path.includes('/partner')) return 'Gói dịch vụ của tôi'
+
+    // Admin
+    if (path.includes('/admin/accounts')) return 'Quản lý tài khoản'
+    if (path.includes('/admin/analytics')) return 'Thống kê hệ thống'
+    if (path.includes('/admin/bookings')) return 'Quản lý đơn đặt chỗ'
+    if (path.includes('/admin/destinations')) return 'Điểm đến phổ biến'
+    if (path.includes('/admin/settings')) return 'Cài đặt hệ thống'
+    if (path.includes('/admin/subscriptions')) return 'Quản lý gói dịch vụ'
+
+    // Partner
+    if (path.includes('/partner/stats')) return 'Thống kê kinh doanh'
+    if (path.includes('/partner/poi')) return 'Quản lý địa điểm (POI)'
+    if (path.includes('/partner/advertisement')) return 'Quản lý quảng cáo'
+    if (path.includes('/partner/subscriptions')) return 'Gói dịch vụ của tôi'
+    if (path.includes('/partner/history')) return 'Lịch sử giao dịch'
+    if (path.includes('/partner/profile')) return 'Hồ sơ doanh nghiệp'
+    
+    // Fallbacks
+    if (path.includes('/profile')) return 'Hồ sơ cá nhân'
     return 'Bảng điều khiển'
   }
+
 
  
 
@@ -99,7 +111,16 @@ export default function AppTopbar({
 
       <div className="flex items-center gap-6">
         <button 
-          onClick={() => navigate({ to: location.href.includes('/partner') ? '/partner/profile' : '/profile' })}
+          onClick={() => {
+            if (location.href.includes('/partner')) {
+              navigate({ to: '/partner/profile' })
+            } else if (location.href.includes('/admin')) {
+              navigate({ to: '/admin/profile' })
+            } else {
+              navigate({ to: '/profile' })
+            }
+          }}
+
           className="flex items-center gap-3 group transition-opacity hover:opacity-80"
         >
           <div className="text-right hidden sm:block">

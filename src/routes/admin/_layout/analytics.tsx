@@ -47,10 +47,11 @@ function AdminAnalytics() {
   ])
 
   const [deviceData] = useState<Device[]>([
-    { name: 'Desktop', value: 400 },
-    { name: 'Mobile', value: 300 },
-    { name: 'Tablet', value: 200 },
+    { name: 'Máy tính', value: 400 },
+    { name: 'Di động', value: 300 },
+    { name: 'Máy tính bảng', value: 200 },
   ])
+
 
   const [topPages] = useState<PageMetric[]>([
     { page: '/home', views: 1200, bounce: '45%', conv: '12%' },
@@ -64,16 +65,16 @@ function AdminAnalytics() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
           <p className="text-text-secondary text-sm font-medium">
-            Total Revenue
+            Tổng doanh thu
           </p>
           <p className="text-2xl font-bold text-text-main mt-2">
-            $18,200
+            18,200,000 ₫
           </p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
           <p className="text-text-secondary text-sm font-medium">
-            Total Bookings
+            Tổng lượt đặt
           </p>
           <p className="text-2xl font-bold text-text-main mt-2">
             540
@@ -82,7 +83,7 @@ function AdminAnalytics() {
 
         <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
           <p className="text-text-secondary text-sm font-medium">
-            Active Users
+            Người dùng hoạt động
           </p>
           <p className="text-2xl font-bold text-text-main mt-2">
             126
@@ -90,13 +91,15 @@ function AdminAnalytics() {
         </div>
       </div>
 
+
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue Chart */}
         <div className="bg-white p-6 rounded-xl border border-[#e7edf4] shadow-sm">
           <h3 className="text-lg font-bold text-text-main mb-4">
-            Revenue vs Expenses
+            Doanh thu và Chi phí
           </h3>
+
 
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -116,14 +119,18 @@ function AdminAnalytics() {
                 <Legend />
                 <Bar
                   dataKey="income"
-                  fill="#258cf4"
+                  name="Thu nhập"
+                  fill="#10b981"
                   radius={[6, 6, 0, 0]}
                 />
                 <Bar
                   dataKey="expense"
+                  name="Chi phí"
                   fill="#cbd5e1"
                   radius={[6, 6, 0, 0]}
                 />
+
+
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -132,8 +139,9 @@ function AdminAnalytics() {
         {/* Device Pie */}
         <div className="bg-white p-6 rounded-xl border border-[#e7edf4] shadow-sm">
           <h3 className="text-lg font-bold text-text-main mb-4">
-            Traffic by Device
+            Lưu lượng theo thiết bị
           </h3>
+
 
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -166,25 +174,27 @@ function AdminAnalytics() {
       {/* Top Pages Table */}
       <div className="bg-white p-6 rounded-xl border border-[#e7edf4] shadow-sm">
         <h3 className="text-lg font-bold text-text-main mb-4">
-          Top Performing Pages
+          Trang hoạt động hiệu quả nhất
         </h3>
+
 
         <table className="w-full table-fixed text-left">
           <thead>
             <tr className="border-b border-[#e7edf4] text-text-secondary text-sm">
               <th className="pb-3 font-medium w-[40%]">
-                Page Name
+                Tên trang
               </th>
               <th className="pb-3 font-medium w-[20%]">
-                Views
+                Lượt xem
               </th>
               <th className="pb-3 font-medium w-[20%]">
-                Bounce Rate
+                Tỷ lệ thoát
               </th>
               <th className="pb-3 font-medium text-right w-[20%]">
-                Conversion
+                Chuyển đổi
               </th>
             </tr>
+
           </thead>
 
           <tbody className="divide-y divide-[#e7edf4]">

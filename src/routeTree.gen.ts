@@ -33,6 +33,7 @@ import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
 import { Route as AdminLayoutSubscriptionsRouteImport } from './routes/admin/_layout/subscriptions'
 import { Route as AdminLayoutSettingsRouteImport } from './routes/admin/_layout/settings'
+import { Route as AdminLayoutProfileRouteImport } from './routes/admin/_layout/profile'
 import { Route as AdminLayoutDestinationsRouteImport } from './routes/admin/_layout/destinations'
 import { Route as AdminLayoutBookingsRouteImport } from './routes/admin/_layout/bookings'
 import { Route as AdminLayoutAnalyticsRouteImport } from './routes/admin/_layout/analytics'
@@ -166,6 +167,11 @@ const AdminLayoutSettingsRoute = AdminLayoutSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminLayoutRoute,
 } as any)
+const AdminLayoutProfileRoute = AdminLayoutProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AdminLayoutRoute,
+} as any)
 const AdminLayoutDestinationsRoute = AdminLayoutDestinationsRouteImport.update({
   id: '/destinations',
   path: '/destinations',
@@ -224,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/bookings': typeof AdminLayoutBookingsRoute
   '/admin/destinations': typeof AdminLayoutDestinationsRoute
+  '/admin/profile': typeof AdminLayoutProfileRoute
   '/admin/settings': typeof AdminLayoutSettingsRoute
   '/admin/subscriptions': typeof AdminLayoutSubscriptionsRoute
   '/demo/api/names': typeof DemoApiNamesRoute
@@ -256,6 +263,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/bookings': typeof AdminLayoutBookingsRoute
   '/admin/destinations': typeof AdminLayoutDestinationsRoute
+  '/admin/profile': typeof AdminLayoutProfileRoute
   '/admin/settings': typeof AdminLayoutSettingsRoute
   '/admin/subscriptions': typeof AdminLayoutSubscriptionsRoute
   '/demo/api/names': typeof DemoApiNamesRoute
@@ -292,6 +300,7 @@ export interface FileRoutesById {
   '/admin/_layout/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/_layout/bookings': typeof AdminLayoutBookingsRoute
   '/admin/_layout/destinations': typeof AdminLayoutDestinationsRoute
+  '/admin/_layout/profile': typeof AdminLayoutProfileRoute
   '/admin/_layout/settings': typeof AdminLayoutSettingsRoute
   '/admin/_layout/subscriptions': typeof AdminLayoutSubscriptionsRoute
   '/demo/api/names': typeof DemoApiNamesRoute
@@ -329,6 +338,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/bookings'
     | '/admin/destinations'
+    | '/admin/profile'
     | '/admin/settings'
     | '/admin/subscriptions'
     | '/demo/api/names'
@@ -361,6 +371,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/bookings'
     | '/admin/destinations'
+    | '/admin/profile'
     | '/admin/settings'
     | '/admin/subscriptions'
     | '/demo/api/names'
@@ -396,6 +407,7 @@ export interface FileRouteTypes {
     | '/admin/_layout/analytics'
     | '/admin/_layout/bookings'
     | '/admin/_layout/destinations'
+    | '/admin/_layout/profile'
     | '/admin/_layout/settings'
     | '/admin/_layout/subscriptions'
     | '/demo/api/names'
@@ -607,6 +619,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLayoutSettingsRouteImport
       parentRoute: typeof AdminLayoutRoute
     }
+    '/admin/_layout/profile': {
+      id: '/admin/_layout/profile'
+      path: '/profile'
+      fullPath: '/admin/profile'
+      preLoaderRoute: typeof AdminLayoutProfileRouteImport
+      parentRoute: typeof AdminLayoutRoute
+    }
     '/admin/_layout/destinations': {
       id: '/admin/_layout/destinations'
       path: '/destinations'
@@ -678,6 +697,7 @@ interface AdminLayoutRouteChildren {
   AdminLayoutAnalyticsRoute: typeof AdminLayoutAnalyticsRoute
   AdminLayoutBookingsRoute: typeof AdminLayoutBookingsRoute
   AdminLayoutDestinationsRoute: typeof AdminLayoutDestinationsRoute
+  AdminLayoutProfileRoute: typeof AdminLayoutProfileRoute
   AdminLayoutSettingsRoute: typeof AdminLayoutSettingsRoute
   AdminLayoutSubscriptionsRoute: typeof AdminLayoutSubscriptionsRoute
   AdminLayoutIndexRoute: typeof AdminLayoutIndexRoute
@@ -688,6 +708,7 @@ const AdminLayoutRouteChildren: AdminLayoutRouteChildren = {
   AdminLayoutAnalyticsRoute: AdminLayoutAnalyticsRoute,
   AdminLayoutBookingsRoute: AdminLayoutBookingsRoute,
   AdminLayoutDestinationsRoute: AdminLayoutDestinationsRoute,
+  AdminLayoutProfileRoute: AdminLayoutProfileRoute,
   AdminLayoutSettingsRoute: AdminLayoutSettingsRoute,
   AdminLayoutSubscriptionsRoute: AdminLayoutSubscriptionsRoute,
   AdminLayoutIndexRoute: AdminLayoutIndexRoute,
