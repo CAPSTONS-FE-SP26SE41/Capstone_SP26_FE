@@ -1,4 +1,4 @@
-import { Bell, LogOut, Search } from 'lucide-react'
+import { LogOut, Search } from 'lucide-react'
 import { useLocation, useNavigate } from '@tanstack/react-router'
 import { logout } from '../../services/authService'
 
@@ -83,7 +83,6 @@ export default function AppTopbar({
 
  
 
-  const hoverText = accentClasses.hoverText
   const ringColor = accentClasses.ring
 
   return (
@@ -117,7 +116,7 @@ export default function AppTopbar({
             } else if (location.href.includes('/admin')) {
               navigate({ to: '/admin/profile' })
             } else {
-              navigate({ to: '/profile' })
+              navigate({ to: '/profile' as any })
             }
           }}
 
