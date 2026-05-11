@@ -20,7 +20,8 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit, initialData }
     endDate: '',
     promoTitle: '',
     promoDescription: '',
-    promoTerms: ''
+    promoTerms: '',
+    limitSaveCount: 0
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -38,12 +39,13 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit, initialData }
           endDate: initialData.endDate ? initialData.endDate.slice(0, 16) : '',
           promoTitle: initialData.promotion?.title || '',
           promoDescription: initialData.promotion?.description || '',
-          promoTerms: initialData.promotion?.terms || ''
+          promoTerms: initialData.promotion?.terms || '',
+          limitSaveCount: initialData.promotion?.limitSaveCount || 0
         });
         setImagePreview(initialData.imageUrl || null);
       } else {
         setNewAdForm({
-          poiId: '', title: '', content: '', startDate: '', endDate: '', promoTitle: '', promoDescription: '', promoTerms: ''
+          poiId: '', title: '', content: '', startDate: '', endDate: '', promoTitle: '', promoDescription: '', promoTerms: '', limitSaveCount: 0
         });
         setImageFile(null);
         setVideoFile(null);
@@ -104,13 +106,14 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit, initialData }
       promotion: newAdForm.promoTitle ? {
         title: newAdForm.promoTitle,
         description: newAdForm.promoDescription,
-        terms: newAdForm.promoTerms
+        terms: newAdForm.promoTerms,
+        limitSaveCount: Number(newAdForm.limitSaveCount)
       } : undefined
     }, imageFile, videoFile);
 
     // Reset form
     setNewAdForm({
-      poiId: '', title: '', content: '', startDate: '', endDate: '', promoTitle: '', promoDescription: '', promoTerms: ''
+      poiId: '', title: '', content: '', startDate: '', endDate: '', promoTitle: '', promoDescription: '', promoTerms: '', limitSaveCount: 0
     });
     setImageFile(null);
     setVideoFile(null);
@@ -315,8 +318,26 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit, initialData }
                     placeholder="Điều kiện kèm theo..." 
                   />
                 </div>
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-bold text-slate-700">Giới hạn lượt lưu</label>
+                    <span className="text-[10px] font-bold text-[#e28743] bg-orange-50 px-2 py-0.5 rounded-full">
+                      Số lượng
+                    </span>
+                  </div>
+                  <input 
+                    type="number" 
+                    min={0}
+                    value={newAdForm.limitSaveCount} 
+                    onChange={e => setNewAdForm({ ...newAdForm, limitSaveCount: parseInt(e.target.value) || 0 })} 
+                    className="w-full px-5 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all font-bold" 
+                    placeholder="VD: 100 (0 là không giới hạn)" 
+                  />
+                  <p className="mt-1.5 text-[11px] text-slate-400 pl-1 italic">Nhập số lượng lượt lưu tối đa cho khuyến mãi này. Để 0 nếu không giới hạn.</p>
+                </div>
               </div>
             </div>
+
           </form>
         </div>
 

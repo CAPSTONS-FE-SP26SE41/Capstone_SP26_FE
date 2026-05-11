@@ -54,7 +54,7 @@ export interface CreatePartnerPOIPayload {
   OpenHour: string
   CloseHour: string
   Is24Hours: boolean
-  VisitRecommendation: string
+  VisitRecommendation?: string
   GoogleMapLink: string
   IsIndoor: boolean
   Type: POIType
@@ -193,7 +193,9 @@ export const createPartnerPOI = async (
   formData.append("OpenHour", payload.OpenHour)
   formData.append("CloseHour", payload.CloseHour)
   formData.append("Is24Hours", String(payload.Is24Hours))
-  formData.append("VisitRecommendation", payload.VisitRecommendation)
+  if (payload.VisitRecommendation) {
+    formData.append("VisitRecommendation", payload.VisitRecommendation)
+  }
   formData.append("GoogleMapLink", payload.GoogleMapLink)
   formData.append("IsIndoor", String(payload.IsIndoor))
   formData.append("Type", payload.Type)

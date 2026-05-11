@@ -89,7 +89,9 @@ function PartnerAdvertisementPage() {
             title: formData.promotion?.title ?? "",
             description: formData.promotion?.description,
             terms: formData.promotion?.terms,
+            limitSaveCount: formData.promotion?.limitSaveCount,
           },
+
         }, imageFile, videoFile)
       } else {
         await createAdvertisement({
@@ -102,7 +104,9 @@ function PartnerAdvertisementPage() {
             title: formData.promotion?.title ?? "",
             description: formData.promotion?.description,
             terms: formData.promotion?.terms,
+            limitSaveCount: formData.promotion?.limitSaveCount,
           },
+
         }, imageFile, videoFile)
       }
       setIsModalOpen(false)

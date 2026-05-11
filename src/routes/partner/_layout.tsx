@@ -24,17 +24,19 @@ export const Route = createFileRoute("/partner/_layout")({
 import { useState, useEffect } from "react"
 
 function PartnerLayout() {
-  const [userName, setUserName] = useState(() => {
-    return (typeof window !== "undefined" && localStorage.getItem("user_name")) || "Đang tải..."
-  })
-  const [userRole, setUserRole] = useState(() => {
-    return (typeof window !== "undefined" && localStorage.getItem("user_role")) || "Đối tác"
-  })
-  const [userAvatar, setUserAvatar] = useState(() => {
-    return (typeof window !== "undefined" && localStorage.getItem("user_avatar")) || "https://i.pravatar.cc/40"
-  })
+  const [userName, setUserName] = useState("Đang tải...")
+  const [userRole, setUserRole] = useState("Đối tác")
+  const [userAvatar, setUserAvatar] = useState("https://i.pravatar.cc/40")
 
   useEffect(() => {
+    // Đọc cache từ localStorage trước để hiển thị nhanh
+    const cachedName = localStorage.getItem("user_name")
+    const cachedRole = localStorage.getItem("user_role")
+    const cachedAvatar = localStorage.getItem("user_avatar")
+    if (cachedName) setUserName(cachedName)
+    if (cachedRole) setUserRole(cachedRole)
+    if (cachedAvatar) setUserAvatar(cachedAvatar)
+
     const fetchMe = async () => {
       try {
         const data = await getMe();

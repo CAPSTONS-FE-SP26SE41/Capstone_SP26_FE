@@ -126,7 +126,7 @@ export default function AdsTable({ ads, poiNameMap = {}, onRefresh, onEdit }: Ad
                         {typeof ad.promotion.saveCount === 'number' && (
                           <div className="flex items-center gap-1 mt-1 text-[11px] font-bold text-sky-600 bg-sky-50 w-fit px-1.5 py-0.5 rounded-md border border-sky-100">
                             <Tag size={10} className="fill-sky-600" />
-                            {ad.promotion.saveCount} lượt lưu
+                            {ad.promotion.saveCount} / {ad.promotion.limitSaveCount > 0 ? ad.promotion.limitSaveCount : '∞'}
                           </div>
                         )}
                       </div>
@@ -251,7 +251,7 @@ function AdDetailModal({ ad, onClose, formatDate, poiNameMap }: AdDetailModalPro
       label: 'Lượt lưu ưu đãi',
       value: (
         <span className="font-bold text-sky-600">
-          {ad.promotion?.saveCount ?? 0} lượt
+          {ad.promotion?.saveCount ?? 0} / {ad.promotion?.limitSaveCount && ad.promotion.limitSaveCount > 0 ? ad.promotion.limitSaveCount : '∞'}
         </span>
       ),
     },

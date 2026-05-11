@@ -64,7 +64,9 @@ export const createAdvertisement = async (data: any, imageFile?: File | null, vi
     if (data.promotion.title) formData.append('Promotion.Title', data.promotion.title)
     if (data.promotion.description) formData.append('Promotion.Description', data.promotion.description)
     if (data.promotion.terms) formData.append('Promotion.Terms', data.promotion.terms)
+    if (data.promotion.limitSaveCount !== undefined) formData.append('Promotion.LimitSaveCount', data.promotion.limitSaveCount.toString())
   }
+
 
   return apiClient("/advertisements", {
     method: "POST",
@@ -86,7 +88,9 @@ export const updateAdvertisement = async (id: string, data: any, imageFile?: Fil
     if (data.promotion.title) formData.append('Promotion.Title', data.promotion.title)
     if (data.promotion.description) formData.append('Promotion.Description', data.promotion.description)
     if (data.promotion.terms) formData.append('Promotion.Terms', data.promotion.terms)
+    if (data.promotion.limitSaveCount !== undefined) formData.append('Promotion.LimitSaveCount', data.promotion.limitSaveCount.toString())
   }
+
 
   return apiClient(`/advertisements/${id}`, {
     method: "PUT",
