@@ -115,10 +115,13 @@ export default function AppTopbar({
               navigate({ to: '/partner/profile' })
             } else if (location.href.includes('/admin')) {
               navigate({ to: '/admin/profile' })
+            } else if (location.href.includes('/staff')) {
+              // Manager chưa có trang profile riêng
             } else {
               navigate({ to: '/profile' as any })
             }
           }}
+
 
           className="flex items-center gap-3 group transition-opacity hover:opacity-80"
         >

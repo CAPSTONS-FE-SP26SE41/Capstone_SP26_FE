@@ -4,8 +4,10 @@ export interface Promotion {
   description: string;
   terms?: string;
   saveCount?: number;
+  limitSaveCount?: number;
   status?: string;
 }
+
 
 export interface Ad {
   adId: string;

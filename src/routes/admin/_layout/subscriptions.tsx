@@ -147,12 +147,20 @@ function SubscriptionsPage() {
   const [editing, setEditing] = useState<Subscription | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    title: string;
+    description: string;
+    price: number | string;
+    durationDays: number | string;
+    maxAdsPerPeriod: number | string;
+    status: string;
+    currency: string;
+  }>({
     title: "",
     description: "",
-    price: 0,
-    durationDays: 30,
-    maxAdsPerPeriod: 5,
+    price: "",
+    durationDays: "",
+    maxAdsPerPeriod: "",
     status: "Active",
     currency: "VNĐ"
   })
@@ -204,9 +212,9 @@ function SubscriptionsPage() {
     setForm({
       title: "",
       description: "",
-      price: 0,
-      durationDays: 30,
-      maxAdsPerPeriod: 5,
+      price: "",
+      durationDays: "",
+      maxAdsPerPeriod: "",
       status: "Active",
       currency: "VNĐ"
     })
@@ -237,10 +245,17 @@ function SubscriptionsPage() {
 
     try {
 
+      const submissionData = {
+        ...form,
+        price: Number(form.price),
+        durationDays: Number(form.durationDays),
+        maxAdsPerPeriod: Number(form.maxAdsPerPeriod)
+      }
+
       if (editing) {
-        await updateSubscription(editing.packageId, form)
+        await updateSubscription(editing.packageId, submissionData as any)
       } else {
-        await createSubscription(form)
+        await createSubscription(submissionData as any)
       }
 
       setModalOpen(false)
@@ -599,10 +614,9 @@ function SubscriptionsPage() {
                   <label className="text-sm font-semibold text-slate-700">Giá (VNĐ)</label>
                   <input
                     type="number"
-                    placeholder="0"
                     value={form.price}
-                    onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                    onChange={(e) => setForm({ ...form, price: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
 
@@ -610,10 +624,9 @@ function SubscriptionsPage() {
                   <label className="text-sm font-semibold text-slate-700">Thời hạn (Ngày)</label>
                   <input
                     type="number"
-                    placeholder="30"
                     value={form.durationDays}
-                    onChange={(e) => setForm({ ...form, durationDays: Number(e.target.value) })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                    onChange={(e) => setForm({ ...form, durationDays: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
@@ -622,10 +635,9 @@ function SubscriptionsPage() {
                 <label className="text-sm font-semibold text-slate-700">Số lượng quảng cáo tối đa</label>
                 <input
                   type="number"
-                  placeholder="10"
                   value={form.maxAdsPerPeriod}
-                  onChange={(e) => setForm({ ...form, maxAdsPerPeriod: Number(e.target.value) })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                  onChange={(e) => setForm({ ...form, maxAdsPerPeriod: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
             </div>

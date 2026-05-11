@@ -542,7 +542,7 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
   const [visitRecommendation, setVisitRecommendation] = useState(poi?.visitRecommendation ?? '')
   const [googleMapLink, setGoogleMapLink] = useState(poi?.googleMapLink ?? '')
   const [isIndoor, setIsIndoor] = useState(poi?.isIndoor ?? false)
-  const [type, setType] = useState<POIType>(poi?.type ?? 'Attraction')
+  const [type, setType] = useState<POIType | ''>(poi?.type ?? '')
   const [locationId, setLocationId] = useState(poi?.locationId ?? '')
   const [districtId, setDistrictId] = useState(poi?.districtId ?? '')
   const [poiPreferences, setPoiPreferences] = useState<string[]>(poi?.poiPreferences ?? [])
@@ -659,7 +659,7 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
 
         await onSubmit(payload, imageFile)
       } else {
-        if (!name || !address || !locationId || !districtId) {
+        if (!name || !address || !locationId || !districtId || !type) {
           showToast("error", 'Vui lòng điền đầy đủ thông tin bắt buộc.')
           return
         }
@@ -738,6 +738,7 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
             <div>
               <label className={labelClasses}>Loại hình <span className="text-red-400">*</span></label>
               <select value={type} onChange={(e) => setType(e.target.value as POIType)} className={inputClasses}>
+                <option value="">-- Chọn loại hình --</option>
                 {loadingPoiTypes ? (
                   <option value="">Đang tải...</option>
                 ) : (
