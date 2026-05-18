@@ -270,35 +270,6 @@ function StaffLocationsPage() {
               placeholder="Tim theo id, tên, tọa độ..."
             />
           </div>
-          <button
-            onClick={() => {
-              resetForm()
-              setShowCreateModal(true)
-            }}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-colors whitespace-nowrap"
-          >
-            <Plus size={16} />
-            Tạo mới
-          </button>
-          <label className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${
-            importing
-              ? "bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
-              : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
-          }`}>
-            <Upload size={16} />
-            {importing ? "Đang import..." : "Import Excel"}
-            <input
-              type="file"
-              accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-              className="hidden"
-              disabled={importing}
-              onChange={(e) => {
-                const file = e.target.files?.[0] ?? null
-                void handleImportFile(file)
-                e.currentTarget.value = ""
-              }}
-            />
-          </label>
         </div>
       </div>
 

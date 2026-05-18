@@ -1,62 +1,67 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { User, Store, Settings, Mail, Phone, MapPin, Calendar, Camera, Save, X, UserCircle } from 'lucide-react'
-import { getMe } from '@/services/authService'
-import { updateUser } from '@/services/userService'
+import { Store, Settings, Mail, Phone, MapPin, Camera, Save, X, UserCircle, Building2, FileText, Clock } from 'lucide-react'
+import {
+  getMyPartnerProfile,
+  updateMyPartnerProfile,
+  updatePartnerAvatar,
+  type PartnerProfileData,
+} from '@/services/partnerProfileService'
 
 export const Route = createFileRoute('/partner/_layout/profile')({
   component: PartnerProfilePage,
 })
 
 function PartnerProfilePage() {
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<PartnerProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Form state
+  // Form state — chỉ chứa các trường doanh nghiệp
   const [formData, setFormData] = useState({
-    name: '',
-    address: '',
-    phoneNumber: '',
-    dateOfBirth: '',
-    gender: '',
+    businessName: '',
+    businessAddress: '',
+    businessPhone: '',
+    businessEmail: '',
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const fetchProfile = async () => {
     try {
-      const data = await getMe();
+      setError(null);
+      const data = await getMyPartnerProfile();
       setProfile(data);
-      // Initialize form data using nested profile object
       setFormData({
-        name: data.name || data.profile?.name || '',
-        address: data.profile?.address || '',
-        phoneNumber: data.profile?.phoneNumber || '',
-        dateOfBirth: data.profile?.dateOfBirth && data.profile?.dateOfBirth !== '0001-01-01T00:00:00' 
-          ? data.profile.dateOfBirth.split('T')[0] 
-          : '',
-        gender: data.profile?.gender || '',
+        businessName: data.businessName || '',
+        businessAddress: data.businessAddress || '',
+        businessPhone: data.businessPhone || '',
+        businessEmail: data.businessEmail || '',
       });
-      // Handle potential field name variations and empty strings
-      const avatar = data.profile?.avtUrl || data.avatarUrl || data.profile?.avatarUrl;
-      setPreviewUrl(avatar && avatar !== "" ? avatar : null);
-
-    } catch (error) {
-      console.error("Error fetching profile:", error);
+      const avatar = data.businessAvatarUrl && data.businessAvatarUrl !== '' ? data.businessAvatarUrl : null;
+      setPreviewUrl(avatar);
+      
+      // Đồng bộ thông tin lên Sidebar/Layout
+      if (data.businessName) localStorage.setItem("user_name", data.businessName);
+      
+      const syncAvatar = avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.businessName || "Doanh nghiệp đối tác")}&background=FDBA74&color=7C2D12`;
+      localStorage.setItem("user_avatar", syncAvatar);
+    } catch (err: any) {
+      console.error("Error fetching partner profile:", err);
+      setError("Không thể tải thông tin hồ sơ doanh nghiệp.");
     } finally {
       setLoading(false);
     }
   };
 
-
   useEffect(() => {
     fetchProfile();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -73,33 +78,63 @@ function PartnerProfilePage() {
     e.preventDefault();
     setIsSaving(true);
     try {
-      const uploadData = new FormData();
-      uploadData.append('Name', formData.name);
-      uploadData.append('Address', formData.address);
-      uploadData.append('PhoneNumber', formData.phoneNumber);
-      uploadData.append('DateOfBirth', formData.dateOfBirth);
-      uploadData.append('Gender', formData.gender);
-      
+      // Cập nhật thông tin text
+      await updateMyPartnerProfile({
+        businessName: formData.businessName || undefined,
+        businessAddress: formData.businessAddress || undefined,
+        businessPhone: formData.businessPhone || undefined,
+        businessEmail: formData.businessEmail || undefined,
+      });
+
+      // Nếu có chọn file ảnh mới → gọi API riêng upload avatar
       if (selectedFile) {
-        uploadData.append('AvatarUrl', selectedFile);
+        await updatePartnerAvatar(selectedFile);
       }
 
-      await updateUser(uploadData);
-      await fetchProfile(); // Refresh profile data
+      await fetchProfile(); // Refresh lại data
       setIsEditing(false);
-      alert('Cập nhật hồ sơ thành công!');
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      alert('Có lỗi xảy ra khi cập nhật hồ sơ.');
+      setSelectedFile(null);
+      alert('Cập nhật hồ sơ doanh nghiệp thành công!');
+    } catch (err: any) {
+      console.error("Error updating partner profile:", err);
+      alert('Có lỗi xảy ra khi cập nhật hồ sơ doanh nghiệp.');
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleCancelEdit = () => {
+    if (profile) {
+      setFormData({
+        businessName: profile.businessName || '',
+        businessAddress: profile.businessAddress || '',
+        businessPhone: profile.businessPhone || '',
+        businessEmail: profile.businessEmail || '',
+      });
+      setPreviewUrl(profile.businessAvatarUrl && profile.businessAvatarUrl !== '' ? profile.businessAvatarUrl : null);
+    }
+    setIsEditing(false);
+    setSelectedFile(null);
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#e28743]"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <div className="text-red-500 text-lg font-semibold">{error}</div>
+        <button
+          onClick={() => { setLoading(true); fetchProfile(); }}
+          className="px-5 py-2.5 bg-[#e28743] text-white rounded-xl hover:bg-[#d47935] transition-all font-semibold"
+        >
+          Thử lại
+        </button>
       </div>
     );
   }
@@ -112,26 +147,18 @@ function PartnerProfilePage() {
         {!isEditing ? (
           <button 
             onClick={() => {
-              // Get avatar using the same logic as fetchProfile
-              const avatar = profile?.profile?.avtUrl || profile?.avatarUrl || profile?.profile?.avatarUrl;
-              const currentAvatar = avatar && avatar !== "" ? avatar : null;
-
-              // Reset form data to current profile state before editing
-              setFormData({
-                name: profile?.name || profile?.profile?.name || '',
-                address: profile?.profile?.address || '',
-                phoneNumber: profile?.profile?.phoneNumber || '',
-                dateOfBirth: profile?.profile?.dateOfBirth && profile?.profile?.dateOfBirth !== '0001-01-01T00:00:00'
-                  ? profile.profile.dateOfBirth.split('T')[0] 
-                  : '',
-                gender: profile?.profile?.gender || '',
-              });
-              setPreviewUrl(currentAvatar);
-              setSelectedFile(null);
+              if (profile) {
+                setFormData({
+                  businessName: profile.businessName || '',
+                  businessAddress: profile.businessAddress || '',
+                  businessPhone: profile.businessPhone || '',
+                  businessEmail: profile.businessEmail || '',
+                });
+                setPreviewUrl(profile.businessAvatarUrl && profile.businessAvatarUrl !== '' ? profile.businessAvatarUrl : null);
+                setSelectedFile(null);
+              }
               setIsEditing(true);
             }}
-
-
             className="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-5 py-2.5 rounded-xl transition-all shadow-sm font-semibold"
           >
             <Settings size={18} className="text-slate-400" />
@@ -140,13 +167,7 @@ function PartnerProfilePage() {
         ) : (
           <div className="flex items-center gap-3">
             <button 
-              onClick={() => {
-                const avatar = profile?.profile?.avtUrl || profile?.avatarUrl || profile?.profile?.avatarUrl;
-                setPreviewUrl(avatar && avatar !== "" ? avatar : null);
-                setIsEditing(false);
-                setSelectedFile(null);
-              }}
-
+              onClick={handleCancelEdit}
               className="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-500 px-5 py-2.5 rounded-xl transition-all font-semibold border border-slate-200"
             >
               <X size={18} />
@@ -176,10 +197,10 @@ function PartnerProfilePage() {
           <div className="relative -mt-16 mb-8 inline-block">
             <div className="w-32 h-32 rounded-3xl border-4 border-white shadow-xl overflow-hidden bg-slate-100">
               {previewUrl ? (
-                <img src={previewUrl} alt="Avatar" className="w-full h-full object-cover" />
+                <img src={previewUrl} alt="Business Avatar" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-slate-300">
-                  <UserCircle size={80} />
+                  <Building2 size={60} />
                 </div>
               )}
             </div>
@@ -204,7 +225,7 @@ function PartnerProfilePage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
               <div className="lg:col-span-1 space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-800">{profile?.name || 'Chưa cập nhật tên'}</h2>
+                  <h2 className="text-2xl font-bold text-slate-800">{profile?.businessName || 'Chưa cập nhật tên doanh nghiệp'}</h2>
                   <p className="text-[#e28743] font-medium flex items-center gap-1.5 mt-1">
                     <Store size={16} />
                     Đối tác chính thức
@@ -214,53 +235,64 @@ function PartnerProfilePage() {
                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
                   <div className="flex items-center gap-3 text-slate-600">
                     <Mail size={18} className="text-slate-400" />
-                    <span className="text-sm font-medium">{profile?.email}</span>
+                    <span className="text-sm font-medium">{profile?.businessEmail || 'Chưa có email doanh nghiệp'}</span>
                   </div>
                   <div className="flex items-center gap-3 text-slate-600">
                     <Phone size={18} className="text-slate-400" />
-                    <span className="text-sm font-medium">{profile?.profile?.phoneNumber || 'Chưa có SĐT'}</span>
+                    <span className="text-sm font-medium">{profile?.businessPhone || 'Chưa có SĐT doanh nghiệp'}</span>
                   </div>
                   <div className="flex items-center gap-3 text-slate-600">
                     <MapPin size={18} className="text-slate-400" />
-                    <span className="text-sm font-medium">{profile?.profile?.address || 'Chưa có địa chỉ'}</span>
+                    <span className="text-sm font-medium">{profile?.businessAddress || 'Chưa có địa chỉ doanh nghiệp'}</span>
                   </div>
-
                 </div>
               </div>
 
               <div className="lg:col-span-2 space-y-8">
                 <div>
                   <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
-                    <User size={16} />
-                    Thông tin cá nhân
+                    <Building2 size={16} />
+                    Thông tin doanh nghiệp
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 bg-white p-6 rounded-2xl border border-slate-100">
                     <div className="space-y-1.5">
-                      <p className="text-xs font-bold text-slate-400 uppercase">Họ và tên</p>
-                      <p className="font-semibold text-slate-700">{profile?.name || '---'}</p>
+                      <p className="text-xs font-bold text-slate-400 uppercase">Tên doanh nghiệp</p>
+                      <p className="font-semibold text-slate-700">{profile?.businessName || '---'}</p>
                     </div>
                     <div className="space-y-1.5">
-                      <p className="text-xs font-bold text-slate-400 uppercase">Giới tính</p>
-                      <p className="font-semibold text-slate-700">
-                        {profile?.profile?.gender === 'Male' ? 'Nam' : 
-                         profile?.profile?.gender === 'Female' ? 'Nữ' : 
-                         profile?.profile?.gender || '---'}
-                      </p>
+                      <p className="text-xs font-bold text-slate-400 uppercase">Email doanh nghiệp</p>
+                      <p className="font-semibold text-slate-700">{profile?.businessEmail || '---'}</p>
                     </div>
                     <div className="space-y-1.5">
-                      <p className="text-xs font-bold text-slate-400 uppercase">Ngày sinh</p>
-                      <p className="font-semibold text-slate-700">
-                        {profile?.profile?.dateOfBirth && profile?.profile?.dateOfBirth !== '0001-01-01T00:00:00'
-                          ? new Date(profile.profile.dateOfBirth).toLocaleDateString('vi-VN') 
+                      <p className="text-xs font-bold text-slate-400 uppercase">Số điện thoại</p>
+                      <p className="font-semibold text-slate-700">{profile?.businessPhone || '---'}</p>
+                    </div>
+                    <div className="space-y-1.5">
+                      <p className="text-xs font-bold text-slate-400 uppercase">Địa chỉ</p>
+                      <p className="font-semibold text-slate-700">{profile?.businessAddress || '---'}</p>
+                    </div>
+                    {profile?.businessLicenseUrl && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-bold text-slate-400 uppercase">Giấy phép kinh doanh</p>
+                        <a 
+                          href={profile.businessLicenseUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="font-semibold text-[#e28743] hover:underline flex items-center gap-1.5"
+                        >
+                          <FileText size={16} />
+                          Xem giấy phép
+                        </a>
+                      </div>
+                    )}
+                    <div className="space-y-1.5">
+                      <p className="text-xs font-bold text-slate-400 uppercase">Ngày tạo hồ sơ</p>
+                      <p className="font-semibold text-slate-700 flex items-center gap-1.5">
+                        <Clock size={14} className="text-slate-400" />
+                        {profile?.createdAt 
+                          ? new Date(profile.createdAt).toLocaleDateString('vi-VN') 
                           : '---'}
                       </p>
-                    </div>
-                    <div className="space-y-1.5">
-                      <p className="text-xs font-bold text-slate-400 uppercase">Trạng thái tài khoản</p>
-                      <div className="flex items-center gap-1.5 text-emerald-600 font-bold">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                        Đang hoạt động
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -272,78 +304,61 @@ function PartnerProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-600 flex items-center gap-2">
-                    <User size={16} className="text-slate-400" />
-                    Họ và tên / Tên doanh nghiệp
+                    <Building2 size={16} className="text-slate-400" />
+                    Tên doanh nghiệp
                   </label>
                   <input 
                     type="text"
-                    name="name"
-                    value={formData.name}
+                    name="businessName"
+                    value={formData.businessName}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#e28743] focus:border-transparent outline-none transition-all"
-                    placeholder="Nhập tên của bạn"
+                    placeholder="Nhập tên doanh nghiệp"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-600 flex items-center gap-2">
                     <Phone size={16} className="text-slate-400" />
-                    Số điện thoại
+                    Số điện thoại doanh nghiệp
                   </label>
                   <input 
                     type="text"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
+                    name="businessPhone"
+                    value={formData.businessPhone}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#e28743] focus:border-transparent outline-none transition-all"
-                    placeholder="Nhập số điện thoại"
+                    placeholder="Nhập số điện thoại doanh nghiệp"
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-bold text-slate-600 flex items-center gap-2">
-                    <Calendar size={16} className="text-slate-400" />
-                    Ngày sinh
+                    <Mail size={16} className="text-slate-400" />
+                    Email doanh nghiệp
                   </label>
                   <input 
-                    type="date"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
+                    type="email"
+                    name="businessEmail"
+                    value={formData.businessEmail}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#e28743] focus:border-transparent outline-none transition-all"
+                    placeholder="Nhập email doanh nghiệp"
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-600 flex items-center gap-2">
-                    <UserCircle size={16} className="text-slate-400" />
-                    Giới tính
-                  </label>
-                  <select 
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#e28743] focus:border-transparent outline-none transition-all appearance-none"
-                  >
-                    <option value="">Chọn giới tính</option>
-                    <option value="Male">Nam</option>
-                    <option value="Female">Nữ</option>
-                    <option value="Other">Khác</option>
-                  </select>
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-bold text-slate-600 flex items-center gap-2">
                     <MapPin size={16} className="text-slate-400" />
-                    Địa chỉ
+                    Địa chỉ doanh nghiệp
                   </label>
                   <input 
                     type="text"
-                    name="address"
-                    value={formData.address}
+                    name="businessAddress"
+                    value={formData.businessAddress}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#e28743] focus:border-transparent outline-none transition-all"
-                    placeholder="Nhập địa chỉ của bạn"
+                    placeholder="Nhập địa chỉ doanh nghiệp"
                   />
                 </div>
               </div>

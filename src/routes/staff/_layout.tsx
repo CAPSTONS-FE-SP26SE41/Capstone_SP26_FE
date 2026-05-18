@@ -4,7 +4,8 @@ import {
   MapPin,
   Map,
   PlaneTakeoff,
-  ClipboardCheck
+  ClipboardCheck,
+  Users
 } from "lucide-react"
 import { useEffect, useState } from "react"
 
@@ -43,6 +44,7 @@ function ManagerLayout() {
         { to: "/staff/pois", icon: MapPin, label: "Quản lí POIs" },
         { to: "/staff/locations", icon: Map, label: "Quản lí địa điểm" },
         { to: "/staff/advertisements", icon: ClipboardCheck, label: "Yêu cầu xét duyệt" }, // Lấy từ feat
+        { to: "/staff/partner-requests", icon: Users, label: "Yêu cầu đối tác" },
       ]}
       userName={userName}
       userRole={userRole}

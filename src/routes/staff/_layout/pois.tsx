@@ -42,6 +42,7 @@ function StaffPOIsPage() {
   const [pois, setPois] = useState<StaffPOI[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState("")
+  const [filterType, setFilterType] = useState<"all" | "system" | "partner">("all")
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [selectedPoi, setSelectedPoi] = useState<StaffPOI | null>(null)
@@ -165,19 +166,27 @@ function StaffPOIsPage() {
 
   useEffect(() => {
     setPage(1)
-  }, [query, pageSize])
+  }, [query, pageSize, filterType])
 
   const filteredPois = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return pois
+    // 1. Lọc theo filterType trước
+    let result = pois
+    if (filterType === "system") {
+      result = pois.filter((p) => !p.PartnerId)
+    } else if (filterType === "partner") {
+      result = pois.filter((p) => !!p.PartnerId)
+    }
 
-    return pois.filter((p) => {
+    // 2. Sau đó lọc theo query tìm kiếm
+    const q = query.trim().toLowerCase()
+    if (!q) return result
+
+    return result.filter((p) => {
       const haystack = [
         p.Id,
         p.Name,
         p.LocationName,
         p.ApproxCost,
-
         p.Address,
         String(p.Latitude),
         String(p.Longitude),
@@ -196,7 +205,7 @@ function StaffPOIsPage() {
 
       return haystack.includes(q)
     })
-  }, [pois, query])
+  }, [pois, query, filterType])
 
   useEffect(() => {
     if (!showEditModal) {
@@ -598,8 +607,8 @@ function StaffPOIsPage() {
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
       {/* Removed Title */}
 
-        <div className="w-full sm:w-auto flex items-center gap-2">
-          <div className="relative w-full sm:w-[360px]">
+        <div className="w-full sm:w-auto flex flex-wrap items-center gap-2">
+          <div className="relative w-full sm:w-[320px]">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               value={query}
@@ -608,6 +617,15 @@ function StaffPOIsPage() {
               placeholder="Tìm theo tên, địa chỉ, thành phố..."
             />
           </div>
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value as any)}
+            className="h-10 rounded-xl border border-slate-200 bg-white text-sm px-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            <option value="all">Tất cả POIs</option>
+            <option value="system">POIs hệ thống</option>
+            <option value="partner">POIs đối tác (Kinh doanh)</option>
+          </select>
           <button
             onClick={() => setShowCreateModal(true)}
             className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-colors whitespace-nowrap"
