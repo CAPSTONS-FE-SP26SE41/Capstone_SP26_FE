@@ -10,7 +10,6 @@ import {
 } from "lucide-react"
 
 import DashboardLayout from "../../components/layouts/DashboardLayout"
-import { getMe } from "@/services/authService"
 
 export const Route = createFileRoute("/partner/_layout")({
   beforeLoad: () => {
@@ -22,11 +21,12 @@ export const Route = createFileRoute("/partner/_layout")({
 })
 
 import { useState, useEffect } from "react"
+import { getMyPartnerProfile } from "@/services/partnerProfileService"
 
 function PartnerLayout() {
   const [userName, setUserName] = useState("Đang tải...")
   const [userRole, setUserRole] = useState("Đối tác")
-  const [userAvatar, setUserAvatar] = useState("https://i.pravatar.cc/40")
+  const [userAvatar, setUserAvatar] = useState("https://ui-avatars.com/api/?name=Partner&background=FDBA74&color=7C2D12")
 
   useEffect(() => {
     // Đọc cache từ localStorage trước để hiển thị nhanh
@@ -39,11 +39,12 @@ function PartnerLayout() {
 
     const fetchMe = async () => {
       try {
-        const data = await getMe();
+        const data = await getMyPartnerProfile();
         if (data) {
-          const name = data.name || "Hồ sơ cá nhân";
-          const role = data.roleName || "Đối tác";
-          const avatar = data.profile?.avtUrl || data.avatarUrl || data.profile?.avatarUrl || "https://i.pravatar.cc/40";
+          const name = data.businessName || "Doanh nghiệp đối tác";
+          const role = "Đối tác";
+          const defaultAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=FDBA74&color=7C2D12`;
+          const avatar = data.businessAvatarUrl || defaultAvatarUrl;
           
           setUserName(name);
           setUserRole(role);
@@ -55,7 +56,7 @@ function PartnerLayout() {
           localStorage.setItem("user_avatar", avatar);
         }
       } catch (error) {
-        console.error("Failed to fetch me:", error);
+        console.error("Failed to fetch partner profile:", error);
       }
     };
     fetchMe();
