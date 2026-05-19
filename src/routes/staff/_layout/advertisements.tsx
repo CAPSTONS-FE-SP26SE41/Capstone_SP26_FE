@@ -351,11 +351,13 @@ function AdvertisementsPage() {
                                         </td>
 
                                         <td className="px-6 py-4">
-                                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${(ad.status === 'PendingApproval' || ad.status === 'Pending' || !ad.status) ? "bg-amber-100 text-amber-700 border border-amber-200" :
+                                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${ad.status === 'Scheduled' ? "bg-blue-100 text-blue-700 border border-blue-200" :
+                                              (ad.status === 'PendingApproval' || ad.status === 'Pending' || !ad.status) ? "bg-amber-100 text-amber-700 border border-amber-200" :
                                               (ad.status === 'Active' || ad.status === 'Approved') ? "bg-emerald-100 text-emerald-700 border border-emerald-200" :
+                                              ad.status === 'Expired' ? "bg-slate-100 text-slate-500 border border-slate-200" :
                                                 "bg-rose-100 text-rose-700 border border-rose-200"
                                             }`}>
-                                            {(ad.status === 'PendingApproval' || ad.status === 'Pending' || !ad.status) ? "Chờ xét duyệt" : (ad.status === 'Active' || ad.status === 'Approved') ? "Hoạt động" : "Từ chối"}
+                                            {ad.status === 'Scheduled' ? "Chờ chạy" : (ad.status === 'PendingApproval' || ad.status === 'Pending' || !ad.status) ? "Chờ xét duyệt" : (ad.status === 'Active' || ad.status === 'Approved') ? "Hoạt động" : ad.status === 'Expired' ? "Hết hạn" : "Từ chối"}
                                           </span>
                                         </td>
 
@@ -622,9 +624,9 @@ function AdvertisementsPage() {
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Thông tin Khuyến mãi</h4>
                       <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-slate-50 border border-slate-100">
-                        <div className={`w-2 h-2 rounded-full animate-pulse ${(selectedAdDetail.status === 'PendingApproval' || selectedAdDetail.status === 'Pending') ? "bg-amber-400" : "bg-emerald-400"}`} />
+                        <div className={`w-2 h-2 rounded-full animate-pulse ${selectedAdDetail.status === 'Scheduled' ? "bg-blue-400" : (selectedAdDetail.status === 'PendingApproval' || selectedAdDetail.status === 'Pending') ? "bg-amber-400" : selectedAdDetail.status === 'Expired' ? "bg-slate-400" : "bg-emerald-400"}`} />
                         <span className="text-[11px] font-bold text-slate-600 uppercase tracking-tight">
-                          {(selectedAdDetail.status === 'PendingApproval' || selectedAdDetail.status === 'Pending' || !selectedAdDetail.status) ? "Chờ duyệt" : "Đã duyệt"}
+                          {selectedAdDetail.status === 'Scheduled' ? "Chờ chạy" : (selectedAdDetail.status === 'PendingApproval' || selectedAdDetail.status === 'Pending' || !selectedAdDetail.status) ? "Chờ duyệt" : selectedAdDetail.status === 'Expired' ? "Hết hạn" : (selectedAdDetail.status === 'Active' || selectedAdDetail.status === 'Approved') ? "Đã duyệt" : "Từ chối"}
                         </span>
                       </div>
                     </div>

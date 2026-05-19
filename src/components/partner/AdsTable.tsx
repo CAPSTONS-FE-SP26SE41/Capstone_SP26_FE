@@ -12,6 +12,7 @@ interface AdsTableProps {
 
 const statusStyles: Record<string, string> = {
   Active: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+  Scheduled: 'bg-blue-50 text-blue-600 border border-blue-100',
   Pending: 'bg-amber-50 text-amber-600 border border-amber-100',
   PendingApproval: 'bg-amber-50 text-amber-600 border border-amber-100',
   Rejected: 'bg-red-50 text-red-500 border border-red-100',
@@ -23,6 +24,7 @@ const statusStyles: Record<string, string> = {
 
 const statusLabels: Record<string, string> = {
   Active: 'Hoạt động',
+  Scheduled: 'Đã duyệt - Chờ chạy',
   Pending: 'Chờ duyệt',
   PendingApproval: 'Chờ xét duyệt',
   Rejected: 'Bị từ chối',
@@ -126,7 +128,7 @@ export default function AdsTable({ ads, poiNameMap = {}, onRefresh, onEdit }: Ad
                         {typeof ad.promotion.saveCount === 'number' && (
                           <div className="flex items-center gap-1 mt-1 text-[11px] font-bold text-sky-600 bg-sky-50 w-fit px-1.5 py-0.5 rounded-md border border-sky-100">
                             <Tag size={10} className="fill-sky-600" />
-                            {ad.promotion.saveCount} / {ad.promotion.limitSaveCount > 0 ? ad.promotion.limitSaveCount : '∞'}
+                            {ad.promotion.saveCount} / {(ad.promotion.limitSaveCount ?? 0) > 0 ? ad.promotion.limitSaveCount : '∞'}
                           </div>
                         )}
                       </div>
