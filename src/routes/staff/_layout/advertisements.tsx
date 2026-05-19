@@ -16,6 +16,7 @@ import {
   getManagerPendingPOIs,
   getStaffPOIs,
   rejectManagerPendingPOI,
+  getStaffPOIById,
   type StaffPOI,
 } from "../../../services/poiService"
 
@@ -59,6 +60,25 @@ function AdvertisementsPage() {
   const [selectedAdDetail, setSelectedAdDetail] = useState<AdvertisementDetail | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [fetchingDetail, setFetchingDetail] = useState(false)
+
+  const [selectedPoiDetail, setSelectedPoiDetail] = useState<StaffPOI | null>(null)
+  const [isPoiDetailModalOpen, setIsPoiDetailModalOpen] = useState(false)
+  const [fetchingPoiDetail, setFetchingPoiDetail] = useState(false)
+
+  const handleShowPoiDetail = async (id: string) => {
+    setFetchingPoiDetail(true)
+    try {
+      const detail = await getStaffPOIById(id)
+      if (detail) {
+        setSelectedPoiDetail(detail)
+        setIsPoiDetailModalOpen(true)
+      }
+    } catch (error) {
+      console.error("Fetch POI detail error", error)
+    } finally {
+      setFetchingPoiDetail(false)
+    }
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -448,8 +468,19 @@ function AdvertisementsPage() {
                         <td className="px-6 py-4">
                           <div className="flex justify-end pr-2 gap-2">
                             <button
+                              onClick={() => void handleShowPoiDetail(poi.Id)}
+                              disabled={fetchingPoiDetail}
+                              className="group relative flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm"
+                            >
+                              <Eye size={16} />
+                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-[90]">
+                                Xem chi tiết
+                                <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                              </span>
+                            </button>
+                            <button
                               onClick={() => void handleApprovePendingPoi(poi.Id)}
-                              className="group relative flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors"
+                              className="group relative flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors shadow-sm"
                             >
                               <Check size={16} />
                               <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-[90]">
@@ -459,7 +490,7 @@ function AdvertisementsPage() {
                             </button>
                             <button
                               onClick={() => void handleRejectPendingPoi(poi.Id)}
-                              className="group relative flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors"
+                              className="group relative flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors shadow-sm"
                             >
                               <X size={16} />
                               <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-[90]">
@@ -658,6 +689,150 @@ function AdvertisementsPage() {
                   </button>
                 </>
               )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    {/* POI Detail Modal */}
+    <AnimatePresence>
+      {isPoiDetailModalOpen && selectedPoiDetail && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm"
+          onClick={() => setIsPoiDetailModalOpen(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 className="text-xl font-bold text-slate-800">Chi tiết POI chờ duyệt</h3>
+              <button
+                onClick={() => setIsPoiDetailModalOpen(false)}
+                className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left side: Image */}
+                <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 h-[280px]">
+                  {selectedPoiDetail.POIImgUrl ? (
+                    <img
+                      src={selectedPoiDetail.POIImgUrl}
+                      alt={selectedPoiDetail.Name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">
+                      Không có ảnh POI
+                    </div>
+                  )}
+                </div>
+
+                {/* Right side: Core Info */}
+                <dl className="grid grid-cols-1 gap-y-3">
+                  <div className="border-b border-slate-100 pb-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500">Tên POI</dt>
+                    <dd className="mt-1 text-sm font-semibold text-slate-900">{selectedPoiDetail.Name || "—"}</dd>
+                  </div>
+                  <div className="border-b border-slate-100 pb-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500">Địa chỉ</dt>
+                    <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.Address || "—"}</dd>
+                  </div>
+                  <div className="border-b border-slate-100 pb-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500">Thành phố / Khu vực</dt>
+                    <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.LocationName || "—"}</dd>
+                  </div>
+                  <div className="border-b border-slate-100 pb-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500">Google Maps</dt>
+                    <dd className="mt-1 text-sm text-slate-800 truncate" title={selectedPoiDetail.GoogleMapLink}>
+                      {selectedPoiDetail.GoogleMapLink ? (
+                        <a
+                          href={selectedPoiDetail.GoogleMapLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-emerald-600 hover:text-emerald-700 hover:underline inline-flex items-center gap-1 font-medium"
+                        >
+                          Xem trên bản đồ <ExternalLink size={12} />
+                        </a>
+                      ) : "—"}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+
+              {/* Grid 2 Column for extra info */}
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                <div className="border-b border-slate-100 pb-2">
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Chi phí dự kiến</dt>
+                  <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.ApproxCost || "—"}</dd>
+                </div>
+                <div className="border-b border-slate-100 pb-2">
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Loại địa điểm</dt>
+                  <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.IsIndoor ? "Trong nhà (Indoor)" : "Ngoài trời (Outdoor)"}</dd>
+                </div>
+                <div className="border-b border-slate-100 pb-2">
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Giờ mở cửa</dt>
+                  <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.OpenHour || "—"}</dd>
+                </div>
+                <div className="border-b border-slate-100 pb-2">
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Giờ đóng cửa</dt>
+                  <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.CloseHour || "—"}</dd>
+                </div>
+                <div className="border-b border-slate-100 pb-2">
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Tọa độ (Latitude / Longitude)</dt>
+                  <dd className="mt-1 text-sm text-slate-800">
+                    {Number.isFinite(selectedPoiDetail.Latitude) ? selectedPoiDetail.Latitude.toFixed(6) : "—"}
+                    {" / "}
+                    {Number.isFinite(selectedPoiDetail.Longitude) ? selectedPoiDetail.Longitude.toFixed(6) : "—"}
+                  </dd>
+                </div>
+                <div className="border-b border-slate-100 pb-2">
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Đăng bởi đối tác</dt>
+                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoiDetail.PartnerName || selectedPoiDetail.PartnerId || "—"}</dd>
+                </div>
+              </dl>
+
+              {selectedPoiDetail.VisitRecommendation && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">
+                  <dt className="text-xs font-bold text-slate-500 uppercase tracking-wide">Gợi ý tham quan</dt>
+                  <dd className="text-sm text-slate-600 leading-relaxed">{selectedPoiDetail.VisitRecommendation}</dd>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50">
+              <button
+                onClick={() => {
+                  void handleRejectPendingPoi(selectedPoiDetail.Id);
+                  setIsPoiDetailModalOpen(false);
+                }}
+                className="px-6 py-2 rounded-xl text-sm font-bold bg-rose-50 border border-rose-100 text-rose-600 hover:bg-rose-100 transition-colors shadow-sm"
+              >
+                Từ chối
+              </button>
+              <button
+                onClick={() => {
+                  void handleApprovePendingPoi(selectedPoiDetail.Id);
+                  setIsPoiDetailModalOpen(false);
+                }}
+                className="px-6 py-2 rounded-xl text-sm font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200"
+              >
+                Phê duyệt ngay
+              </button>
             </div>
           </motion.div>
         </motion.div>

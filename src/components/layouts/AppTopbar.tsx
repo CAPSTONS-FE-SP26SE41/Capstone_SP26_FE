@@ -54,6 +54,7 @@ export default function AppTopbar({
 
   const getPageTitle = (path: string) => {
     // Staff
+    if (path.includes('/staff/partner-requests')) return 'Yêu cầu đối tác'
     if (path.includes('/staff/advertisements')) return 'Yêu cầu xét duyệt'
     if (path.includes('/staff/locations')) return 'Quản lý địa điểm'
     if (path.includes('/staff/pois')) return 'Quản lý POIs'

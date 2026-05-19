@@ -915,8 +915,8 @@ function StaffPOIsPage() {
                   <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.Status ?? "—"}</dd>
                 </div>
                 <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">PartnerId</dt>
-                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.PartnerId ?? "—"}</dd>
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Đối tác</dt>
+                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.PartnerName || selectedPoi.PartnerId || "—"}</dd>
                 </div>
                 <div className="border-b border-slate-100 pb-2">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Latitude / Longitude</dt>

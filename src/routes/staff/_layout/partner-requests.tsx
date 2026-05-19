@@ -139,31 +139,21 @@ function PartnerRequestsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-            Yêu cầu đối tác
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Xem xét hồ sơ, giấy phép và phê duyệt/từ chối các tài khoản đăng ký làm đối tác kinh doanh.
-          </p>
-        </div>
-        <button
-          onClick={() => void fetchRequests()}
-          className="inline-flex items-center justify-center h-10 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold transition-colors shadow-sm self-start lg:self-auto"
-        >
-          Làm mới
-        </button>
-      </div>
-
       {/* Main Content Card */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden mt-2">
         <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between flex-shrink-0">
-          <h2 className="text-lg font-semibold text-slate-800">Danh sách yêu cầu chờ duyệt</h2>
-          <span className="text-sm text-slate-500 font-medium bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">
-            {totalItems} Yêu cầu
-          </span>
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-semibold text-slate-800">Danh sách yêu cầu chờ duyệt</h2>
+            <span className="text-sm text-slate-500 font-medium bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">
+              {totalItems} Yêu cầu
+            </span>
+          </div>
+          <button
+            onClick={() => void fetchRequests()}
+            className="inline-flex items-center justify-center h-10 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold transition-colors shadow-sm"
+          >
+            Làm mới
+          </button>
         </div>
 
         {loading ? (

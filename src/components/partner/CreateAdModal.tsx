@@ -326,14 +326,17 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit, initialData }
                     </span>
                   </div>
                   <input 
-                    type="number" 
-                    min={0}
-                    value={newAdForm.limitSaveCount} 
-                    onChange={e => setNewAdForm({ ...newAdForm, limitSaveCount: parseInt(e.target.value) || 0 })} 
+                    type="text"
+                    inputMode="numeric"
+                    value={newAdForm.limitSaveCount === 0 ? '' : newAdForm.limitSaveCount} 
+                    onChange={e => {
+                      const val = e.target.value.replace(/[^0-9]/g, '')
+                      setNewAdForm({ ...newAdForm, limitSaveCount: val ? parseInt(val) : 0 })
+                    }} 
                     className="w-full px-5 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all font-bold" 
-                    placeholder="VD: 100 (0 là không giới hạn)" 
+                    placeholder="VD: 100 (để trống nếu không giới hạn)" 
                   />
-                  <p className="mt-1.5 text-[11px] text-slate-400 pl-1 italic">Nhập số lượng lượt lưu tối đa cho khuyến mãi này. Để 0 nếu không giới hạn.</p>
+                  <p className="mt-1.5 text-[11px] text-slate-400 pl-1 italic">Nhập số lượng lượt lưu tối đa cho khuyến mãi này. Để trống nếu không giới hạn.</p>
                 </div>
               </div>
             </div>

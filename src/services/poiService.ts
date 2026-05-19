@@ -31,6 +31,7 @@ export type StaffPOI = {
   // Các trường mới từ backend
   Status?: string | number
   PartnerId?: string
+  PartnerName?: string
   PoiPreferences?: string[]
 
   // Một số backend có thể trả thêm, nhưng không bắt buộc
@@ -190,6 +191,7 @@ function normalizeStaffPOI(p: any): StaffPOI {
     DistrictId: String(p?.DistrictId ?? p?.districtId ?? ""),
     Status: statusNormalized,
     PartnerId: partnerIdNormalized,
+    PartnerName: p?.PartnerName ?? p?.partnerName ?? undefined,
     PoiPreferences: poiPreferencesNormalized,
     LocationName: p?.LocationName ?? p?.locationName,
     OpeningHours: String(p?.OpeningHours ?? openingHours ?? ""),
