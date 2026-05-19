@@ -95,10 +95,10 @@ function StaffPOIsPage() {
     PartnerId: "",
   })
 
-  
+
   const [districts, setDistricts] = useState<District[]>([])
   const [loadingDistricts, setLoadingDistricts] = useState(false)
-  const [formErrors, setFormErrors] = useState<{districtId?: string}>({})
+  const [formErrors, setFormErrors] = useState<{ districtId?: string }>({})
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message })
@@ -317,7 +317,7 @@ function StaffPOIsPage() {
         if (showEditModal && editForm.DistrictId && !data.some(d => d.id === editForm.DistrictId)) {
           setEditForm(prev => ({ ...prev, DistrictId: "" }))
         }
-      } catch(e) {
+      } catch (e) {
         console.error("Failed to fetch districts", e)
       } finally {
         setLoadingDistricts(false)
@@ -572,10 +572,10 @@ function StaffPOIsPage() {
       setPois(
         editImageFile
           ? refreshedData.map((p) =>
-              p.Id === editingPoiId && p.POIImgUrl
-                ? { ...p, POIImgUrl: withCacheBust(p.POIImgUrl) }
-                : p
-            )
+            p.Id === editingPoiId && p.POIImgUrl
+              ? { ...p, POIImgUrl: withCacheBust(p.POIImgUrl) }
+              : p
+          )
           : refreshedData
       )
       setShowEditModal(false)
@@ -605,7 +605,7 @@ function StaffPOIsPage() {
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-      {/* Removed Title */}
+        {/* Removed Title */}
 
         <div className="w-full sm:w-auto flex flex-wrap items-center gap-2">
           <div className="relative w-full sm:w-[320px]">
@@ -633,11 +633,10 @@ function StaffPOIsPage() {
             <Plus size={16} />
             Tạo mới
           </button>
-          <label className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${
-            importing
-              ? "bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
-              : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
-          }`}>
+          <label className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${importing
+            ? "bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
+            : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
+            }`}>
             <Upload size={16} />
             {importing ? "Đang import..." : "Import Excel"}
             <input
@@ -718,11 +717,10 @@ function StaffPOIsPage() {
 
                         <td className="px-6 py-4">
                           <span
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
-                              p.IsIndoor
-                                ? "bg-emerald-100 text-emerald-800 border-emerald-200"
-                                : "bg-slate-100 text-slate-700 border-slate-200"
-                            }`}
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${p.IsIndoor
+                              ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                              : "bg-slate-100 text-slate-700 border-slate-200"
+                              }`}
                           >
                             {p.IsIndoor ? "Trong nhà" : "Ngoài trời"}
                           </span>
@@ -809,11 +807,10 @@ function StaffPOIsPage() {
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`h-10 w-10 rounded-xl border text-sm font-semibold transition-colors ${
-                      p === page
-                        ? "bg-emerald-600 border-emerald-600 text-white"
-                        : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
+                    className={`h-10 w-10 rounded-xl border text-sm font-semibold transition-colors ${p === page
+                      ? "bg-emerald-600 border-emerald-600 text-white"
+                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                      }`}
                   >
                     {p}
                   </button>
@@ -880,7 +877,7 @@ function StaffPOIsPage() {
                   </div>
                   <div className="border-b border-slate-100 pb-2">
                     <dt className="text-xs uppercase tracking-wide text-slate-500">Thành phố</dt>
-                    <dd className="mt-1 text-sm text-slate-800">{selectedPoi.City || "—"}</dd>
+                    <dd className="mt-1 text-sm text-slate-800">{selectedPoi.LocationId || "—"}</dd>
                   </div>
                   <div className="border-b border-slate-100 pb-2">
                     <dt className="text-xs uppercase tracking-wide text-slate-500">Google Maps</dt>
@@ -915,8 +912,8 @@ function StaffPOIsPage() {
                   <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.Status ?? "—"}</dd>
                 </div>
                 <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">Đối tác</dt>
-                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.PartnerName || selectedPoi.PartnerId || "—"}</dd>
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">PartnerId</dt>
+                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.PartnerId ?? "—"}</dd>
                 </div>
                 <div className="border-b border-slate-100 pb-2">
                   <dt className="text-xs uppercase tracking-wide text-slate-500">Latitude / Longitude</dt>
@@ -1106,13 +1103,12 @@ function StaffPOIsPage() {
                                 : [...prev.PoiPreferences, pref.id],
                             }))
                           }}
-                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                            isSelected
-                              ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                              : isDisabled
-                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                                : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-600 hover:text-emerald-600'
-                          }`}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${isSelected
+                            ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                            : isDisabled
+                              ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-600 hover:text-emerald-600'
+                            }`}
                         >
                           {pref.name}
                         </button>
@@ -1349,11 +1345,10 @@ function StaffPOIsPage() {
                     return (
                       <label
                         key={opt.id}
-                        className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer ${
-                          isDisabled
-                            ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'
-                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                        }`}
+                        className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer ${isDisabled
+                          ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'
+                          : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                          }`}
                       >
                         <input
                           type="checkbox"
@@ -1455,11 +1450,10 @@ function StaffPOIsPage() {
 
       {toast ? (
         <div
-          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${
-            toast.type === "success"
-              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-              : "bg-rose-50 text-rose-700 border-rose-200"
-          }`}
+          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${toast.type === "success"
+            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+            : "bg-rose-50 text-rose-700 border-rose-200"
+            }`}
         >
           {toast.message}
         </div>
