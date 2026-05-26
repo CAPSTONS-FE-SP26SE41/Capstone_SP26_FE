@@ -3,6 +3,7 @@ import { X, Plus, Megaphone } from 'lucide-react';
 import { Ad } from '../../types/ad';
 import { getMyPartnerPOIs } from '../../services/partnerPoiService';
 import { CustomSelect } from '../ui/CustomSelect';
+import { useAlert } from '../ui/AlertContext';
 
 interface CreateAdModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface CreateAdModalProps {
 }
 
 export default function CreateAdModal({ isOpen, onClose, onSubmit, initialData }: CreateAdModalProps) {
+  const { showWarning } = useAlert();
   const [newAdForm, setNewAdForm] = useState({
     poiId: '',
     title: '',
@@ -94,7 +96,7 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit, initialData }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAdForm.poiId) {
-      alert("Vui lòng chọn Điểm tham quan (POI)!");
+      showWarning("Vui lòng chọn Điểm tham quan (POI)!");
       return;
     }
     onSubmit({

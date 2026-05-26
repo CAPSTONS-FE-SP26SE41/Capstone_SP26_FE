@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ImageIcon, MapPin, Calendar, Tag, Eye, X, ExternalLink, Clock, FileText, Play, Pause, Loader2, Edit3 } from 'lucide-react';
 import { Ad } from '../../types/ad';
 import { activateMyAdvertisement, inactivateMyAdvertisement } from '../../services/advertisementService';
+import { useAlert } from '../ui/AlertContext';
 
 interface AdsTableProps {
   ads: Ad[];
@@ -40,6 +41,7 @@ const isValidImageUrl = (url?: string) => {
 };
 
 export default function AdsTable({ ads, poiNameMap = {}, onRefresh, onEdit }: AdsTableProps) {
+  const { showError } = useAlert();
   const [detailAd, setDetailAd] = useState<Ad | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
@@ -54,7 +56,7 @@ export default function AdsTable({ ads, poiNameMap = {}, onRefresh, onEdit }: Ad
       if (onRefresh) onRefresh();
     } catch (error: any) {
       console.error("Error toggling ad status", error);
-      alert(error?.response?.data?.message || "Có lỗi xảy ra khi cập nhật trạng thái.");
+      showError(error?.response?.data?.message || "Có lỗi xảy ra khi cập nhật trạng thái.");
     } finally {
       setActionLoadingId(null);
     }

@@ -7,18 +7,21 @@ import {
   updatePartnerAvatar,
   type PartnerProfileData,
 } from '@/services/partnerProfileService'
+import { useAlert } from '@/components/ui/AlertContext'
 
 export const Route = createFileRoute('/partner/_layout/profile')({
   component: PartnerProfilePage,
 })
 
 function PartnerProfilePage() {
+  const { showSuccess, showError } = useAlert();
   const [profile, setProfile] = useState<PartnerProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   // Form state — chỉ chứa các trường doanh nghiệp
   const [formData, setFormData] = useState({
@@ -41,14 +44,14 @@ function PartnerProfilePage() {
         businessPhone: data.businessPhone || '',
         businessEmail: data.businessEmail || '',
       });
-      const avatar = data.businessAvatarUrl && data.businessAvatarUrl !== '' ? data.businessAvatarUrl : null;
+      const defaultAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.businessName || "Doanh nghiệp đối tác")}&background=FDBA74&color=7C2D12`;
+      const avatar = data.businessAvatarUrl && data.businessAvatarUrl !== '' ? data.businessAvatarUrl : defaultAvatarUrl;
       setPreviewUrl(avatar);
       
       // Đồng bộ thông tin lên Sidebar/Layout
       if (data.businessName) localStorage.setItem("user_name", data.businessName);
       
-      const syncAvatar = avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.businessName || "Doanh nghiệp đối tác")}&background=FDBA74&color=7C2D12`;
-      localStorage.setItem("user_avatar", syncAvatar);
+      localStorage.setItem("user_avatar", avatar);
     } catch (err: any) {
       console.error("Error fetching partner profile:", err);
       setError("Không thể tải thông tin hồ sơ doanh nghiệp.");
@@ -94,10 +97,10 @@ function PartnerProfilePage() {
       await fetchProfile(); // Refresh lại data
       setIsEditing(false);
       setSelectedFile(null);
-      alert('Cập nhật hồ sơ doanh nghiệp thành công!');
+      showSuccess('Cập nhật hồ sơ doanh nghiệp thành công!');
     } catch (err: any) {
       console.error("Error updating partner profile:", err);
-      alert('Có lỗi xảy ra khi cập nhật hồ sơ doanh nghiệp.');
+      showError('Có lỗi xảy ra khi cập nhật hồ sơ doanh nghiệp.');
     } finally {
       setIsSaving(false);
     }
@@ -111,7 +114,9 @@ function PartnerProfilePage() {
         businessPhone: profile.businessPhone || '',
         businessEmail: profile.businessEmail || '',
       });
-      setPreviewUrl(profile.businessAvatarUrl && profile.businessAvatarUrl !== '' ? profile.businessAvatarUrl : null);
+      const defaultAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.businessName || "Doanh nghiệp đối tác")}&background=FDBA74&color=7C2D12`;
+      const avatar = profile.businessAvatarUrl && profile.businessAvatarUrl !== '' ? profile.businessAvatarUrl : defaultAvatarUrl;
+      setPreviewUrl(avatar);
     }
     setIsEditing(false);
     setSelectedFile(null);

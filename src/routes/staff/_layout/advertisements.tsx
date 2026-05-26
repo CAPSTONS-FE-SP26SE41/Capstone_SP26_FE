@@ -46,11 +46,8 @@ export const Route = createFileRoute("/staff/_layout/advertisements")({
 function AdvertisementsPage() {
 
   const [activeTab, setActiveTab] = useState<"poi" | "advertisement">("poi")
-  const [ads, setAds] = useState<Advertisement[]>([])
   const [accounts, setAccounts] = useState<any[]>([])
-  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [loadingAds, setLoadingAds] = useState(false)
   const [loadingPendingPois, setLoadingPendingPois] = useState(false)
   const [poiMap, setPoiMap] = useState<Record<string, string>>({})
   const [pendingPois, setPendingPois] = useState<StaffPOI[]>([])
@@ -64,6 +61,39 @@ function AdvertisementsPage() {
   const [selectedPoiDetail, setSelectedPoiDetail] = useState<StaffPOI | null>(null)
   const [isPoiDetailModalOpen, setIsPoiDetailModalOpen] = useState(false)
   const [fetchingPoiDetail, setFetchingPoiDetail] = useState(false)
+
+  const [expandedAccountIds, setExpandedAccountIds] = useState<Record<string, boolean>>({})
+  const [partnerAds, setPartnerAds] = useState<Record<string, Advertisement[]>>({})
+  const [loadingAdsMap, setLoadingAdsMap] = useState<Record<string, boolean>>({})
+
+  const handleToggleExpand = async (accId: string) => {
+    const isNowExpanded = !expandedAccountIds[accId]
+    setExpandedAccountIds(prev => ({
+      ...prev,
+      [accId]: isNowExpanded
+    }))
+
+    if (isNowExpanded && !partnerAds[accId]) {
+      setLoadingAdsMap(prev => ({ ...prev, [accId]: true }))
+      try {
+        const data = await getManagerAccountAdvertisements(accId)
+        const adsData = data?.items || data
+        setPartnerAds(prev => ({
+          ...prev,
+          [accId]: Array.isArray(adsData) ? adsData : []
+        }))
+      } catch (error) {
+        console.error("Fetch account ads error", error)
+        setPartnerAds(prev => ({
+          ...prev,
+          [accId]: []
+        }))
+      } finally {
+        setLoadingAdsMap(prev => ({ ...prev, [accId]: false }))
+      }
+    }
+  }
+
 
   const handleShowPoiDetail = async (id: string) => {
     setFetchingPoiDetail(true)
@@ -109,27 +139,6 @@ function AdvertisementsPage() {
   }, [])
 
   useEffect(() => {
-    const fetchAds = async () => {
-      if (!selectedAccountId) {
-        setAds([])
-        return
-      }
-      setLoadingAds(true)
-      try {
-        const data = await getManagerAccountAdvertisements(selectedAccountId)
-        const adsData = data?.items || data
-        setAds(Array.isArray(adsData) ? adsData : [])
-      } catch (error) {
-        console.error("Fetch account ads error", error)
-        setAds([])
-      } finally {
-        setLoadingAds(false)
-      }
-    }
-    fetchAds()
-  }, [selectedAccountId])
-
-  useEffect(() => {
     const fetchPendingPois = async () => {
       setLoadingPendingPois(true)
       try {
@@ -151,19 +160,61 @@ function AdvertisementsPage() {
   }, [activeTab, pendingPoiPage, pendingPoiPageSize])
 
   const handleApprove = async (id: string) => {
-
     await approveAdvertisement(id)
+    let targetAccountId: string | null = null
+    setPartnerAds(prev => {
+      const next = { ...prev }
+      for (const accId in next) {
+        const found = next[accId].some(ad => ad.adId === id)
+        if (found) {
+          targetAccountId = accId
+          next[accId] = next[accId].filter(ad => ad.adId !== id)
+        }
+      }
+      return next
+    })
 
-    setAds(prev => prev.filter(ad => ad.adId !== id))
-
+    if (targetAccountId) {
+      setAccounts(prev => prev.map(acc => {
+        const accId = acc?.accountId || acc?.id
+        if (accId === targetAccountId && acc.pendingAdsCount !== undefined) {
+          return {
+            ...acc,
+            pendingAdsCount: Math.max(0, acc.pendingAdsCount - 1)
+          }
+        }
+        return acc
+      }))
+    }
   }
 
   const handleReject = async (id: string) => {
-
     await rejectAdvertisement(id)
+    let targetAccountId: string | null = null
+    setPartnerAds(prev => {
+      const next = { ...prev }
+      for (const accId in next) {
+        const found = next[accId].some(ad => ad.adId === id)
+        if (found) {
+          targetAccountId = accId
+          next[accId] = next[accId].filter(ad => ad.adId !== id)
+        }
+      }
+      return next
+    })
 
-    setAds(prev => prev.filter(ad => ad.adId !== id))
-
+    if (targetAccountId) {
+      setAccounts(prev => prev.map(acc => {
+        const accId = acc?.accountId || acc?.id
+        if (accId === targetAccountId && acc.pendingAdsCount !== undefined) {
+          return {
+            ...acc,
+            pendingAdsCount: Math.max(0, acc.pendingAdsCount - 1)
+          }
+        }
+        return acc
+      }))
+    }
   }
 
   const handleApprovePendingPoi = async (id: string) => {
@@ -246,7 +297,7 @@ function AdvertisementsPage() {
                       displayValue = `${namePart} ${countPart}`.trim()
                     }
 
-                    const isExpanded = selectedAccountId === accId
+                    const isExpanded = !!expandedAccountIds[accId]
 
                     return (
                       <li key={idx} className="flex flex-col border border-slate-200 rounded-xl overflow-hidden transition-all duration-200 hover:border-emerald-300 shadow-sm">
@@ -255,7 +306,7 @@ function AdvertisementsPage() {
                         <div
                           className={`flex justify-between items-center p-4 cursor-pointer transition-colors ${isExpanded ? 'bg-emerald-50' : 'bg-white hover:bg-slate-50'
                             }`}
-                          onClick={() => setSelectedAccountId(isExpanded ? null : accId)}
+                          onClick={() => handleToggleExpand(accId)}
                         >
                           <div className="flex flex-col">
                             <span className="font-semibold text-slate-800 text-base">{displayValue}</span>
@@ -280,11 +331,11 @@ function AdvertisementsPage() {
                         {isExpanded && (
                           <div className="border-t border-slate-200 bg-white">
 
-                            {loadingAds ? (
+                            {loadingAdsMap[accId] ? (
                               <div className="px-6 py-10 text-center text-slate-500">
                                 Đang tải quảng cáo...
                               </div>
-                            ) : ads.length > 0 ? (
+                            ) : (partnerAds[accId] || []).length > 0 ? (
 
                               <div className="overflow-x-auto overflow-y-visible">
                                 <table className="w-full text-left border-collapse table-fixed">
@@ -299,7 +350,7 @@ function AdvertisementsPage() {
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-slate-100">
-                                    {ads.map(ad => (
+                                    {(partnerAds[accId] || []).map(ad => (
                                       <tr key={ad.adId} className="hover:bg-slate-50/50">
 
                                         <td className="px-6 py-4">

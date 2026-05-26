@@ -1,7 +1,6 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-
 import appCss from '../styles.css?url'
+import { AlertProvider } from '../components/ui/AlertContext'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -55,7 +54,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <AlertProvider>
+          {children}
+        </AlertProvider>
 
         {/* <TanStackDevtools
           config={{
@@ -74,3 +75,4 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     </html>
   )
 }
+
