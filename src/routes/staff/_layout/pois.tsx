@@ -21,19 +21,6 @@ export const Route = createFileRoute("/staff/_layout/pois")({
   component: StaffPOIsPage,
 })
 
-const POI_PREFERENCES_OPTIONS: Array<{ id: string; name: string }> = [
-  { id: "4b16bf5c-c699-4a61-880f-98460a2d4daa", name: "Adventure" },
-  { id: "4eb0fdb5-105d-40bd-9f5e-2df53b8ad9db", name: "Budget" },
-  { id: "37e3b490-ad00-432d-8e35-c3dbc019630f", name: "Culture" },
-  { id: "2c109efa-8ceb-4c56-b5b9-a1a2c82c91a1", name: "Food" },
-  { id: "b43e3fc0-234a-45f3-8e27-10124cee0ee8", name: "Indoor" },
-  { id: "9b9159e1-1b60-4a12-9607-1bcf02da3e50", name: "Luxury" },
-  { id: "ce454660-2991-42ea-800c-b6853da8ba2c", name: "Nature" },
-  { id: "b41066e4-7857-4a3d-b92d-b7c2aa113334", name: "Nightlife" },
-  { id: "7bb12f2c-567d-4bc2-a715-037b7a195dc1", name: "Outdoor" },
-  { id: "2cc0a43b-4d97-4d3d-8a3d-02af16d8999d", name: "Relax" },
-  { id: "ab4509fd-4b2c-4705-bed3-afed9f51af78", name: "Shopping" },
-]
 
 const MAX_PREFERENCES = 4
 
@@ -375,9 +362,9 @@ function StaffPOIsPage() {
           .map((v) => String(v ?? "").trim())
           .filter(Boolean)
           .map((v) => {
-            const byId = POI_PREFERENCES_OPTIONS.find((o) => o.id === v)
+            const byId = preferencesList.find((o) => o.id === v)
             if (byId) return byId
-            const byName = POI_PREFERENCES_OPTIONS.find(
+            const byName = preferencesList.find(
               (o) => o.name.toLowerCase() === v.toLowerCase()
             )
             if (byName) return byName
@@ -832,9 +819,9 @@ function StaffPOIsPage() {
       </div>
 
       {selectedPoi ? (
-        <div className="fixed inset-0 z-50 bg-black/40 p-4 flex items-center justify-center">
-          <div className="w-full max-w-3xl rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 bg-black/40 p-0 md:p-4 flex items-center justify-center">
+          <div className="w-full h-full md:h-[90vh] md:max-w-6xl rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden flex flex-col">
+            <div className="flex-shrink-0 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-slate-900">
                 Chi tiết POI
               </h3>
@@ -846,93 +833,143 @@ function StaffPOIsPage() {
               </button>
             </div>
 
-            <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50">
-                  {selectedPoi.POIImgUrl ? (
-                    <img
-                      src={selectedPoi.POIImgUrl}
-                      alt={selectedPoi.Name}
-                      className="w-full h-[280px] object-cover"
-                    />
-                  ) : (
-                    <div className="h-[280px] flex items-center justify-center text-slate-400 text-sm">
-                      Không có ảnh POI
-                    </div>
-                  )}
-                </div>
+            <div className="flex-1 min-h-0 p-6 flex flex-col md:grid md:grid-cols-2 md:gap-x-8 overflow-y-auto md:overflow-hidden relative">
+              {/* Cột trái */}
+              <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4">
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="border-b border-slate-100 pb-2 sm:col-span-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Tên POI</dt>
+                    <dd className="mt-1 text-base font-bold text-slate-900">{selectedPoi.Name || "—"}</dd>
+                  </div>
+                  
+                  <div className="border-b border-slate-100 pb-2 sm:col-span-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Địa chỉ</dt>
+                    <dd className="mt-1 text-sm text-slate-800 font-medium">{selectedPoi.Address || "—"}</dd>
+                  </div>
 
-                <dl className="grid grid-cols-1 gap-y-3">
                   <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500">Tên</dt>
-                    <dd className="mt-1 text-sm font-semibold text-slate-900">{selectedPoi.Name || "—"}</dd>
+                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Chi phí gần đúng</dt>
+                    <dd className="mt-1 text-sm text-slate-800 font-medium">{selectedPoi.ApproxCost || "—"}</dd>
                   </div>
+
                   <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500">Mã ID</dt>
-                    <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.Id || "—"}</dd>
+                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Trong nhà</dt>
+                    <dd className="mt-1 text-sm text-slate-800 font-medium">{selectedPoi.IsIndoor ? "Trong nhà" : "Ngoài trời / Khác"}</dd>
                   </div>
+
                   <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500">Địa chỉ</dt>
-                    <dd className="mt-1 text-sm text-slate-800">{selectedPoi.Address || "—"}</dd>
+                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Giờ mở cửa</dt>
+                    <dd className="mt-1 text-sm text-slate-800 font-medium">{selectedPoi.OpenHour || "—"}</dd>
                   </div>
+
                   <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500">Thành phố</dt>
-                    <dd className="mt-1 text-sm text-slate-800">{selectedPoi.LocationId || "—"}</dd>
+                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Giờ đóng cửa</dt>
+                    <dd className="mt-1 text-sm text-slate-800 font-medium">{selectedPoi.CloseHour || "—"}</dd>
                   </div>
+
+                  <div className="border-b border-slate-100 pb-2 sm:col-span-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Google Maps</dt>
+                    <dd className="mt-1 text-sm text-emerald-600 break-all font-medium">
+                      {selectedPoi.GoogleMapLink ? (
+                        <a href={selectedPoi.GoogleMapLink} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                          {selectedPoi.GoogleMapLink}
+                        </a>
+                      ) : "—"}
+                    </dd>
+                  </div>
+
                   <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500">Google Maps</dt>
-                    <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.GoogleMapLink || "—"}</dd>
+                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Trạng thái</dt>
+                    <dd className="mt-1 text-sm text-emerald-600 font-bold">Đang hoạt động</dd>
+                  </div>
+
+                  {selectedPoi.PartnerName ? (
+                    <div className="border-b border-slate-100 pb-2">
+                      <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Đối tác</dt>
+                      <dd className="mt-1 text-sm text-slate-800 font-medium">{selectedPoi.PartnerName}</dd>
+                    </div>
+                  ) : null}
+
+                  <div className="border-b border-slate-100 pb-2 sm:col-span-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Latitude / Longitude</dt>
+                    <dd className="mt-1 text-sm text-slate-800 font-medium">
+                      {Number.isFinite(selectedPoi.Latitude) ? selectedPoi.Latitude.toFixed(6) : "—"}
+                      {" / "}
+                      {Number.isFinite(selectedPoi.Longitude) ? selectedPoi.Longitude.toFixed(6) : "—"}
+                    </dd>
                   </div>
                 </dl>
               </div>
 
-              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">Chi phí</dt>
-                  <dd className="mt-1 text-sm text-slate-800">{selectedPoi.ApproxCost || "—"}</dd>
+              {/* Cột phải */}
+              <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col h-full">
+                {/* Hình ảnh */}
+                <div className="space-y-2">
+                  <span className="text-sm text-slate-700 font-semibold block">Hình ảnh</span>
+                  <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 h-48 sm:h-64">
+                    {selectedPoi.POIImgUrl ? (
+                      <img
+                        src={selectedPoi.POIImgUrl}
+                        alt={selectedPoi.Name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-slate-400 text-sm">
+                        Không có ảnh POI
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">Trong nhà</dt>
-                  <dd className="mt-1 text-sm text-slate-800">{selectedPoi.IsIndoor ? "Có" : "Không"}</dd>
+
+                {/* Nhãn Preferences */}
+                <div className="space-y-2">
+                  <span className="text-sm text-slate-700 font-semibold block">Nhãn (Preferences)</span>
+                  {selectedPoi.PoiPreferences && selectedPoi.PoiPreferences.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedPoi.PoiPreferences.map((pref, i) => (
+                        <span
+                          key={i}
+                          className="px-2.5 py-1 rounded-full text-xs font-semibold border border-emerald-600 bg-emerald-50 text-emerald-700"
+                        >
+                          {pref}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 font-medium">Không có nhãn</p>
+                  )}
                 </div>
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">Mở cửa</dt>
-                  <dd className="mt-1 text-sm text-slate-800">{selectedPoi.OpenHour || "—"}</dd>
+
+                {/* Gợi ý tham quan */}
+                <div className="flex flex-col flex-1 min-h-[120px]">
+                  <span className="text-sm text-slate-700 font-semibold block mb-1.5">
+                    Gợi ý tham quan (VisitRecommendation)
+                  </span>
+                  <div className="flex-1 min-h-[80px] md:min-h-0 w-full p-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-700 text-sm overflow-y-auto font-medium leading-relaxed">
+                    {selectedPoi.VisitRecommendation || "Không có gợi ý tham quan."}
+                  </div>
                 </div>
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">Đóng cửa</dt>
-                  <dd className="mt-1 text-sm text-slate-800">{selectedPoi.CloseHour || "—"}</dd>
-                </div>
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">LocationId</dt>
-                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.LocationId || "—"}</dd>
-                </div>
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">Status</dt>
-                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.Status ?? "—"}</dd>
-                </div>
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">PartnerId</dt>
-                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoi.PartnerId ?? "—"}</dd>
-                </div>
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">Latitude / Longitude</dt>
-                  <dd className="mt-1 text-sm text-slate-800">
-                    {Number.isFinite(selectedPoi.Latitude) ? selectedPoi.Latitude.toFixed(6) : "—"}
-                    {" / "}
-                    {Number.isFinite(selectedPoi.Longitude) ? selectedPoi.Longitude.toFixed(6) : "—"}
-                  </dd>
-                </div>
-              </dl>
+              </div>
+
+              {/* Actions Footer */}
+              <div className="col-span-2 flex-shrink-0 bg-white border-t border-slate-200 pt-4 mt-6 flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={() => setSelectedPoi(null)}
+                  className="h-10 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors"
+                >
+                  Đóng
+                </button>
+              </div>
             </div>
           </div>
         </div>
       ) : null}
 
       {showCreateModal ? (
-        <div className="fixed inset-0 z-50 bg-black/40 p-4 flex items-center justify-center">
-          <div className="w-full max-w-2xl rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 bg-black/40 p-0 md:p-4 flex items-center justify-center">
+          <div className="w-full h-full md:h-[90vh] md:max-w-6xl rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden flex flex-col">
+            <div className="flex-shrink-0 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-slate-900">
                 Tạo mới POI
               </h3>
@@ -949,228 +986,258 @@ function StaffPOIsPage() {
 
             <form
               onSubmit={handleCreateSubmit}
-              className="p-6 max-h-[75vh] overflow-y-auto space-y-4"
+              className="flex-1 min-h-0 p-6 flex flex-col md:grid md:grid-cols-2 md:gap-x-8 overflow-y-auto md:overflow-hidden relative"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <label className="text-sm text-slate-700">
-                  Tên
-                  <input
-                    value={createForm.Name}
-                    onChange={(e) =>
-                      setCreateForm((prev) => ({ ...prev, Name: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    placeholder="Name"
-                    required
-                  />
-                </label>
+              {/* Cột trái */}
+              <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Tên <span className="text-red-400">*</span>
+                    <input
+                      value={createForm.Name}
+                      onChange={(e) =>
+                        setCreateForm((prev) => ({ ...prev, Name: e.target.value }))
+                      }
+                      className="mt-1.5 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700"
+                      placeholder="Nhập tên"
+                      required
+                    />
+                  </label>
 
-                <label className="text-sm text-slate-700">
-                  Địa chỉ
-                  <input
-                    value={createForm.Address}
-                    onChange={(e) =>
-                      setCreateForm((prev) => ({ ...prev, Address: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    placeholder="Address"
-                  />
-                </label>
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Địa chỉ <span className="text-red-400">*</span>
+                    <input
+                      value={createForm.Address}
+                      onChange={(e) =>
+                        setCreateForm((prev) => ({ ...prev, Address: e.target.value }))
+                      }
+                      className="mt-1.5 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700"
+                      placeholder="Nhập địa chỉ"
+                      required
+                    />
+                  </label>
 
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Thành phố (City) <span className="text-red-400">*</span>
+                    <div className="mt-1.5">
+                      <CustomSelect
+                        value={createForm.LocationId}
+                        onChange={(val: string) => {
+                          const selName = mergedLocationOptions.find(l => l.Id === val)?.Name || "";
+                          setCreateForm((prev) => ({
+                            ...prev,
+                            LocationId: val,
+                            City: selName,
+                            DistrictId: ""
+                          }))
+                        }}
+                        options={mergedLocationOptions.map(l => ({ value: l.Id, label: l.Name || l.Id }))}
+                        placeholder={loadingLocations ? "Đang tải..." : "-- Chọn Thành phố --"}
+                      />
+                    </div>
+                  </label>
 
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Quận huyện (District) <span className="text-red-400">*</span>
+                    <div className="mt-1.5">
+                      <CustomSelect
+                        value={createForm.DistrictId}
+                        onChange={(val: string) => {
+                          setCreateForm((prev) => ({
+                            ...prev,
+                            DistrictId: val,
+                          }))
+                          setFormErrors({})
+                        }}
+                        options={districts.map(d => ({ value: d.id, label: d.name }))}
+                        placeholder={loadingDistricts ? "Đang tải..." : (!createForm.LocationId ? "-- Chọn City trước --" : (districts.length === 0 ? "City này chưa có district" : "-- Chọn District --"))}
+                        disabled={!createForm.LocationId || loadingDistricts}
+                        error={!!formErrors.districtId}
+                      />
+                    </div>
+                    {formErrors.districtId && <p className="text-red-500 text-xs mt-1">{formErrors.districtId}</p>}
+                  </label>
 
-                <label className="text-sm text-slate-700">
-                  Chi phí gần đúng
-                  <input
-                    value={createForm.ApproxCost}
-                    onChange={(e) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        ApproxCost: e.target.value,
-                      }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    placeholder="ApproxCost"
-                  />
-                </label>
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Chi phí gần đúng
+                    <input
+                      value={createForm.ApproxCost}
+                      onChange={(e) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          ApproxCost: e.target.value,
+                        }))
+                      }
+                      className="mt-1.5 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700"
+                      placeholder="VD: 50.000 - 100.000 VND"
+                    />
+                  </label>
 
-                <label className="text-sm text-slate-700">
-                  Giờ mở cửa
-                  <input
-                    type="time"
-                    value={createForm.OpenHour}
-                    onChange={(e) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        OpenHour: e.target.value,
-                      }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    placeholder="OpenHour"
-                  />
-                </label>
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Google map link
+                    <input
+                      value={createForm.GoogleMapLink}
+                      onChange={(e) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          GoogleMapLink: e.target.value,
+                        }))
+                      }
+                      className="mt-1.5 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700"
+                      placeholder="https://maps.google.com/..."
+                    />
+                  </label>
 
-                <label className="text-sm text-slate-700">
-                  Giờ đóng cửa
-                  <input
-                    type="time"
-                    value={createForm.CloseHour}
-                    onChange={(e) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        CloseHour: e.target.value,
-                      }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    placeholder="CloseHour"
-                  />
-                </label>
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Giờ mở cửa
+                    <input
+                      type="time"
+                      value={createForm.OpenHour}
+                      onChange={(e) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          OpenHour: e.target.value,
+                        }))
+                      }
+                      className="mt-1.5 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700"
+                    />
+                  </label>
 
-                <label className="text-sm text-slate-700">
-                  Google map link
-                  <input
-                    value={createForm.GoogleMapLink}
-                    onChange={(e) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        GoogleMapLink: e.target.value,
-                      }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    placeholder="GoogleMapLink"
-                  />
-                </label>
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Giờ đóng cửa
+                    <input
+                      type="time"
+                      value={createForm.CloseHour}
+                      onChange={(e) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          CloseHour: e.target.value,
+                        }))
+                      }
+                      className="mt-1.5 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700"
+                    />
+                  </label>
+                </div>
 
-                <label className="text-sm text-slate-700">
-                  Thành phố (City)
-                  <CustomSelect
-                    value={createForm.LocationId}
-                    onChange={(val: string) => {
-                      const selName = mergedLocationOptions.find(l => l.Id === val)?.Name || "";
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        LocationId: val,
-                        City: selName,
-                        DistrictId: ""
-                      }))
-                    }}
-                    options={mergedLocationOptions.map(l => ({ value: l.Id, label: l.Name || l.Id }))}
-                    placeholder={loadingLocations ? "Đang tải..." : "-- Chọn Thành phố --"}
-                  />
-                </label>
-
-                <label className="text-sm text-slate-700">
-                  Quận huyện (District)
-                  <CustomSelect
-                    value={createForm.DistrictId}
-                    onChange={(val: string) => {
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        DistrictId: val,
-                      }))
-                      setFormErrors({})
-                    }}
-                    options={districts.map(d => ({ value: d.id, label: d.name }))}
-                    placeholder={loadingDistricts ? "Đang tải..." : (!createForm.LocationId ? "-- Chọn City trước --" : (districts.length === 0 ? "City này chưa có district" : "-- Chọn District --"))}
-                    disabled={!createForm.LocationId || loadingDistricts}
-                    error={!!formErrors.districtId}
-                  />
-                  {formErrors.districtId && <p className="text-red-500 text-xs mt-1">{formErrors.districtId}</p>}
-                </label>
+                <div className="pt-2">
+                  <label className="inline-flex items-center gap-2 text-sm text-slate-700 font-semibold cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={createForm.IsIndoor}
+                      onChange={(e) =>
+                        setCreateForm((prev) => ({ ...prev, IsIndoor: e.target.checked }))
+                      }
+                      className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
+                    />
+                    Trong nhà
+                  </label>
+                </div>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-sm text-slate-700 block">Nhãn (Preferences)</label>
-                {loadingPreferences ? (
-                  <p className="text-sm text-slate-500">Đang tải...</p>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {preferencesList.map((pref) => {
-                      const isSelected = createForm.PoiPreferences.includes(pref.id)
-                      const canSelectMore = createForm.PoiPreferences.length < MAX_PREFERENCES
-                      const isDisabled = !isSelected && !canSelectMore
-                      return (
-                        <button
-                          type="button"
-                          key={pref.id}
-                          disabled={isDisabled}
-                          onClick={() => {
-                            if (isDisabled) return
-                            setCreateForm((prev) => ({
-                              ...prev,
-                              PoiPreferences: isSelected
-                                ? prev.PoiPreferences.filter((p) => p !== pref.id)
-                                : [...prev.PoiPreferences, pref.id],
-                            }))
-                          }}
-                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${isSelected
-                            ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                            : isDisabled
-                              ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                              : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-600 hover:text-emerald-600'
-                            }`}
-                        >
-                          {pref.name}
-                        </button>
-                      )
-                    })}
+              {/* Cột phải */}
+              <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col h-full">
+                {/* Hình ảnh */}
+                <div className="space-y-2">
+                  <span className="text-sm text-slate-700 font-semibold block">Hình ảnh</span>
+                  <div className="flex items-center gap-3">
+                    <label className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 cursor-pointer hover:bg-slate-100 transition-all font-semibold">
+                      <Upload size={16} />
+                      Chọn ảnh
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null
+                          setCreateImageFile(file)
+                        }}
+                      />
+                    </label>
+                    {createImageFile && (
+                      <span className="text-xs text-slate-500 truncate max-w-[200px] bg-slate-50 border border-slate-100 px-2 py-1 rounded-lg">
+                        {createImageFile.name}
+                      </span>
+                    )}
                   </div>
-                )}
+                </div>
+
+                {/* Nhãn Preferences */}
+                <div className="space-y-2">
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Nhãn (Preferences) <span className="text-slate-400 font-normal">(tối đa {MAX_PREFERENCES})</span>
+                  </label>
+                  {loadingPreferences ? (
+                    <p className="text-sm text-slate-500">Đang tải...</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      {preferencesList.map((pref) => {
+                        const isSelected = createForm.PoiPreferences.includes(pref.id)
+                        const canSelectMore = createForm.PoiPreferences.length < MAX_PREFERENCES
+                        const isDisabled = !isSelected && !canSelectMore
+                        return (
+                          <button
+                            type="button"
+                            key={pref.id}
+                            disabled={isDisabled}
+                            onClick={() => {
+                              if (isDisabled) return
+                              setCreateForm((prev) => ({
+                                ...prev,
+                                PoiPreferences: isSelected
+                                  ? prev.PoiPreferences.filter((p) => p !== pref.id)
+                                  : [...prev.PoiPreferences, pref.id],
+                              }))
+                            }}
+                            className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${isSelected
+                              ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                              : isDisabled
+                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-600 hover:text-emerald-600'
+                              }`}
+                          >
+                            {pref.name}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Gợi ý tham quan */}
+                <div className="flex flex-col flex-1 min-h-[120px]">
+                  <label className="text-sm text-slate-700 font-semibold block mb-1.5">
+                    Gợi ý tham quan (VisitRecommendation)
+                  </label>
+                  <textarea
+                    value={createForm.VisitRecommendation}
+                    onChange={(e) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        VisitRecommendation: e.target.value,
+                      }))
+                    }
+                    className="flex-1 min-h-[80px] md:min-h-0 w-full p-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700 resize-none"
+                    placeholder="VD: Nên đi vào buổi sáng để ngắm cảnh đẹp nhất..."
+                  />
+                </div>
               </div>
 
-              <label className="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={createForm.IsIndoor}
-                  onChange={(e) =>
-                    setCreateForm((prev) => ({ ...prev, IsIndoor: e.target.checked }))
-                  }
-                  className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
-                />
-                Trong nhà
-              </label>
-
-              <div className="space-y-2">
-                <label className="text-sm text-slate-700 block">
-                  POIImgUrl
-                  <input
-                    value={createImageFile?.name ?? createForm.POIImgUrl}
-                    readOnly
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 outline-none"
-                    placeholder="Chọn file ảnh"
-                  />
-                </label>
-
-                <label className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 cursor-pointer hover:bg-slate-100">
-                  <Upload size={16} />
-                  Chọn ảnh
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0] ?? null
-                      setCreateImageFile(file)
-                    }}
-                  />
-                </label>
-              </div>
-
-              <div className="pt-2 flex items-center justify-end gap-2">
+              {/* Actions Footer */}
+              <div className="col-span-2 flex-shrink-0 bg-white border-t border-slate-200 pt-4 mt-6 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => {
                     setShowCreateModal(false)
                     resetCreateForm()
                   }}
-                  className="h-10 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50"
+                  className="h-10 px-6 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors font-semibold"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={creating}
-                  className="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold disabled:opacity-60"
+                  className="h-10 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold disabled:opacity-60 transition-colors"
                 >
                   {creating ? "Đang tạo..." : "Tạo mới"}
                 </button>
@@ -1181,9 +1248,9 @@ function StaffPOIsPage() {
       ) : null}
 
       {showEditModal ? (
-        <div className="fixed inset-0 z-50 bg-black/40 p-4 flex items-center justify-center">
-          <div className="w-full max-w-2xl rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 bg-black/40 p-0 md:p-4 flex items-center justify-center">
+          <div className="w-full h-full md:h-[90vh] md:max-w-6xl rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden flex flex-col">
+            <div className="flex-shrink-0 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-slate-900">
                 Chỉnh sửa POI
               </h3>
@@ -1200,89 +1267,232 @@ function StaffPOIsPage() {
 
             <form
               onSubmit={handleEditSubmit}
-              className="p-6 max-h-[75vh] overflow-y-auto space-y-4"
+              className="flex-1 min-h-0 p-6 flex flex-col md:grid md:grid-cols-2 md:gap-x-8 overflow-y-auto md:overflow-hidden relative"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <label className="text-sm text-slate-700">
-                  Tên
-                  <input
-                    value={editForm.Name}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, Name: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    required
-                  />
-                </label>
+              {/* Cột trái */}
+              <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Tên <span className="text-red-400">*</span>
+                    <input
+                      value={editForm.Name}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({ ...prev, Name: e.target.value }))
+                      }
+                      className="mt-1.5 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700"
+                      required
+                    />
+                  </label>
 
-                <label className="text-sm text-slate-700">
-                  Địa chỉ
-                  <input
-                    value={editForm.Address}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, Address: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                  />
-                </label>
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Địa chỉ <span className="text-red-400">*</span>
+                    <input
+                      value={editForm.Address}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({ ...prev, Address: e.target.value }))
+                      }
+                      className="mt-1.5 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700"
+                    />
+                  </label>
 
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Thành phố (City) <span className="text-red-400">*</span>
+                    <div className="mt-1.5">
+                      <CustomSelect
+                        value={editForm.LocationId}
+                        onChange={(val: string) => {
+                          const selName = mergedLocationOptions.find(l => l.Id === val)?.Name || "";
+                          setEditForm((prev) => ({
+                            ...prev,
+                            LocationId: val,
+                            City: selName,
+                            DistrictId: ""
+                          }))
+                        }}
+                        options={mergedLocationOptions.map(l => ({ value: l.Id, label: l.Name || l.Id }))}
+                        placeholder={loadingLocations ? "Đang tải..." : "-- Chọn Thành phố --"}
+                      />
+                    </div>
+                  </label>
 
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Quận huyện (District) <span className="text-red-400">*</span>
+                    <div className="mt-1.5">
+                      <CustomSelect
+                        value={editForm.DistrictId}
+                        onChange={(val: string) => {
+                          setEditForm((prev) => ({
+                            ...prev,
+                            DistrictId: val,
+                          }))
+                          setFormErrors({})
+                        }}
+                        options={districts.map(d => ({ value: d.id, label: d.name }))}
+                        placeholder={loadingDistricts ? "Đang tải..." : (!editForm.LocationId ? "-- Chọn City trước --" : (districts.length === 0 ? "City này chưa có district" : "-- Chọn District --"))}
+                        disabled={!editForm.LocationId || loadingDistricts}
+                        error={!!formErrors.districtId}
+                      />
+                    </div>
+                    {formErrors.districtId && <p className="text-red-500 text-xs mt-1">{formErrors.districtId}</p>}
+                  </label>
 
-                <label className="text-sm text-slate-700">
-                  Chi phí gần đúng
-                  <input
-                    value={editForm.ApproxCost}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({
-                        ...prev,
-                        ApproxCost: e.target.value,
-                      }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                  />
-                </label>
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Chi phí gần đúng
+                    <input
+                      value={editForm.ApproxCost}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({
+                          ...prev,
+                          ApproxCost: e.target.value,
+                        }))
+                      }
+                      className="mt-1.5 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700"
+                    />
+                  </label>
 
-                <label className="text-sm text-slate-700">
-                  Giờ mở cửa
-                  <input
-                    type="time"
-                    value={editForm.OpenHour}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, OpenHour: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                  />
-                </label>
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Google map link
+                    <input
+                      value={editForm.GoogleMapLink}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({
+                          ...prev,
+                          GoogleMapLink: e.target.value,
+                        }))
+                      }
+                      className="mt-1.5 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700"
+                    />
+                  </label>
 
-                <label className="text-sm text-slate-700">
-                  Giờ đóng cửa
-                  <input
-                    type="time"
-                    value={editForm.CloseHour}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, CloseHour: e.target.value }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                  />
-                </label>
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Giờ mở cửa
+                    <input
+                      type="time"
+                      value={editForm.OpenHour}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({ ...prev, OpenHour: e.target.value }))
+                      }
+                      className="mt-1.5 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700"
+                    />
+                  </label>
 
-                <label className="text-sm text-slate-700">
-                  Google map link
-                  <input
-                    value={editForm.GoogleMapLink}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({
-                        ...prev,
-                        GoogleMapLink: e.target.value,
-                      }))
-                    }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                  />
-                </label>
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Giờ đóng cửa
+                    <input
+                      type="time"
+                      value={editForm.CloseHour}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({ ...prev, CloseHour: e.target.value }))
+                      }
+                      className="mt-1.5 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700"
+                    />
+                  </label>
+                </div>
 
-                <label className="text-sm text-slate-700 sm:col-span-2">
-                  Gợi ý tham quan (VisitRecommendation)
-                  <input
+                <div className="pt-2">
+                  <label className="inline-flex items-center gap-2 text-sm text-slate-700 font-semibold cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editForm.IsIndoor}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({ ...prev, IsIndoor: e.target.checked }))
+                      }
+                      className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
+                    />
+                    Trong nhà
+                  </label>
+                </div>
+              </div>
+
+              {/* Cột phải */}
+              <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col h-full">
+                {/* Hình ảnh */}
+                <div className="space-y-2">
+                  <span className="text-sm text-slate-700 font-semibold block">Hình ảnh</span>
+                  <div className="flex items-center gap-3">
+                    <label className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 cursor-pointer hover:bg-slate-100 transition-all font-semibold">
+                      <Upload size={16} />
+                      Chọn ảnh mới
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          handleSelectEditImage(e.target.files?.[0] ?? null)
+                          e.currentTarget.value = ""
+                        }}
+                      />
+                    </label>
+                    {editImageFile && (
+                      <span className="text-xs text-slate-500 truncate max-w-[200px] bg-slate-50 border border-slate-100 px-2 py-1 rounded-lg">
+                        {editImageFile.name}
+                      </span>
+                    )}
+                  </div>
+                  {/* Image preview box */}
+                  <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 h-32">
+                    {editImagePreviewUrl ? (
+                      <img
+                        src={editImagePreviewUrl}
+                        alt={editForm.Name || "POI"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-slate-400 text-sm">
+                        Không có ảnh
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Nhãn Preferences */}
+                <div className="space-y-2">
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    PoiPreferences <span className="text-slate-400 font-normal">(tối đa {MAX_PREFERENCES})</span>
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    {preferencesList.map((opt) => {
+                      const checked = editForm.PoiPreferences.some((p) => p.id === opt.id)
+                      const canSelectMore = editForm.PoiPreferences.length < MAX_PREFERENCES
+                      const isDisabled = !checked && !canSelectMore
+                      return (
+                        <label
+                          key={opt.id}
+                          className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 text-xs cursor-pointer transition-all ${isDisabled
+                            ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'
+                            : checked
+                              ? 'border-emerald-600 bg-emerald-50 text-emerald-700 font-semibold'
+                              : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                            }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            disabled={isDisabled}
+                            onChange={(e) => {
+                              const nextChecked = e.target.checked
+                              setEditForm((prev) => {
+                                const next = nextChecked
+                                  ? [...prev.PoiPreferences, opt]
+                                  : prev.PoiPreferences.filter((p) => p.id !== opt.id)
+                                return { ...prev, PoiPreferences: next }
+                              })
+                            }}
+                            className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
+                          />
+                          <span className="truncate">{opt.name}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Gợi ý tham quan */}
+                <div className="flex flex-col flex-1 min-h-[120px]">
+                  <label className="text-sm text-slate-700 font-semibold block mb-1.5">
+                    Gợi ý tham quan (VisitRecommendation)
+                  </label>
+                  <textarea
                     value={editForm.VisitRecommendation}
                     onChange={(e) =>
                       setEditForm((prev) => ({
@@ -1290,155 +1500,28 @@ function StaffPOIsPage() {
                         VisitRecommendation: e.target.value,
                       }))
                     }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                    placeholder="VD: Nên đi buổi sáng / mùa khô..."
+                    className="flex-1 min-h-[80px] md:min-h-0 w-full p-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700 resize-none"
+                    placeholder="VD: Nên đi vào buổi sáng để ngắm cảnh đẹp nhất..."
                   />
-                </label>
-
-                <label className="text-sm text-slate-700">
-                  Thành phố (City)
-                  <CustomSelect
-                    value={editForm.LocationId}
-                    onChange={(val: string) => {
-                      const selName = mergedLocationOptions.find(l => l.Id === val)?.Name || "";
-                      setEditForm((prev) => ({
-                        ...prev,
-                        LocationId: val,
-                        City: selName,
-                        DistrictId: ""
-                      }))
-                    }}
-                    options={mergedLocationOptions.map(l => ({ value: l.Id, label: l.Name || l.Id }))}
-                    placeholder={loadingLocations ? "Đang tải..." : "-- Chọn Thành phố --"}
-                  />
-                </label>
-
-                <label className="text-sm text-slate-700">
-                  Quận huyện (District)
-                  <CustomSelect
-                    value={editForm.DistrictId}
-                    onChange={(val: string) => {
-                      setEditForm((prev) => ({
-                        ...prev,
-                        DistrictId: val,
-                      }))
-                      setFormErrors({})
-                    }}
-                    options={districts.map(d => ({ value: d.id, label: d.name }))}
-                    placeholder={loadingDistricts ? "Đang tải..." : (!editForm.LocationId ? "-- Chọn City trước --" : (districts.length === 0 ? "City này chưa có district" : "-- Chọn District --"))}
-                    disabled={!editForm.LocationId || loadingDistricts}
-                    error={!!formErrors.districtId}
-                  />
-                  {formErrors.districtId && <p className="text-red-500 text-xs mt-1">{formErrors.districtId}</p>}
-                </label>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-slate-700">
-                  PoiPreferences <span className="text-slate-400">(tối đa {MAX_PREFERENCES})</span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {POI_PREFERENCES_OPTIONS.map((opt) => {
-                    const checked = editForm.PoiPreferences.some((p) => p.id === opt.id)
-                    const canSelectMore = editForm.PoiPreferences.length < MAX_PREFERENCES
-                    const isDisabled = !checked && !canSelectMore
-                    return (
-                      <label
-                        key={opt.id}
-                        className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer ${isDisabled
-                          ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'
-                          : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                          }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          disabled={isDisabled}
-                          onChange={(e) => {
-                            const nextChecked = e.target.checked
-                            setEditForm((prev) => {
-                              const next = nextChecked
-                                ? [...prev.PoiPreferences, opt]
-                                : prev.PoiPreferences.filter((p) => p.id !== opt.id)
-                              return { ...prev, PoiPreferences: next }
-                            })
-                          }}
-                          className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
-                        />
-                        <span className="truncate">{opt.name}</span>
-                      </label>
-                    )
-                  })}
                 </div>
               </div>
 
-              <label className="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={editForm.IsIndoor}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({ ...prev, IsIndoor: e.target.checked }))
-                  }
-                  className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
-                />
-                Trong nhà
-              </label>
-
-              <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50">
-                {editImagePreviewUrl ? (
-                  <img
-                    src={editImagePreviewUrl}
-                    alt={editForm.Name || "POI"}
-                    className="w-full h-[220px] object-cover"
-                  />
-                ) : (
-                  <div className="h-[220px] flex items-center justify-center text-slate-400 text-sm">
-                    Không có ảnh
-                  </div>
-                )}
-              </div>
-
-              <label className="text-sm text-slate-700 block">
-                POIImgUrl
-                <input
-                  value={editImageFile?.name ?? editForm.POIImgUrl}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({ ...prev, POIImgUrl: e.target.value }))
-                  }
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300"
-                  placeholder="POIImgUrl"
-                />
-              </label>
-
-              <label className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 cursor-pointer hover:bg-slate-100">
-                <Upload size={16} />
-                Chọn ảnh mới
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    handleSelectEditImage(e.target.files?.[0] ?? null)
-                    e.currentTarget.value = ""
-                  }}
-                />
-              </label>
-
-              <div className="pt-2 flex items-center justify-end gap-2">
+              {/* Actions Footer */}
+              <div className="col-span-2 flex-shrink-0 bg-white border-t border-slate-200 pt-4 mt-6 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => {
                     setShowEditModal(false)
                     setEditingPoiId("")
                   }}
-                  className="h-10 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50"
+                  className="h-10 px-6 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors font-semibold"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={editing}
-                  className="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold disabled:opacity-60"
+                  className="h-10 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold disabled:opacity-60 transition-colors"
                 >
                   {editing ? "Đang cập nhật..." : "Cập nhật"}
                 </button>

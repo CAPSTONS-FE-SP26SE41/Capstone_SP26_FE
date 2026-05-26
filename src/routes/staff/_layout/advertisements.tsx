@@ -587,138 +587,136 @@ function AdvertisementsPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-0 md:p-4 bg-slate-900/40 backdrop-blur-sm"
           onClick={() => setIsDetailModalOpen(false)}
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
+            className="bg-white rounded-2xl shadow-2xl w-full h-full md:h-[90vh] md:max-w-6xl overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50 flex-shrink-0">
               <h3 className="text-xl font-bold text-slate-800">Chi tiết Quảng cáo</h3>
               <button
                 onClick={() => setIsDetailModalOpen(false)}
-                className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500"
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-500"
               >
                 <X size={20} />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Left: Media & Basic Info */}
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Hình ảnh & Video</h4>
-                    <div className="aspect-video rounded-xl bg-slate-100 overflow-hidden border border-slate-200 relative group">
-                      {selectedAdDetail.imageUrl ? (
-                        <img
-                          src={selectedAdDetail.imageUrl}
-                          alt={selectedAdDetail.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-slate-400">Không có hình ảnh</div>
-                      )}
-                      {selectedAdDetail.videoUrl && selectedAdDetail.videoUrl !== "string" && (
-                        <a
-                          href={selectedAdDetail.videoUrl}
-                          target="_blank"
-                          className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <span className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-sm font-semibold flex items-center gap-2">
-                            <ExternalLink size={16} /> Xem Video
-                          </span>
-                        </a>
-                      )}
-                    </div>
-                  </div>
+            <div className="flex-1 min-h-0 p-6 flex flex-col md:grid md:grid-cols-2 md:gap-x-8 overflow-y-auto md:overflow-hidden relative">
+              {/* Left: Media */}
+              <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4 flex flex-col h-full">
+                <span className="text-sm font-semibold text-slate-700 block">Hình ảnh quảng cáo</span>
+                <div className="flex-1 min-h-[300px] md:min-h-0 w-full rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 relative group">
+                  {selectedAdDetail.imageUrl ? (
+                    <img
+                      src={selectedAdDetail.imageUrl}
+                      alt={selectedAdDetail.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400">Không có hình ảnh</div>
+                  )}
+                  {selectedAdDetail.videoUrl && selectedAdDetail.videoUrl !== "string" && (
+                    <a
+                      href={selectedAdDetail.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <span className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-sm font-semibold flex items-center gap-2">
+                        <ExternalLink size={16} /> Xem Video
+                      </span>
+                    </a>
+                  )}
+                </div>
+              </div>
 
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase">Tiêu đề</label>
-                      <p className="text-lg font-bold text-slate-800">{selectedAdDetail.title}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase">Nội dung</label>
-                      <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
-                        {selectedAdDetail.content}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs font-bold text-slate-500 uppercase">Ngày bắt đầu</label>
-                        <p className="text-sm font-semibold text-slate-700">
-                          {new Date(selectedAdDetail.startDate).toLocaleDateString('vi-VN')}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold text-slate-500 uppercase">Ngày kết thúc</label>
-                        <p className="text-sm font-semibold text-slate-700">
-                          {new Date(selectedAdDetail.endDate).toLocaleDateString('vi-VN')}
-                        </p>
-                      </div>
+              {/* Right: Info */}
+              <div className="space-y-6 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col h-full">
+                {/* Header info */}
+                <div>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Tiêu đề</span>
+                  <h4 className="text-2xl font-extrabold text-slate-900 break-words">{selectedAdDetail.title}</h4>
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200">
+                      <div className={`w-2 h-2 rounded-full animate-pulse ${(selectedAdDetail.status === 'PendingApproval' || selectedAdDetail.status === 'Pending') ? "bg-amber-400" : "bg-emerald-400"}`} />
+                      <span className="text-[11px] font-bold text-slate-600 uppercase tracking-tight">
+                        {(selectedAdDetail.status === 'PendingApproval' || selectedAdDetail.status === 'Pending' || !selectedAdDetail.status) ? "Chờ duyệt" : "Đã duyệt"}
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Right: Promotion Info */}
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Thông tin Khuyến mãi</h4>
-                      <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-slate-50 border border-slate-100">
-                        <div className={`w-2 h-2 rounded-full animate-pulse ${(selectedAdDetail.status === 'PendingApproval' || selectedAdDetail.status === 'Pending') ? "bg-amber-400" : "bg-emerald-400"}`} />
-                        <span className="text-[11px] font-bold text-slate-600 uppercase tracking-tight">
-                          {(selectedAdDetail.status === 'PendingApproval' || selectedAdDetail.status === 'Pending' || !selectedAdDetail.status) ? "Chờ duyệt" : "Đã duyệt"}
-                        </span>
-                      </div>
-                    </div>
-                    {selectedAdDetail.promotion ? (
-                      <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-5 space-y-4 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-100/50 rounded-full -mr-12 -mt-12 blur-2xl" />
-                        
-                        <div>
-                          <label className="text-xs font-bold text-emerald-600 uppercase">Tiêu đề khuyến mãi</label>
-                          <p className="font-bold text-slate-800 text-lg">{selectedAdDetail.promotion.title}</p>
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-emerald-600 uppercase">Mô tả</label>
-                          <p className="text-sm text-slate-600 leading-relaxed">
-                            {selectedAdDetail.promotion.description}
-                          </p>
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-emerald-600 uppercase">Điều khoản & Điều kiện</label>
-                          <p className="text-sm text-slate-600 italic bg-white/50 p-3 rounded-lg border border-emerald-100 mt-1">
-                            {selectedAdDetail.promotion.terms}
-                          </p>
-                        </div>
-
-                      </div>
-                    ) : (
-                      <div className="h-full flex flex-col items-center justify-center py-12 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-slate-400">
-                        <div className="text-4xl mb-2">🎁</div>
-                        <p className="text-sm font-medium">Không có khuyến mãi kèm theo</p>
-                      </div>
-                    )}
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Nội dung chi tiết</span>
+                    <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 font-medium">
+                      {selectedAdDetail.content}
+                    </p>
                   </div>
 
+                  <div className="grid grid-cols-2 gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Ngày bắt đầu</span>
+                      <p className="text-sm font-semibold text-slate-800">
+                        {new Date(selectedAdDetail.startDate).toLocaleDateString('vi-VN')}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Ngày kết thúc</span>
+                      <p className="text-sm font-semibold text-slate-800">
+                        {new Date(selectedAdDetail.endDate).toLocaleDateString('vi-VN')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
+                {/* Promotion Info */}
+                <div className="flex-1 flex flex-col min-h-[180px]">
+                  <span className="text-sm font-semibold text-slate-700 block mb-2">Thông tin Khuyến mãi</span>
+                  {selectedAdDetail.promotion ? (
+                    <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-5 space-y-4 relative overflow-hidden flex-1">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-100/50 rounded-full -mr-12 -mt-12 blur-2xl" />
+                      
+                      <div>
+                        <span className="text-xs font-bold text-emerald-600 uppercase block mb-0.5">Tiêu đề khuyến mãi</span>
+                        <p className="font-bold text-slate-800 text-base">{selectedAdDetail.promotion.title}</p>
+                      </div>
+
+                      <div>
+                        <span className="text-xs font-bold text-emerald-600 uppercase block mb-0.5">Mô tả</span>
+                        <p className="text-sm text-slate-700 leading-relaxed">
+                          {selectedAdDetail.promotion.description}
+                        </p>
+                      </div>
+
+                      <div>
+                        <span className="text-xs font-bold text-emerald-600 uppercase block mb-0.5">Điều khoản & Điều kiện</span>
+                        <p className="text-xs text-emerald-700 italic bg-white/60 p-3 rounded-lg border border-emerald-100 mt-1 leading-relaxed">
+                          {selectedAdDetail.promotion.terms}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center py-8 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-slate-400">
+                      <div className="text-3xl mb-2">🎁</div>
+                      <p className="text-xs font-semibold">Không có khuyến mãi kèm theo</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50">
-              {(selectedAdDetail.status === 'PendingApproval' || selectedAdDetail.status === 'Pending' || !selectedAdDetail.status) && (
+            <div className="px-6 py-4 border-t border-slate-200 flex justify-end gap-3 bg-slate-50/50 flex-shrink-0">
+              {(selectedAdDetail.status === 'PendingApproval' || selectedAdDetail.status === 'Pending' || !selectedAdDetail.status) ? (
                 <>
                   <button
                     onClick={() => {
@@ -739,6 +737,13 @@ function AdvertisementsPage() {
                     Phê duyệt ngay
                   </button>
                 </>
+              ) : (
+                <button
+                  onClick={() => setIsDetailModalOpen(false)}
+                  className="px-6 py-2 rounded-xl text-sm font-bold bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+                >
+                  Đóng
+                </button>
               )}
             </div>
           </motion.div>

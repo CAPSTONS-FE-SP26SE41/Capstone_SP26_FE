@@ -223,7 +223,29 @@ function PartnerPOIPage() {
       }
       setIsModalOpen(false)
       setEditingPoi(null)
-      fetchPois(false)
+      
+      // Tải lại dữ liệu mới từ API
+      const result = await getMyPartnerPOIs(page, pageSize)
+      
+      // Nếu có chỉnh sửa ảnh, thêm cache-buster để tránh trình duyệt cache ảnh cũ
+      const cacheBust = Date.now()
+      const withCacheBust = (url: string) => {
+        if (!url) return url
+        const hasQuery = url.includes("?")
+        return `${url}${hasQuery ? "&" : "?"}v=${cacheBust}`
+      }
+
+      setPois(
+        imageFile && editingPoi
+          ? result.items.map((p) =>
+              p.id === editingPoi.id && p.poiImgUrl
+                ? { ...p, poiImgUrl: withCacheBust(p.poiImgUrl) }
+                : p
+            )
+          : result.items
+      )
+      setTotalPages(result.totalPages)
+      setTotalItems(result.totalItems)
     } catch (error: any) {
       throw error // Let the modal handle it to show inline errors
     } finally {
@@ -422,7 +444,7 @@ function PartnerPOIPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between bg-white rounded-2xl border border-slate-200 shadow-sm px-6 py-3">
               <span className="text-sm text-slate-500">
-                Trang {page} / {totalPages}
+                Trang {page} / {totalPages} • Tổng: {totalItems} POIs
               </span>
               <div className="flex items-center gap-2">
                 <button
@@ -572,6 +594,19 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
     fetchPreferences()
   }, [])
 
+  useEffect(() => {
+    if (poi?.poiPreferences && preferencesList.length > 0) {
+      const mappedIds = poi.poiPreferences.map(prefVal => {
+        const byId = preferencesList.find(p => p.id === prefVal)
+        if (byId) return byId.id
+        const byName = preferencesList.find(p => p.name.toLowerCase() === prefVal.toLowerCase())
+        if (byName) return byName.id
+        return prefVal
+      })
+      setPoiPreferences(mappedIds)
+    }
+  }, [poi?.poiPreferences, preferencesList])
+
   const [formErrors, setFormErrors] = useState<{locationId?: string, districtId?: string}>({})
 
   useEffect(() => {
@@ -637,8 +672,6 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
       return
     }
 
-    const locName = locations.find(l => l.id === locationId)?.name || ''
-
     try {
       if (isEditing) {
         const payload: UpdatePartnerPOIPayload = {
@@ -651,7 +684,7 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
           VisitRecommendation: visitRecommendation,
           GoogleMapLink: googleMapLink,
           IsIndoor: isIndoor,
-          Type: type,
+          Type: type === '' ? undefined : type,
           LocationId: locationId,
           DistrictId: districtId,
           PoiPreferences: poiPreferences,
@@ -673,7 +706,7 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
           VisitRecommendation: visitRecommendation,
           GoogleMapLink: googleMapLink,
           IsIndoor: isIndoor,
-          Type: type,
+          Type: type as POIType,
           LocationId: locationId,
           DistrictId: districtId,
           PoiPreferences: poiPreferences,
@@ -697,10 +730,9 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden mx-4 flex flex-col">
-        <div className="max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full h-full md:h-[90vh] md:max-w-6xl overflow-hidden mx-0 md:mx-4 flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
+        <div className="flex-shrink-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
           <h2 className="text-lg font-bold text-slate-800">
             {isEditing ? 'Chỉnh sửa POI' : 'Thêm POI mới'}
           </h2>
@@ -710,195 +742,201 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
         </div>
 
         {/* Form */}
-        <form onSubmit={handleFormSubmit} className="p-6 space-y-5 flex-1 relative">
-          {/* Image */}
-          <div>
-            <label className={labelClasses}>Hình ảnh</label>
-            <div className="flex items-center gap-4">
-              {imagePreview ? (
-                <img src={imagePreview} alt="Preview" className="h-20 w-20 rounded-xl object-cover border border-slate-200" />
-              ) : (
-                <div className="h-20 w-20 rounded-xl bg-slate-100 flex items-center justify-center">
-                  <ImageIcon size={28} className="text-slate-300" />
+        <form onSubmit={handleFormSubmit} className="flex-1 min-h-0 p-6 flex flex-col md:grid md:grid-cols-2 md:gap-x-8 overflow-y-auto md:overflow-hidden relative">
+          
+          {/* Cột trái */}
+          <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4">
+            {/* Tên POI & Loại hình */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClasses}>Tên POI <span className="text-red-400">*</span></label>
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={inputClasses} placeholder="Nhập tên POI" required />
+              </div>
+              <div>
+                <label className={labelClasses}>Loại hình <span className="text-red-400">*</span></label>
+                <select value={type} onChange={(e) => setType(e.target.value as POIType)} className={inputClasses}>
+                  <option value="">-- Chọn loại hình --</option>
+                  {loadingPoiTypes ? (
+                    <option value="">Đang tải...</option>
+                  ) : (
+                    poiTypeOptions.length > 0 ? (
+                      poiTypeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))
+                    ) : (
+                      Object.entries(fallbackTypeLabels).map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))
+                    )
+                  )}
+                </select>
+              </div>
+            </div>
+
+            {/* Thành phố & Quận huyện */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClasses}>Thành phố (City) <span className="text-red-400">*</span></label>
+                <CustomSelect 
+                  value={locationId} 
+                  onChange={(val) => {
+                    setLocationId(val)
+                    setDistrictId('') 
+                    setDistricts([]) 
+                  }}
+                  options={locations.map(loc => ({ value: loc.id, label: loc.name }))}
+                  placeholder={loadingLocations ? 'Đang tải...' : '-- Chọn Thành phố --'}
+                  error={!!formErrors.locationId}
+                />
+                {formErrors.locationId && <p className="text-red-500 text-xs mt-1">{formErrors.locationId}</p>}
+              </div>
+              <div>
+                <label className={labelClasses}>Quận huyện (District) <span className="text-red-400">*</span></label>
+                <CustomSelect 
+                  value={districtId} 
+                  onChange={(val) => {
+                    setDistrictId(val)
+                    setFormErrors(prev => ({ ...prev, districtId: undefined }))
+                  }}
+                  options={districts.map(dist => ({ value: dist.id, label: dist.name }))}
+                  placeholder={loadingDistricts ? 'Đang tải...' : (!locationId ? '-- Chọn City trước --' : (districts.length === 0 ? 'City này chưa có district' : '-- Chọn District --'))}
+                  disabled={!locationId || loadingDistricts}
+                  error={!!formErrors.districtId}
+                />
+                {formErrors.districtId && <p className="text-red-500 text-xs mt-1">{formErrors.districtId}</p>}
+              </div>
+            </div>
+
+            {/* Địa chỉ */}
+            <div>
+              <label className={labelClasses}>Địa chỉ <span className="text-red-400">*</span></label>
+              <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className={inputClasses} placeholder="Nhập số nhà, tên đường..." required />
+            </div>
+
+            {/* Chi phí & Link Google Map */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClasses}>Chi phí ước tính</label>
+                <input type="text" value={approxCost} onChange={(e) => setApproxCost(e.target.value)} className={inputClasses} placeholder="VD: 100,000 - 200,000 VND" />
+              </div>
+              <div>
+                <label className={labelClasses}>Link Google Map</label>
+                <input type="text" value={googleMapLink} onChange={(e) => setGoogleMapLink(e.target.value)} className={inputClasses} placeholder="https://maps.google.com/..." />
+              </div>
+            </div>
+
+            {/* Thời gian mở cửa */}
+            <div>
+              <label className={labelClasses}>Thời gian mở cửa</label>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={is24Hours}
+                    onChange={(e) => setIs24Hours(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-300 text-[#e28743] focus:ring-[#e28743]"
+                  />
+                  <span className="text-sm text-slate-600 font-medium">Mở 24 giờ</span>
+                </label>
+              </div>
+              {!is24Hours && (
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Giờ mở</label>
+                    <input type="time" value={openHour} onChange={(e) => setOpenHour(e.target.value)} className={inputClasses} />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Giờ đóng</label>
+                    <input type="time" value={closeHour} onChange={(e) => setCloseHour(e.target.value)} className={inputClasses} />
+                  </div>
                 </div>
               )}
-              <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-xl text-sm font-medium transition-all">
-                Chọn ảnh
-                <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-              </label>
             </div>
-          </div>
 
-          {/* Name & Type */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClasses}>Tên POI <span className="text-red-400">*</span></label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={inputClasses} placeholder="Nhập tên POI" required />
-            </div>
-            <div>
-              <label className={labelClasses}>Loại hình <span className="text-red-400">*</span></label>
-              <select value={type} onChange={(e) => setType(e.target.value as POIType)} className={inputClasses}>
-                <option value="">-- Chọn loại hình --</option>
-                {loadingPoiTypes ? (
-                  <option value="">Đang tải...</option>
-                ) : (
-                  poiTypeOptions.length > 0 ? (
-                    poiTypeOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))
-                  ) : (
-                    Object.entries(fallbackTypeLabels).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))
-                  )
-                )}
-              </select>
-            </div>
-          </div>
-
-          {/* Location ID & District ID */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClasses}>Thành phố (City) <span className="text-red-400">*</span></label>
-              <CustomSelect 
-                value={locationId} 
-                onChange={(val) => {
-                  setLocationId(val)
-                  setDistrictId('') // reset district when location changes
-                  setDistricts([]) // clear old districts while loading
-                }}
-                options={locations.map(loc => ({ value: loc.id, label: loc.name }))}
-                placeholder={loadingLocations ? 'Đang tải...' : '-- Chọn Thành phố --'}
-                error={!!formErrors.locationId}
-              />
-              {formErrors.locationId && <p className="text-red-500 text-xs mt-1">{formErrors.locationId}</p>}
-            </div>
-            <div>
-              <label className={labelClasses}>Quận huyện (District) <span className="text-red-400">*</span></label>
-              <CustomSelect 
-                value={districtId} 
-                onChange={(val) => {
-                  setDistrictId(val)
-                  setFormErrors(prev => ({ ...prev, districtId: undefined }))
-                }}
-                options={districts.map(dist => ({ value: dist.id, label: dist.name }))}
-                placeholder={loadingDistricts ? 'Đang tải...' : (!locationId ? '-- Chọn City trước --' : (districts.length === 0 ? 'City này chưa có district' : '-- Chọn District --'))}
-                disabled={!locationId || loadingDistricts}
-                error={!!formErrors.districtId}
-              />
-              {formErrors.districtId && <p className="text-red-500 text-xs mt-1">{formErrors.districtId}</p>}
-            </div>
-          </div>
-
-          {/* Address */}
-          <div>
-            <label className={labelClasses}>Địa chỉ <span className="text-red-400">*</span></label>
-            <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className={inputClasses} placeholder="Nhập số nhà, tên đường..." required />
-          </div>
-
-          {/* Cost & Google Map */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClasses}>Chi phí ước tính</label>
-              <input type="text" value={approxCost} onChange={(e) => setApproxCost(e.target.value)} className={inputClasses} placeholder="VD: 100,000 - 200,000 VND" />
-            </div>
-            <div>
-              <label className={labelClasses}>Link Google Map</label>
-              <input type="text" value={googleMapLink} onChange={(e) => setGoogleMapLink(e.target.value)} className={inputClasses} placeholder="https://maps.google.com/..." />
-            </div>
-          </div>
-
-          {/* Opening Hours */}
-          <div>
-            <label className={labelClasses}>Thời gian mở cửa</label>
-            <div className="flex items-center gap-4">
+            {/* Checkboxes: Trong nhà */}
+            <div className="flex items-center gap-6">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={is24Hours}
-                  onChange={(e) => setIs24Hours(e.target.checked)}
+                  checked={isIndoor}
+                  onChange={(e) => setIsIndoor(e.target.checked)}
                   className="w-4 h-4 rounded border-slate-300 text-[#e28743] focus:ring-[#e28743]"
                 />
-                <span className="text-sm text-slate-600 font-medium">Mở 24 giờ</span>
+                <span className="text-sm text-slate-600 font-medium">Trong nhà</span>
               </label>
             </div>
-            {!is24Hours && (
-              <div className="grid grid-cols-2 gap-4 mt-3">
-                <div>
-                  <label className="block text-xs text-slate-500 mb-1">Giờ mở</label>
-                  <input type="time" value={openHour} onChange={(e) => setOpenHour(e.target.value)} className={inputClasses} />
-                </div>
-                <div>
-                  <label className="block text-xs text-slate-500 mb-1">Giờ đóng</label>
-                  <input type="time" value={closeHour} onChange={(e) => setCloseHour(e.target.value)} className={inputClasses} />
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Checkboxes */}
-          <div className="flex items-center gap-6">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isIndoor}
-                onChange={(e) => setIsIndoor(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-[#e28743] focus:ring-[#e28743]"
+          {/* Cột phải */}
+          <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col h-full">
+            {/* Hình ảnh */}
+            <div>
+              <label className={labelClasses}>Hình ảnh</label>
+              <div className="flex items-center gap-4">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Preview" className="h-20 w-20 rounded-xl object-cover border border-slate-200" />
+                ) : (
+                  <div className="h-20 w-20 rounded-xl bg-slate-100 flex items-center justify-center">
+                    <ImageIcon size={28} className="text-slate-300" />
+                  </div>
+                )}
+                <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-xl text-sm font-medium transition-all">
+                  Chọn ảnh
+                  <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                </label>
+              </div>
+            </div>
+
+            {/* Nhãn Preferences */}
+            <div>
+              <label className={labelClasses}>Nhãn (Preferences)</label>
+              {loadingPreferences ? (
+                <p className="text-sm text-slate-500">Đang tải...</p>
+              ) : (
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {preferencesList.map(pref => {
+                    const isSelected = poiPreferences.includes(pref.id)
+                    return (
+                      <button
+                        type="button"
+                        key={pref.id}
+                        onClick={() => {
+                          setPoiPreferences(prev => 
+                            isSelected ? prev.filter(p => p !== pref.id) : [...prev, pref.id]
+                          )
+                        }}
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
+                          isSelected 
+                            ? 'bg-[#e28743] border-[#e28743] hover:bg-[#cf7632] hover:border-[#cf7632] text-white' 
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-[#e28743] hover:text-[#e28743]'
+                        }`}
+                      >
+                        {pref.name}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Gợi ý tham quan */}
+            <div className="flex flex-col flex-1 min-h-[120px]">
+              <label className={labelClasses}>Gợi ý tham quan</label>
+              <textarea
+                value={visitRecommendation}
+                onChange={(e) => setVisitRecommendation(e.target.value)}
+                className={`${inputClasses} flex-1 resize-none min-h-[80px] md:min-h-0`}
+                placeholder="Nhập gợi ý cho du khách..."
               />
-              <span className="text-sm text-slate-600 font-medium">Trong nhà</span>
-            </label>
+            </div>
           </div>
 
-          {/* Preferences */}
-          <div>
-            <label className={labelClasses}>Nhãn (Preferences)</label>
-            {loadingPreferences ? (
-              <p className="text-sm text-slate-500">Đang tải...</p>
-            ) : (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {preferencesList.map(pref => {
-                  const isSelected = poiPreferences.includes(pref.id)
-                  return (
-                    <button
-                      type="button"
-                      key={pref.id}
-                      onClick={() => {
-                        setPoiPreferences(prev => 
-                          isSelected ? prev.filter(p => p !== pref.id) : [...prev, pref.id]
-                        )
-                      }}
-                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                        isSelected 
-                          ? 'bg-[#e28743] border-[#e28743] hover:bg-[#cf7632] hover:border-[#cf7632] text-white' 
-                          : 'bg-white text-slate-600 border-slate-200 hover:border-[#e28743] hover:text-[#e28743]'
-                      }`}
-                    >
-                      {pref.name}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Visit Recommendation */}
-          <div>
-            <label className={labelClasses}>Gợi ý tham quan</label>
-            <textarea
-              value={visitRecommendation}
-              onChange={(e) => setVisitRecommendation(e.target.value)}
-              className={`${inputClasses} resize-none`}
-              rows={3}
-              placeholder="Nhập gợi ý cho du khách..."
-            />
-          </div>
-
-          {/* Actions - Sticky bottom */}
-          <div className="sticky bottom-0 -mx-6 -mb-6 bg-white border-t border-slate-200 p-4 mt-6 flex items-center justify-end gap-3 rounded-b-2xl">
+          {/* Actions Footer */}
+          <div className="col-span-2 flex-shrink-0 bg-white border-t border-slate-200 pt-4 mt-6 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
@@ -916,7 +954,6 @@ function POIFormModal({ poi, submitting, poiTypeOptions, loadingPoiTypes, onClos
             </button>
           </div>
         </form>
-        </div>
       </div>
     </div>
   )

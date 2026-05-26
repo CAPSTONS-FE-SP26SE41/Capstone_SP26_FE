@@ -102,8 +102,8 @@ function normalizePOI(p: any): PartnerPOI {
     locationId: String(p?.LocationId ?? p?.locationId ?? ""),
     locationName: p?.LocationName ?? p?.locationName ?? null,
     districtId: String(p?.DistrictId ?? p?.districtId ?? ""),
-    poiPreferences: Array.isArray(p?.POIPreferences ?? p?.poiPreferences)
-      ? (p?.POIPreferences ?? p?.poiPreferences)
+    poiPreferences: Array.isArray(p?.POIPreferences ?? p?.poiPreferences ?? p?.Preferences ?? p?.preferences)
+      ? (p?.POIPreferences ?? p?.poiPreferences ?? p?.Preferences ?? p?.preferences)
       : [],
   }
 }
@@ -242,7 +242,7 @@ export const getMyPartnerPOIs = async (
   pageSize: number = 10
 ): Promise<PagedResult<PartnerPOI>> => {
   const data = await apiClient(
-    `/partner/pois/my?page=${page}&pageSize=${pageSize}`
+    `/partner/pois/my?page=${page}&pageSize=${pageSize}&_t=${Date.now()}`
   )
 
   // Handle both paged and array responses
@@ -272,7 +272,7 @@ export const getMyPartnerPOIById = async (
   id: string
 ): Promise<PartnerPOI | null> => {
   try {
-    const data = await apiClient(`/partner/pois/my/${id}`)
+    const data = await apiClient(`/partner/pois/my/${id}?_t=${Date.now()}`)
     if (!data) return null
     return normalizePOI(data)
   } catch {
