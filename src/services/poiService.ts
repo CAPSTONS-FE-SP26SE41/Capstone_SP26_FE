@@ -71,7 +71,7 @@ function normalizeStaffPOI(p: any): StaffPOI {
   const statusRaw = p?.Status ?? p?.POIStatus ?? p?.status
   const partnerIdRaw = p?.PartnerId ?? p?.partnerId ?? p?.PartnerID ?? p?.partner_id
 
-  const poiPreferencesRaw = p?.PoiPreferences ?? p?.poiPreferences ?? p?.POIPreferences
+  const poiPreferencesRaw = p?.PoiPreferences ?? p?.poiPreferences ?? p?.POIPreferences ?? p?.Preferences ?? p?.preferences
   const poiPreferencesNormalized =
     Array.isArray(poiPreferencesRaw)
       ? poiPreferencesRaw.map((x) => {
@@ -199,7 +199,7 @@ function normalizeStaffPOI(p: any): StaffPOI {
 }
 
 export const getStaffPOIs = async (): Promise<StaffPOI[]> => {
-  const data = await apiClient("/manager/pois")
+  const data = await apiClient(`/manager/pois?_t=${Date.now()}`)
   const items = Array.isArray(data) ? data : (data?.items || data?.Items || [])
   return items.map(normalizeStaffPOI)
 }
@@ -230,7 +230,7 @@ export const getManagerPendingPOIs = async (
 
 export const getStaffPOIById = async (id: string): Promise<StaffPOI | null> => {
   try {
-    const data = await apiClient(`/manager/pois/${id}`)
+    const data = await apiClient(`/manager/pois/${id}?_t=${Date.now()}`)
     if (!data) return null
     return normalizeStaffPOI(data)
   } catch {
@@ -386,15 +386,12 @@ if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0
   }
   
   if (payload.PoiPreferences?.length) {
-    // Xử lý thông minh từ dev_2 (đã bao hàm luôn logic của nhánh feat)
     payload.PoiPreferences.forEach((pref) => {
       if (pref && typeof pref === "object") {
         const id = (pref as any).id ?? (pref as any).Id
-        const name = (pref as any).name ?? (pref as any).Name
-        if (id) formData.append(`PoiPreferences[${id}]`, String(name ?? ""))
+        if (id) formData.append("PoiPreferences", String(id))
         return
       }
-      // Nếu là string bình thường (giống nhánh feat), vẫn append vào mảng
       formData.append("PoiPreferences", String(pref))
     })
   }
@@ -470,48 +467,49 @@ export const updateStaffPOI = async (
     poiImgUrlForUpdate = await uploadStaffPOIImage(imageFile)
   }
 
-  const paramsObj: Record<string, string> = {
-    Name: payload.Name ?? "",
-    Address: payload.Address ?? "",
-
-    ApproxCost: payload.ApproxCost ?? "",
-    OpenHour: normalizeTimeOnly(payload.OpenHour ?? ""),
-    CloseHour: normalizeTimeOnly(payload.CloseHour ?? ""),
-    LocationId: payload.LocationId ?? "",
-    DistrictId: payload.DistrictId ?? "",
-    GoogleMapLink: payload.GoogleMapLink ?? "",
-    IsIndoor: String(Boolean(payload.IsIndoor)),
-    POIImgUrl: poiImgUrlForUpdate ?? "",
-  }
+  const formData = new FormData()
+  formData.append("Name", payload.Name ?? "")
+  formData.append("Address", payload.Address ?? "")
+  formData.append("ApproxCost", payload.ApproxCost ?? "")
+  formData.append("OpenHour", normalizeTimeOnly(payload.OpenHour ?? ""))
+  formData.append("CloseHour", normalizeTimeOnly(payload.CloseHour ?? ""))
+  formData.append("LocationId", payload.LocationId ?? "")
+  formData.append("DistrictId", payload.DistrictId ?? "")
+  formData.append("GoogleMapLink", payload.GoogleMapLink ?? "")
+  formData.append("IsIndoor", String(Boolean(payload.IsIndoor)))
+  formData.append("POIImgUrl", poiImgUrlForUpdate ?? "")
 
   if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
-    paramsObj.VisitRecommendation = payload.VisitRecommendation.trim()
+    formData.append("VisitRecommendation", payload.VisitRecommendation.trim())
   }
 
   if (payload.Status !== undefined) {
-    paramsObj.Status = String(payload.Status)
+    formData.append("Status", String(payload.Status))
   }
   if (payload.PartnerId) {
-    paramsObj.PartnerId = payload.PartnerId
+    formData.append("PartnerId", payload.PartnerId)
   }
 
-  const params = new URLSearchParams(paramsObj)
-  if (payload.PoiPreferences?.length) {
-    payload.PoiPreferences.forEach((pref) => {
-      if (pref && typeof pref === "object") {
-        const pid = (pref as any).id ?? (pref as any).Id
-        const name = (pref as any).name ?? (pref as any).Name
-        if (pid) params.append(`PoiPreferences[${pid}]`, String(name ?? ""))
-        return
-      }
-      params.append("PoiPreferences", String(pref))
-    })
+  if (payload.PoiPreferences !== undefined) {
+    if (payload.PoiPreferences.length > 0) {
+      payload.PoiPreferences.forEach((pref) => {
+        if (pref && typeof pref === "object") {
+          const pid = (pref as any).id ?? (pref as any).Id
+          if (pid) formData.append("PoiPreferences", String(pid))
+          return
+        }
+        formData.append("PoiPreferences", String(pref))
+      })
+    } else {
+      formData.append("PoiPreferences", "")
+    }
   }
 
   const data = await apiClient(
-    `/manager/pois/${encodeURIComponent(id)}?${params.toString()}`,
+    `/manager/pois/${encodeURIComponent(id)}`,
     {
-    method: "PUT",
+      method: "PUT",
+      body: formData,
     }
   )
   return normalizeStaffPOI(data ?? payload)
@@ -520,6 +518,21 @@ export const updateStaffPOI = async (
 export const deleteStaffPOI = async (id: string): Promise<void> => {
   await apiClient(`/manager/pois/${id}`, {
     method: "DELETE",
+  })
+}
+
+export const inactivateStaffPOI = async (
+  id: string,
+  confirmCascade: boolean = false
+): Promise<any> => {
+  return apiClient(`/manager/pois/${encodeURIComponent(id)}/inactivate?confirmCascade=${confirmCascade}`, {
+    method: "PATCH",
+  })
+}
+
+export const activateStaffPOI = async (id: string): Promise<any> => {
+  return apiClient(`/manager/pois/${encodeURIComponent(id)}/activate`, {
+    method: "PATCH",
   })
 }
 
