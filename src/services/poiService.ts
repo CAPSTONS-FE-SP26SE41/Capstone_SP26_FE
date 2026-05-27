@@ -521,6 +521,21 @@ export const deleteStaffPOI = async (id: string): Promise<void> => {
   })
 }
 
+export const inactivateStaffPOI = async (
+  id: string,
+  confirmCascade: boolean = false
+): Promise<any> => {
+  return apiClient(`/manager/pois/${encodeURIComponent(id)}/inactivate?confirmCascade=${confirmCascade}`, {
+    method: "PATCH",
+  })
+}
+
+export const activateStaffPOI = async (id: string): Promise<any> => {
+  return apiClient(`/manager/pois/${encodeURIComponent(id)}/activate`, {
+    method: "PATCH",
+  })
+}
+
 export const approveManagerPendingPOI = async (id: string): Promise<void> => {
   await apiClient(`/manager/pois/${id}/approve`, {
     method: "POST",

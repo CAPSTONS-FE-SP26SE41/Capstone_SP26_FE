@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
-import { Edit2, Eye, Plus, Search, Trash2, Upload, X } from "lucide-react"
+import { Edit2, Eye, Plus, Search, Trash2, Upload, X, ImageIcon, Tag, MapPin, Clock, ExternalLink } from "lucide-react"
 
 import {
   createStaffPOI,
@@ -13,6 +13,8 @@ import {
   type StaffLocationOption,
   type StaffPOI,
   updateStaffPOI,
+  inactivateStaffPOI,
+  activateStaffPOI,
 } from "../../../services/poiService"
 import { getDistrictsByLocationId, getPreferences, type District, type POIPreference } from "../../../services/partnerPoiService"
 import { CustomSelect } from "../../../components/ui/CustomSelect"
@@ -86,6 +88,7 @@ function StaffPOIsPage() {
   const [districts, setDistricts] = useState<District[]>([])
   const [loadingDistricts, setLoadingDistricts] = useState(false)
   const [formErrors, setFormErrors] = useState<{ districtId?: string }>({})
+  const [toggleLoadingId, setToggleLoadingId] = useState<string | null>(null)
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message })
@@ -323,6 +326,30 @@ function StaffPOIsPage() {
     } catch (e) {
       console.error("Failed to delete POI", e)
       showToast("error", "Xóa POI thất bại")
+    }
+  }
+
+  const handleToggleStatus = async (poi: StaffPOI) => {
+    const currentStatus = poi.Status === "Active" ? "Active" : "Inactive"
+    const nextStatus = currentStatus === "Active" ? "Inactive" : "Active"
+    try {
+      setToggleLoadingId(poi.Id)
+      
+      if (nextStatus === "Inactive") {
+        await inactivateStaffPOI(poi.Id, true)
+      } else {
+        await activateStaffPOI(poi.Id)
+      }
+
+      setPois((prev) =>
+        prev.map((x) => (x.Id === poi.Id ? { ...x, Status: nextStatus } : x))
+      )
+      showToast("success", `Đổi trạng thái POI "${poi.Name}" thành công`)
+    } catch (e) {
+      console.error("Failed to toggle POI status", e)
+      showToast("error", "Đổi trạng thái POI thất bại")
+    } finally {
+      setToggleLoadingId(null)
     }
   }
 
@@ -735,16 +762,26 @@ function StaffPOIsPage() {
                                 <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
                               </span>
                             </button>
-                            <button
-                              onClick={() => handleDelete(p)}
-                              className="group relative inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors"
-                            >
-                              <Trash2 size={16} />
-                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
-                                Xóa
-                                <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                            <div className="group relative inline-flex items-center justify-center">
+                              <button
+                                type="button"
+                                onClick={() => void handleToggleStatus(p)}
+                                disabled={toggleLoadingId === p.Id}
+                                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                                  p.Status === "Active" ? "bg-emerald-600" : "bg-slate-200"
+                                }`}
+                              >
+                                <span
+                                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                    p.Status === "Active" ? "translate-x-5" : "translate-x-0"
+                                  }`}
+                                />
+                              </button>
+                              <span className="pointer-events-none absolute bottom-full right-0 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
+                                {p.Status === "Active" ? "Ngừng hoạt động" : "Kích hoạt"}
+                                <span className="absolute right-[18px] top-full border-[5px] border-transparent border-t-slate-800"></span>
                               </span>
-                            </button>
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -819,166 +856,194 @@ function StaffPOIsPage() {
       </div>
 
       {selectedPoi ? (
-        <div className="fixed inset-0 z-50 bg-black/40 p-0 md:p-4 flex items-center justify-center">
-          <div className="w-full h-full md:h-[90vh] md:max-w-6xl rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden flex flex-col">
-            <div className="flex-shrink-0 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-900">
-                Chi tiết POI
-              </h3>
+        <div className="fixed inset-0 z-50 p-0 md:p-4 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedPoi(null)} />
+          <div className="relative w-full h-full md:h-[90vh] md:max-w-6xl rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden flex flex-col z-10">
+            {/* Header */}
+            <div className="flex-shrink-0 px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+              <h2 className="text-lg font-bold text-slate-800">Chi tiết POI</h2>
               <button
                 onClick={() => setSelectedPoi(null)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-500"
               >
                 <X size={20} />
               </button>
             </div>
 
+            {/* Body */}
             <div className="flex-1 min-h-0 p-6 flex flex-col md:grid md:grid-cols-2 md:gap-x-8 overflow-y-auto md:overflow-hidden relative">
-              {/* Cột trái */}
-              <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4">
-                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="border-b border-slate-100 pb-2 sm:col-span-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Tên POI</dt>
-                    <dd className="mt-1 text-base font-bold text-slate-900">{selectedPoi.Name || "—"}</dd>
-                  </div>
-                  
-                  <div className="border-b border-slate-100 pb-2 sm:col-span-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Địa chỉ</dt>
-                    <dd className="mt-1 text-sm text-slate-800 font-medium">{selectedPoi.Address || "—"}</dd>
-                  </div>
-
-                  <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Chi phí gần đúng</dt>
-                    <dd className="mt-1 text-sm text-slate-800 font-medium">{selectedPoi.ApproxCost || "—"}</dd>
-                  </div>
-
-                  <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Trong nhà</dt>
-                    <dd className="mt-1 text-sm text-slate-800 font-medium">{selectedPoi.IsIndoor ? "Trong nhà" : "Ngoài trời / Khác"}</dd>
-                  </div>
-
-                  <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Giờ mở cửa</dt>
-                    <dd className="mt-1 text-sm text-slate-800 font-medium">{selectedPoi.OpenHour || "—"}</dd>
-                  </div>
-
-                  <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Giờ đóng cửa</dt>
-                    <dd className="mt-1 text-sm text-slate-800 font-medium">{selectedPoi.CloseHour || "—"}</dd>
-                  </div>
-
-                  <div className="border-b border-slate-100 pb-2 sm:col-span-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Google Maps</dt>
-                    <dd className="mt-1 text-sm text-emerald-600 break-all font-medium">
-                      {selectedPoi.GoogleMapLink ? (
-                        <a href={selectedPoi.GoogleMapLink} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
-                          {selectedPoi.GoogleMapLink}
-                        </a>
-                      ) : "—"}
-                    </dd>
-                  </div>
-
-                  <div className="border-b border-slate-100 pb-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Trạng thái</dt>
-                    <dd className="mt-1 text-sm text-emerald-600 font-bold">Đang hoạt động</dd>
-                  </div>
-
-                  {selectedPoi.PartnerName ? (
-                    <div className="border-b border-slate-100 pb-2">
-                      <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Đối tác</dt>
-                      <dd className="mt-1 text-sm text-slate-800 font-medium">{selectedPoi.PartnerName}</dd>
+              {/* Cột trái: Hình ảnh POI */}
+              <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4 flex flex-col">
+                <span className="text-sm font-semibold text-slate-700 block">Hình ảnh POI</span>
+                <div className="flex-1 min-h-[300px] md:min-h-0 w-full rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 relative group shadow-sm">
+                  {selectedPoi.POIImgUrl ? (
+                    <img
+                      src={selectedPoi.POIImgUrl}
+                      alt={selectedPoi.Name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400">
+                      <div className="text-center">
+                        <ImageIcon size={48} className="mx-auto text-slate-300 mb-2" />
+                        <p className="text-sm">Không có hình ảnh</p>
+                      </div>
                     </div>
-                  ) : null}
-
-                  <div className="border-b border-slate-100 pb-2 sm:col-span-2">
-                    <dt className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Latitude / Longitude</dt>
-                    <dd className="mt-1 text-sm text-slate-800 font-medium">
-                      {Number.isFinite(selectedPoi.Latitude) ? selectedPoi.Latitude.toFixed(6) : "—"}
-                      {" / "}
-                      {Number.isFinite(selectedPoi.Longitude) ? selectedPoi.Longitude.toFixed(6) : "—"}
-                    </dd>
-                  </div>
-                </dl>
+                  )}
+                </div>
               </div>
 
-              {/* Cột phải */}
-              <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col h-full">
-                {/* Hình ảnh */}
-                <div className="space-y-2">
-                  <span className="text-sm text-slate-700 font-semibold block">Hình ảnh</span>
-                  <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 h-48 sm:h-64">
-                    {selectedPoi.POIImgUrl ? (
-                      <img
-                        src={selectedPoi.POIImgUrl}
-                        alt={selectedPoi.Name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="h-full flex items-center justify-center text-slate-400 text-sm">
-                        Không có ảnh POI
-                      </div>
-                    )}
+              {/* Cột phải: Thông tin chi tiết */}
+              <div className="space-y-6 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col h-full">
+                {/* Header info */}
+                <div>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Địa điểm tham quan</span>
+                  <h3 className="text-2xl font-extrabold text-slate-900 break-words">{selectedPoi.Name || "—"}</h3>
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${selectedPoi.Status === "Active" ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-slate-100 text-slate-500 border border-slate-200"}`}>
+                      {selectedPoi.Status === "Active" ? "Hoạt động" : "Ngừng hoạt động"}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200`}>
+                      {selectedPoi.IsIndoor ? "Trong nhà" : "Ngoài trời"}
+                    </span>
                   </div>
                 </div>
 
-                {/* Nhãn Preferences */}
-                <div className="space-y-2">
-                  <span className="text-sm text-slate-700 font-semibold block">Nhãn (Preferences)</span>
-                  {selectedPoi.PoiPreferences && selectedPoi.PoiPreferences.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                      {selectedPoi.PoiPreferences.map((pref, i) => (
-                        <span
-                          key={i}
-                          className="px-2.5 py-1 rounded-full text-xs font-semibold border border-emerald-600 bg-emerald-50 text-emerald-700"
-                        >
-                          {pref}
-                        </span>
-                      ))}
+                {/* Chi tiết từng hàng thông tin */}
+                <div className="space-y-4">
+                  <div className="border-b border-slate-100 pb-3">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Địa chỉ</span>
+                    <div className="text-sm text-slate-800 font-medium break-words leading-relaxed flex items-start gap-2">
+                      <MapPin size={16} className="text-slate-400 mt-0.5 shrink-0" />
+                      <span>{selectedPoi.Address || "—"}</span>
                     </div>
-                  ) : (
-                    <p className="text-xs text-slate-400 font-medium">Không có nhãn</p>
+                  </div>
+
+                  <div className="border-b border-slate-100 pb-3">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Thành phố</span>
+                    <div className="text-sm text-slate-800 font-medium break-words leading-relaxed">
+                      {selectedPoi.LocationName || "—"}
+                    </div>
+                  </div>
+
+                  <div className="border-b border-slate-100 pb-3">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Chi phí gần đúng</span>
+                    <div className="text-sm text-slate-800 font-medium break-words leading-relaxed">
+                      {selectedPoi.ApproxCost || "—"}
+                    </div>
+                  </div>
+
+                  <div className="border-b border-slate-100 pb-3">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Giờ hoạt động</span>
+                    <div className="text-sm text-slate-800 font-medium break-words leading-relaxed flex items-center gap-2">
+                      <Clock size={16} className="text-slate-400 shrink-0" />
+                      <span>
+                        {selectedPoi.Is24Hours ? "Mở cửa 24/7" : (selectedPoi.OpenHour && selectedPoi.CloseHour ? `${selectedPoi.OpenHour} - ${selectedPoi.CloseHour}` : "—")}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="border-b border-slate-100 pb-3">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Google Maps</span>
+                    <div className="text-sm text-slate-800 font-medium break-words leading-relaxed">
+                      {selectedPoi.GoogleMapLink ? (
+                        <a href={selectedPoi.GoogleMapLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1.5">
+                          <ExternalLink size={16} />
+                          <span>Xem trên bản đồ</span>
+                        </a>
+                      ) : "—"}
+                    </div>
+                  </div>
+
+                  {selectedPoi.PartnerName && (
+                    <div className="border-b border-slate-100 pb-3">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Đối tác sở hữu</span>
+                      <div className="text-sm text-slate-800 font-medium break-words leading-relaxed">
+                        {selectedPoi.PartnerName}
+                      </div>
+                    </div>
+                  )}
+
+                  {Number.isFinite(selectedPoi.Latitude) && Number.isFinite(selectedPoi.Longitude) && (
+                    <div className="border-b border-slate-100 pb-3">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Tọa độ (Latitude / Longitude)</span>
+                      <div className="text-sm text-slate-800 font-medium break-words leading-relaxed">
+                        {selectedPoi.Latitude.toFixed(6)} / {selectedPoi.Longitude.toFixed(6)}
+                      </div>
+                    </div>
                   )}
                 </div>
 
-                {/* Gợi ý tham quan */}
-                <div className="flex flex-col flex-1 min-h-[120px]">
-                  <span className="text-sm text-slate-700 font-semibold block mb-1.5">
-                    Gợi ý tham quan (VisitRecommendation)
-                  </span>
-                  <div className="flex-1 min-h-[80px] md:min-h-0 w-full p-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-700 text-sm overflow-y-auto font-medium leading-relaxed">
-                    {selectedPoi.VisitRecommendation || "Không có gợi ý tham quan."}
+                {/* Preferences & Recommendation */}
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-5 space-y-3 relative overflow-hidden flex-shrink-0">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-100/50 rounded-full -mr-12 -mt-12 blur-2xl" />
+                  <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
+                    <Tag size={16} />
+                    <span>Thông tin bổ sung</span>
                   </div>
+                  
+                  <div>
+                    <label className="text-xs font-bold text-emerald-600 uppercase block mb-1">Nhãn (Preferences)</label>
+                    {selectedPoi.PoiPreferences && selectedPoi.PoiPreferences.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {selectedPoi.PoiPreferences.map((pref, i) => (
+                          <span
+                            key={i}
+                            className="px-2.5 py-1 rounded-full text-xs font-semibold border border-emerald-200 bg-white text-emerald-700"
+                          >
+                            {pref}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 font-medium">Không có nhãn</p>
+                    )}
+                  </div>
+
+                  {selectedPoi.VisitRecommendation && (
+                    <div>
+                      <label className="text-xs font-bold text-emerald-600 uppercase block mb-1">Gợi ý tham quan</label>
+                      <p className="text-sm text-slate-700 leading-relaxed bg-white/50 p-3 rounded-lg border border-emerald-100">
+                        {selectedPoi.VisitRecommendation}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
+            </div>
 
-              {/* Actions Footer */}
-              <div className="col-span-2 flex-shrink-0 bg-white border-t border-slate-200 pt-4 mt-6 flex items-center justify-end">
-                <button
-                  type="button"
-                  onClick={() => setSelectedPoi(null)}
-                  className="h-10 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors"
-                >
-                  Đóng
-                </button>
-              </div>
+            {/* Footer */}
+            <div className="flex-shrink-0 px-6 py-4 border-t border-slate-200 flex justify-end bg-slate-50/50 z-10">
+              <button
+                type="button"
+                onClick={() => setSelectedPoi(null)}
+                className="px-6 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors"
+              >
+                Đóng
+              </button>
             </div>
           </div>
         </div>
       ) : null}
 
       {showCreateModal ? (
-        <div className="fixed inset-0 z-50 bg-black/40 p-0 md:p-4 flex items-center justify-center">
-          <div className="w-full h-full md:h-[90vh] md:max-w-6xl rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden flex flex-col">
-            <div className="flex-shrink-0 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-900">
+        <div className="fixed inset-0 z-50 p-0 md:p-4 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => {
+            setShowCreateModal(false)
+            resetCreateForm()
+          }} />
+          <div className="relative w-full h-full md:h-[90vh] md:max-w-6xl rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden flex flex-col z-10">
+            <div className="flex-shrink-0 px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+              <h2 className="text-lg font-bold text-slate-800">
                 Tạo mới POI
-              </h3>
+              </h2>
               <button
+                type="button"
                 onClick={() => {
                   setShowCreateModal(false)
                   resetCreateForm()
                 }}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-500"
               >
                 <X size={20} />
               </button>
@@ -1223,14 +1288,14 @@ function StaffPOIsPage() {
               </div>
 
               {/* Actions Footer */}
-              <div className="col-span-2 flex-shrink-0 bg-white border-t border-slate-200 pt-4 mt-6 flex items-center justify-end gap-2">
+              <div className="col-span-2 flex-shrink-0 px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-2 bg-slate-50/50 z-10">
                 <button
                   type="button"
                   onClick={() => {
                     setShowCreateModal(false)
                     resetCreateForm()
                   }}
-                  className="h-10 px-6 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors font-semibold"
+                  className="h-10 px-6 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors font-semibold"
                 >
                   Hủy
                 </button>
@@ -1248,18 +1313,23 @@ function StaffPOIsPage() {
       ) : null}
 
       {showEditModal ? (
-        <div className="fixed inset-0 z-50 bg-black/40 p-0 md:p-4 flex items-center justify-center">
-          <div className="w-full h-full md:h-[90vh] md:max-w-6xl rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden flex flex-col">
-            <div className="flex-shrink-0 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-900">
+        <div className="fixed inset-0 z-50 p-0 md:p-4 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => {
+            setShowEditModal(false)
+            setEditingPoiId("")
+          }} />
+          <div className="relative w-full h-full md:h-[90vh] md:max-w-6xl rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden flex flex-col z-10">
+            <div className="flex-shrink-0 px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+              <h2 className="text-lg font-bold text-slate-800">
                 Chỉnh sửa POI
-              </h3>
+              </h2>
               <button
+                type="button"
                 onClick={() => {
                   setShowEditModal(false)
                   setEditingPoiId("")
                 }}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-500"
               >
                 <X size={20} />
               </button>
@@ -1507,14 +1577,14 @@ function StaffPOIsPage() {
               </div>
 
               {/* Actions Footer */}
-              <div className="col-span-2 flex-shrink-0 bg-white border-t border-slate-200 pt-4 mt-6 flex items-center justify-end gap-2">
+              <div className="col-span-2 flex-shrink-0 px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-2 bg-slate-50/50 z-10">
                 <button
                   type="button"
                   onClick={() => {
                     setShowEditModal(false)
                     setEditingPoiId("")
                   }}
-                  className="h-10 px-6 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors font-semibold"
+                  className="h-10 px-6 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors font-semibold"
                 >
                   Hủy
                 </button>

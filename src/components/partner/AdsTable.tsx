@@ -259,17 +259,7 @@ function AdDetailModal({ ad, onClose, formatDate, poiNameMap }: AdDetailModalPro
     },
   ];
 
-  if (ad.imageUrl) {
-    infoRows.push({
-      icon: <ImageIcon size={16} />,
-      label: 'Hình ảnh',
-      value: (
-        <a href={ad.imageUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline truncate block max-w-xs">
-          Xem hình ảnh
-        </a>
-      ),
-    });
-  }
+
 
   if (ad.videoUrl) {
     infoRows.push({
