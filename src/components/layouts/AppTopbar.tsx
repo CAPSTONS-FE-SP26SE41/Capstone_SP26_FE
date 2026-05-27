@@ -64,7 +64,7 @@ export default function AppTopbar({
     if (path.includes('/admin/accounts')) return 'Quản lý tài khoản'
     if (path.includes('/admin/analytics')) return 'Thống kê hệ thống'
     if (path.includes('/admin/bookings')) return 'Quản lý đơn đặt chỗ'
-    if (path.includes('/admin/destinations')) return 'Điểm đến phổ biến'
+    if (path.includes('/admin/destinations')) return 'Quản lý địa điểm'
     if (path.includes('/admin/settings')) return 'Cài đặt hệ thống'
     if (path.includes('/admin/subscriptions')) return 'Quản lý gói dịch vụ'
 

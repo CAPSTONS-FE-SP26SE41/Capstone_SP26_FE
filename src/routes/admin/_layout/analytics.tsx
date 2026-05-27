@@ -69,37 +69,31 @@ function AdminAnalytics() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-text-main">Thống kê hệ thống</h2>
-          <p className="text-text-secondary mt-1">Giám sát hiệu suất và tốc độ tăng trưởng của nền tảng.</p>
+      <div className="flex flex-col sm:flex-row gap-3 items-center">
+        <div className="flex items-center gap-2">
+          <input 
+            type="date" 
+            value={dateRange.start}
+            onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+            className="bg-white border border-[#e7edf4] text-text-main text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none shadow-sm transition-all"
+          />
+          <span className="text-text-secondary">-</span>
+          <input 
+            type="date" 
+            value={dateRange.end}
+            onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+            className="bg-white border border-[#e7edf4] text-text-main text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none shadow-sm transition-all"
+          />
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 items-center">
-          <div className="flex items-center gap-2">
-            <input 
-              type="date" 
-              value={dateRange.start}
-              onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-              className="bg-white border border-[#e7edf4] text-text-main text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none shadow-sm transition-all"
-            />
-            <span className="text-text-secondary">-</span>
-            <input 
-              type="date" 
-              value={dateRange.end}
-              onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-              className="bg-white border border-[#e7edf4] text-text-main text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none shadow-sm transition-all"
-            />
-          </div>
-          
-          <select 
-            value={period} 
-            onChange={(e) => setPeriod(e.target.value)}
-            className="bg-white border border-[#e7edf4] text-text-main text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full sm:w-auto p-2.5 outline-none font-medium shadow-sm transition-all"
-          >
-            <option value="daily">Kiểu xem: Theo ngày</option>
-            <option value="monthly">Kiểu xem: Theo tháng</option>
-          </select>
-        </div>
+        
+        <select 
+          value={period} 
+          onChange={(e) => setPeriod(e.target.value)}
+          className="bg-white border border-[#e7edf4] text-text-main text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full sm:w-auto p-2.5 outline-none font-medium shadow-sm transition-all"
+        >
+          <option value="daily">Kiểu xem: Theo ngày</option>
+          <option value="monthly">Kiểu xem: Theo tháng</option>
+        </select>
       </div>
 
       {/* Summary Cards */}

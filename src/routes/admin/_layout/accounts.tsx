@@ -362,20 +362,21 @@ function AccountsPage() {
 
                     {/* Actions */}
                     <td className="px-6 py-4 text-right pr-6">
-
-                      <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-                        <ToggleSwitch
-                          initialState={account.status === "Active"}
-                          onChange={(state) => {
-                            if (state) {
-                              handleActivate(account.id)
-                            } else {
-                              handleDisable(account.id)
-                            }
-                          }}
-                        />
-                      </div>
-
+                      {account.role.name.trim().toUpperCase() !== "ADMIN" &&
+                      account.role.name.trim().toUpperCase() !== "SUPERADMIN" ? (
+                        <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+                          <ToggleSwitch
+                            initialState={account.status === "Active"}
+                            onChange={(state) => {
+                              if (state) {
+                                handleActivate(account.id)
+                              } else {
+                                handleDisable(account.id)
+                              }
+                            }}
+                          />
+                        </div>
+                      ) : null}
                     </td>
 
                   </tr>
@@ -396,9 +397,7 @@ function AccountsPage() {
                         Không tìm thấy tài khoản nào
                       </p>
 
-                      <p className="text-xs">
-                        Tạo tài khoản mới để bắt đầu
-                      </p>
+
 
 
                     </div>

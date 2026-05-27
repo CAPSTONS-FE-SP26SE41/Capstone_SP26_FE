@@ -42,7 +42,6 @@ function ManagerLayout() {
       navItems={[
         { to: "/staff", icon: LayoutDashboard, label: "Thống kê", exact: true },
         { to: "/staff/pois", icon: MapPin, label: "Quản lí POIs" },
-        { to: "/staff/locations", icon: Map, label: "Quản lí địa điểm" },
         { to: "/staff/advertisements", icon: ClipboardCheck, label: "Yêu cầu xét duyệt" }, // Lấy từ feat
         { to: "/staff/partner-requests", icon: Users, label: "Yêu cầu đối tác" },
       ]}

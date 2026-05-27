@@ -31,7 +31,7 @@ function StaffPOIsPage() {
   const [pois, setPois] = useState<StaffPOI[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState("")
-  const [filterType, setFilterType] = useState<"all" | "system" | "partner">("all")
+  const [filterType, setFilterType] = useState<"system" | "partner">("system")
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [selectedPoi, setSelectedPoi] = useState<StaffPOI | null>(null)
@@ -169,32 +169,35 @@ function StaffPOIsPage() {
 
     // 2. Sau đó lọc theo query tìm kiếm
     const q = query.trim().toLowerCase()
-    if (!q) return result
+    if (q) {
+      result = result.filter((p) => {
+        const haystack = [
+          p.Id,
+          p.Name,
+          p.LocationName,
+          p.ApproxCost,
+          p.Address,
+          String(p.Latitude),
+          String(p.Longitude),
+          p.IsIndoor ? "Trong nhà" : "Ngoài trời",
+          p.LocationId,
+          p.OpenHour,
+          p.CloseHour,
+          p.Is24Hours ? "24 giờ" : "",
+          p.VisitRecommendation,
+          p.ApproxCost,
+          p.GoogleMapLink,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase()
 
-    return result.filter((p) => {
-      const haystack = [
-        p.Id,
-        p.Name,
-        p.LocationName,
-        p.ApproxCost,
-        p.Address,
-        String(p.Latitude),
-        String(p.Longitude),
-        p.IsIndoor ? "Trong nhà" : "Ngoài trời",
-        p.LocationId,
-        p.OpenHour,
-        p.CloseHour,
-        p.Is24Hours ? "24 giờ" : "",
-        p.VisitRecommendation,
-        p.ApproxCost,
-        p.GoogleMapLink,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
+        return haystack.includes(q)
+      })
+    }
 
-      return haystack.includes(q)
-    })
+    // Sắp xếp theo thứ tự chữ cái alphabet tiếng Việt (tránh phân biệt chữ hoa thường)
+    return [...result].sort((a, b) => a.Name.localeCompare(b.Name, "vi", { sensitivity: "base" }))
   }, [pois, query, filterType])
 
   useEffect(() => {
@@ -618,10 +621,9 @@ function StaffPOIsPage() {
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-        {/* Removed Title */}
-
-        <div className="w-full sm:w-auto flex flex-wrap items-center gap-2">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        {/* Left side: Search & Action Buttons */}
+        <div className="w-full lg:w-auto flex flex-wrap items-center gap-2">
           <div className="relative w-full sm:w-[320px]">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -631,15 +633,6 @@ function StaffPOIsPage() {
               placeholder="Tìm theo tên, địa chỉ, thành phố..."
             />
           </div>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value as any)}
-            className="h-10 rounded-xl border border-slate-200 bg-white text-sm px-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            <option value="all">Tất cả POIs</option>
-            <option value="system">POIs hệ thống</option>
-            <option value="partner">POIs đối tác (Kinh doanh)</option>
-          </select>
           <button
             onClick={() => setShowCreateModal(true)}
             className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-colors whitespace-nowrap"
@@ -665,6 +658,32 @@ function StaffPOIsPage() {
               }}
             />
           </label>
+        </div>
+
+        {/* Right side: Subtabs Switcher */}
+        <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 h-10 items-center shadow-inner self-start lg:self-auto">
+          <button
+            type="button"
+            onClick={() => setFilterType("system")}
+            className={`h-8 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ease-in-out flex items-center justify-center whitespace-nowrap ${
+              filterType === "system"
+                ? "bg-white text-emerald-700 shadow-sm"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
+            }`}
+          >
+            POI hệ thống
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilterType("partner")}
+            className={`h-8 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ease-in-out flex items-center justify-center whitespace-nowrap ${
+              filterType === "partner"
+                ? "bg-white text-emerald-700 shadow-sm"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
+            }`}
+          >
+            POI đối tác
+          </button>
         </div>
       </div>
 
