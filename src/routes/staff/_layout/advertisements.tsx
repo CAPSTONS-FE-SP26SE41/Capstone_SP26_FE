@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { Check, X, ExternalLink, ChevronUp, ChevronDown, Eye } from "lucide-react"
+import { Check, X, ExternalLink, ChevronUp, ChevronDown, Eye, Image } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 import { createPortal } from "react-dom"
 import {
@@ -109,6 +109,33 @@ function AdvertisementsPage() {
       setFetchingPoiDetail(false)
     }
   }
+
+  useEffect(() => {
+    const originalBodyOverflow = document.body.style.overflow
+    const originalBodyHeight = document.body.style.height
+
+    document.body.style.overflow = 'hidden'
+    document.body.style.height = '100vh'
+
+    const mainEl = document.querySelector('main')
+    let originalMainOverflow = ''
+    let originalMainHeight = ''
+    if (mainEl) {
+      originalMainOverflow = mainEl.style.overflow
+      originalMainHeight = mainEl.style.height
+      mainEl.style.overflow = 'hidden'
+      mainEl.style.height = 'calc(100vh - 72px)'
+    }
+
+    return () => {
+      document.body.style.overflow = originalBodyOverflow
+      document.body.style.height = originalBodyHeight
+      if (mainEl) {
+        mainEl.style.overflow = originalMainOverflow
+        mainEl.style.height = originalMainHeight
+      }
+    }
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -283,7 +310,7 @@ function AdvertisementsPage() {
         <div className="flex-1 min-h-0 mt-6 overflow-hidden">
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between flex-shrink-0">
-              <h2 className="text-lg font-semibold text-slate-800">Danh sách Partner</h2>
+              <h2 className="text-lg font-semibold text-slate-800">Danh sách quảng cáo chờ duyệt</h2>
             </div>
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
               {accounts.length > 0 ? (
@@ -466,7 +493,7 @@ function AdvertisementsPage() {
                 </ul>
               ) : (
                 <div className="py-10 text-center text-slate-500">
-                  Chưa có Partner nào.
+                  Không có quảng cáo chờ duyệt
                 </div>
               )}
             </div>
@@ -780,10 +807,11 @@ function AdvertisementsPage() {
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left side: Image */}
-                <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 h-[280px]">
+            <div className="flex-1 min-h-0 p-6 flex flex-col md:grid md:grid-cols-2 md:gap-x-8 overflow-y-auto md:overflow-hidden relative">
+              {/* Left side: Image */}
+              <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4 flex flex-col h-full">
+                <span className="text-sm font-semibold text-slate-700 block">Hình ảnh POI</span>
+                <div className="flex-1 min-h-[300px] md:min-h-0 w-full rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 relative group shadow-sm">
                   {selectedPoiDetail.POIImgUrl ? (
                     <img
                       src={selectedPoiDetail.POIImgUrl}
@@ -791,13 +819,19 @@ function AdvertisementsPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">
-                      Không có ảnh POI
+                    <div className="w-full h-full flex items-center justify-center text-slate-400">
+                      <div className="text-center">
+                        <Image size={48} className="mx-auto text-slate-300 mb-2" />
+                        <p className="text-sm">Không có hình ảnh</p>
+                      </div>
                     </div>
                   )}
                 </div>
+              </div>
 
-                {/* Right side: Core Info */}
+              {/* Right side: Information */}
+              <div className="space-y-6 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col h-full">
+                {/* Core Info */}
                 <dl className="grid grid-cols-1 gap-y-3">
                   <div className="border-b border-slate-100 pb-2">
                     <dt className="text-xs uppercase tracking-wide text-slate-500">Tên POI</dt>
@@ -827,46 +861,46 @@ function AdvertisementsPage() {
                     </dd>
                   </div>
                 </dl>
+
+                {/* Extra info */}
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                  <div className="border-b border-slate-100 pb-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500">Chi phí dự kiến</dt>
+                    <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.ApproxCost || "—"}</dd>
+                  </div>
+                  <div className="border-b border-slate-100 pb-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500">Loại địa điểm</dt>
+                    <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.IsIndoor ? "Trong nhà (Indoor)" : "Ngoài trời (Outdoor)"}</dd>
+                  </div>
+                  <div className="border-b border-slate-100 pb-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500">Giờ mở cửa</dt>
+                    <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.OpenHour || "—"}</dd>
+                  </div>
+                  <div className="border-b border-slate-100 pb-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500">Giờ đóng cửa</dt>
+                    <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.CloseHour || "—"}</dd>
+                  </div>
+                  <div className="border-b border-slate-100 pb-2 col-span-1 sm:col-span-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500">Tọa độ (Latitude / Longitude)</dt>
+                    <dd className="mt-1 text-sm text-slate-800">
+                      {Number.isFinite(selectedPoiDetail.Latitude) ? selectedPoiDetail.Latitude.toFixed(6) : "—"}
+                      {" / "}
+                      {Number.isFinite(selectedPoiDetail.Longitude) ? selectedPoiDetail.Longitude.toFixed(6) : "—"}
+                    </dd>
+                  </div>
+                  <div className="border-b border-slate-100 pb-2 col-span-1 sm:col-span-2">
+                    <dt className="text-xs uppercase tracking-wide text-slate-500">Đăng bởi đối tác</dt>
+                    <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoiDetail.PartnerName || selectedPoiDetail.PartnerId || "—"}</dd>
+                  </div>
+                </dl>
+
+                {selectedPoiDetail.VisitRecommendation && (
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">
+                    <dt className="text-xs font-bold text-slate-500 uppercase tracking-wide">Gợi ý tham quan</dt>
+                    <dd className="text-sm text-slate-600 leading-relaxed">{selectedPoiDetail.VisitRecommendation}</dd>
+                  </div>
+                )}
               </div>
-
-              {/* Grid 2 Column for extra info */}
-              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">Chi phí dự kiến</dt>
-                  <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.ApproxCost || "—"}</dd>
-                </div>
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">Loại địa điểm</dt>
-                  <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.IsIndoor ? "Trong nhà (Indoor)" : "Ngoài trời (Outdoor)"}</dd>
-                </div>
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">Giờ mở cửa</dt>
-                  <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.OpenHour || "—"}</dd>
-                </div>
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">Giờ đóng cửa</dt>
-                  <dd className="mt-1 text-sm text-slate-800">{selectedPoiDetail.CloseHour || "—"}</dd>
-                </div>
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">Tọa độ (Latitude / Longitude)</dt>
-                  <dd className="mt-1 text-sm text-slate-800">
-                    {Number.isFinite(selectedPoiDetail.Latitude) ? selectedPoiDetail.Latitude.toFixed(6) : "—"}
-                    {" / "}
-                    {Number.isFinite(selectedPoiDetail.Longitude) ? selectedPoiDetail.Longitude.toFixed(6) : "—"}
-                  </dd>
-                </div>
-                <div className="border-b border-slate-100 pb-2">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">Đăng bởi đối tác</dt>
-                  <dd className="mt-1 text-sm text-slate-800 break-all">{selectedPoiDetail.PartnerName || selectedPoiDetail.PartnerId || "—"}</dd>
-                </div>
-              </dl>
-
-              {selectedPoiDetail.VisitRecommendation && (
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">
-                  <dt className="text-xs font-bold text-slate-500 uppercase tracking-wide">Gợi ý tham quan</dt>
-                  <dd className="text-sm text-slate-600 leading-relaxed">{selectedPoiDetail.VisitRecommendation}</dd>
-                </div>
-              )}
             </div>
 
             {/* Modal Footer */}

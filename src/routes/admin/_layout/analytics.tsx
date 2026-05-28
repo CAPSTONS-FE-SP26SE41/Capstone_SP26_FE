@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { Users, MapPin, Megaphone, UserPlus } from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -98,40 +99,68 @@ function AdminAnalytics() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
-          <p className="text-text-secondary text-sm font-medium">
-            Tổng tài khoản
-          </p>
-          <p className="text-2xl font-bold text-text-main mt-2">
-            {stats.totalAccounts}
-          </p>
+        {/* Card 1: Tổng tài khoản */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-white to-blue-50/20 p-5 rounded-2xl border border-[#e7edf4] shadow-sm flex items-center justify-between transition-all hover:shadow-md hover:-translate-y-0.5 duration-300 group">
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 to-cyan-400" />
+          <div>
+            <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">
+              Tổng tài khoản
+            </p>
+            <p className="text-3xl font-extrabold text-slate-800 mt-2">
+              {stats.totalAccounts}
+            </p>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-blue-50 group-hover:bg-blue-500 group-hover:text-white flex items-center justify-center text-blue-600 transition-all duration-300 shadow-sm">
+            <Users size={22} />
+          </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
-          <p className="text-text-secondary text-sm font-medium">
-            Tổng địa điểm (POI)
-          </p>
-          <p className="text-2xl font-bold text-text-main mt-2">
-            {stats.totalPois}
-          </p>
+        {/* Card 2: Tổng địa điểm (POI) */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-white to-emerald-50/20 p-5 rounded-2xl border border-[#e7edf4] shadow-sm flex items-center justify-between transition-all hover:shadow-md hover:-translate-y-0.5 duration-300 group">
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-500 to-teal-400" />
+          <div>
+            <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">
+              Tổng địa điểm (POI)
+            </p>
+            <p className="text-3xl font-extrabold text-slate-800 mt-2">
+              {stats.totalPois}
+            </p>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 group-hover:bg-emerald-500 group-hover:text-white flex items-center justify-center text-emerald-600 transition-all duration-300 shadow-sm">
+            <MapPin size={22} />
+          </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
-          <p className="text-text-secondary text-sm font-medium">
-            Tổng quảng cáo
-          </p>
-          <p className="text-2xl font-bold text-text-main mt-2">
-            {stats.totalAds}
-          </p>
+        {/* Card 3: Tổng quảng cáo */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-white to-amber-50/20 p-5 rounded-2xl border border-[#e7edf4] shadow-sm flex items-center justify-between transition-all hover:shadow-md hover:-translate-y-0.5 duration-300 group">
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-amber-500 to-orange-400" />
+          <div>
+            <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">
+              Tổng quảng cáo
+            </p>
+            <p className="text-3xl font-extrabold text-slate-800 mt-2">
+              {stats.totalAds}
+            </p>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-amber-50 group-hover:bg-amber-500 group-hover:text-white flex items-center justify-center text-amber-600 transition-all duration-300 shadow-sm">
+            <Megaphone size={22} />
+          </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-[#e7edf4] shadow-sm">
-          <p className="text-text-secondary text-sm font-medium">
-            Tài khoản mới
-          </p>
-          <p className="text-2xl font-bold text-emerald-600 mt-2">
-            +{stats.accountGrowth.reduce((sum, item) => sum + item.newAccounts, 0)}
-          </p>
+        {/* Card 4: Tài khoản mới */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-white to-purple-50/20 p-5 rounded-2xl border border-[#e7edf4] shadow-sm flex items-center justify-between transition-all hover:shadow-md hover:-translate-y-0.5 duration-300 group">
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-purple-500 to-indigo-400" />
+          <div>
+            <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">
+              Tài khoản mới
+            </p>
+            <p className="text-3xl font-extrabold text-slate-800 mt-2">
+              +{stats.accountGrowth.reduce((sum, item) => sum + item.newAccounts, 0)}
+            </p>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-purple-50 group-hover:bg-purple-500 group-hover:text-white flex items-center justify-center text-purple-600 transition-all duration-300 shadow-sm">
+            <UserPlus size={22} />
+          </div>
         </div>
       </div>
 

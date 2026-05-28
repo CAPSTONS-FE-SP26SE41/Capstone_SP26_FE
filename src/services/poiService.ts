@@ -459,14 +459,6 @@ export const updateStaffPOI = async (
     return s
   }
 
-  // Backend của bạn có endpoint upload ảnh riêng:
-  // POST /api/manager/pois/upload-image -> trả về URL ảnh
-  // Sau đó update POI bằng POIImgUrl (string) sẽ giúp GET chi tiết trả ảnh đúng.
-  let poiImgUrlForUpdate = payload.POIImgUrl ?? ""
-  if (imageFile) {
-    poiImgUrlForUpdate = await uploadStaffPOIImage(imageFile)
-  }
-
   const formData = new FormData()
   formData.append("Name", payload.Name ?? "")
   formData.append("Address", payload.Address ?? "")
@@ -477,7 +469,10 @@ export const updateStaffPOI = async (
   formData.append("DistrictId", payload.DistrictId ?? "")
   formData.append("GoogleMapLink", payload.GoogleMapLink ?? "")
   formData.append("IsIndoor", String(Boolean(payload.IsIndoor)))
-  formData.append("POIImgUrl", poiImgUrlForUpdate ?? "")
+
+  if (imageFile) {
+    formData.append("POIImgUrl", imageFile)
+  }
 
   if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
     formData.append("VisitRecommendation", payload.VisitRecommendation.trim())

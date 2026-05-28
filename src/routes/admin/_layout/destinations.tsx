@@ -261,36 +261,17 @@ function AdminDestinations() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full h-10 pl-10 pr-4 bg-slate-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5ab473] transition-all border border-slate-200"
+            className="w-full h-10 pl-10 pr-4 bg-slate-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#258cf4] transition-all border border-slate-200"
             placeholder="Tìm theo ID, tên, tọa độ..."
           />
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-[#5ab473] hover:bg-[#499A60] text-white text-sm font-semibold transition-colors whitespace-nowrap shadow-sm"
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-[#258cf4] hover:bg-[#1d72cb] text-white text-sm font-semibold transition-colors whitespace-nowrap shadow-sm"
         >
           <Plus size={16} />
           Tạo mới
         </button>
-        <label className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${
-          importing
-            ? "bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
-            : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300 shadow-sm"
-        }`}>
-          <Upload size={16} />
-          {importing ? "Đang import..." : "Import Excel"}
-          <input
-            type="file"
-            accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-            className="hidden"
-            disabled={importing}
-            onChange={(e) => {
-              const file = e.target.files?.[0] ?? null
-              void handleImportFile(file)
-              e.currentTarget.value = ""
-            }}
-          />
-        </label>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -398,7 +379,7 @@ function AdminDestinations() {
                 <select
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
-                  className="h-10 rounded-xl border border-slate-200 bg-slate-50 text-sm px-3 outline-none focus:ring-2 focus:ring-[#5ab473]"
+                  className="h-10 rounded-xl border border-slate-200 bg-slate-50 text-sm px-3 outline-none focus:ring-2 focus:ring-[#258cf4]"
                 >
                   <option value={10}>10 / trang</option>
                   <option value={20}>20 / trang</option>
@@ -419,7 +400,7 @@ function AdminDestinations() {
                     onClick={() => setPage(p)}
                     className={`h-10 w-10 rounded-xl border text-sm font-semibold transition-colors ${
                       p === page
-                        ? "bg-[#5ab473] border-[#5ab473] text-white"
+                        ? "bg-[#258cf4] border-[#258cf4] text-white"
                         : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
                     }`}
                   >
@@ -464,7 +445,7 @@ function AdminDestinations() {
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, LocationName: e.target.value }))
                   }
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none font-normal focus:ring-2 focus:ring-[#5ab473]/30 focus:border-[#5ab473]"
+                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none font-normal focus:ring-2 focus:ring-[#258cf4]/30 focus:border-[#258cf4]"
                   required
                 />
               </label>
@@ -479,7 +460,7 @@ function AdminDestinations() {
                     onChange={(e) =>
                       setForm((prev) => ({ ...prev, Latitude: e.target.value }))
                     }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none font-normal focus:ring-2 focus:ring-[#5ab473]/30 focus:border-[#5ab473]"
+                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none font-normal focus:ring-2 focus:ring-[#258cf4]/30 focus:border-[#258cf4]"
                     required
                   />
                 </label>
@@ -492,7 +473,7 @@ function AdminDestinations() {
                     onChange={(e) =>
                       setForm((prev) => ({ ...prev, Longitude: e.target.value }))
                     }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none font-normal focus:ring-2 focus:ring-[#5ab473]/30 focus:border-[#5ab473]"
+                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none font-normal focus:ring-2 focus:ring-[#258cf4]/30 focus:border-[#258cf4]"
                     required
                   />
                 </label>
@@ -512,7 +493,7 @@ function AdminDestinations() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="h-10 px-4 rounded-xl bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold disabled:opacity-60"
+                  className="h-10 px-4 rounded-xl bg-[#258cf4] hover:bg-[#1d72cb] text-white font-semibold disabled:opacity-60"
                 >
                   {saving ? "Đang tạo..." : "Tạo mới"}
                 </button>
@@ -547,7 +528,7 @@ function AdminDestinations() {
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, LocationName: e.target.value }))
                   }
-                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none font-normal focus:ring-2 focus:ring-[#5ab473]/30 focus:border-[#5ab473]"
+                  className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none font-normal focus:ring-2 focus:ring-[#258cf4]/30 focus:border-[#258cf4]"
                   required
                 />
               </label>
@@ -562,7 +543,7 @@ function AdminDestinations() {
                     onChange={(e) =>
                       setForm((prev) => ({ ...prev, Latitude: e.target.value }))
                     }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none font-normal focus:ring-2 focus:ring-[#5ab473]/30 focus:border-[#5ab473]"
+                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none font-normal focus:ring-2 focus:ring-[#258cf4]/30 focus:border-[#258cf4]"
                     required
                   />
                 </label>
@@ -575,7 +556,7 @@ function AdminDestinations() {
                     onChange={(e) =>
                       setForm((prev) => ({ ...prev, Longitude: e.target.value }))
                     }
-                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none font-normal focus:ring-2 focus:ring-[#5ab473]/30 focus:border-[#5ab473]"
+                    className="mt-1 w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none font-normal focus:ring-2 focus:ring-[#258cf4]/30 focus:border-[#258cf4]"
                     required
                   />
                 </label>
@@ -596,7 +577,7 @@ function AdminDestinations() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="h-10 px-4 rounded-xl bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold disabled:opacity-60"
+                  className="h-10 px-4 rounded-xl bg-[#258cf4] hover:bg-[#1d72cb] text-white font-semibold disabled:opacity-60"
                 >
                   {saving ? "Đang cập nhật..." : "Cập nhật"}
                 </button>

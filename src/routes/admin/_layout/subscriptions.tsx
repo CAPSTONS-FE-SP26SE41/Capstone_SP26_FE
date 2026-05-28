@@ -96,7 +96,7 @@ function FilterDropdown({
               onClick={() => {
                 onChange(opt)
               }}
-              className={`w-full text-left px-4 py-2 hover:bg-[#e9f5ed] hover:text-[#5ab473] transition-colors ${value === opt ? "bg-[#e9f5ed]/50 text-[#5ab473] font-medium" : "text-slate-700"}`}
+              className={`w-full text-left px-4 py-2 hover:bg-[#e6f0fa] hover:text-[#258cf4] transition-colors ${value === opt ? "bg-[#e6f0fa]/50 text-[#258cf4] font-medium" : "text-slate-700"}`}
             >
               {opt}
             </button>
@@ -352,7 +352,7 @@ function SubscriptionsPage() {
           {/* Action Button */}
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors"
+            className="flex items-center gap-2 bg-[#258cf4] hover:bg-[#1d72cb] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors"
           >
             <Plus size={18} />
             <span className="text-sm">Thêm gói</span>
@@ -455,7 +455,7 @@ function SubscriptionsPage() {
 
 
                   <td
-                    className="px-4 py-3 text-left pr-4 border-b border-[#e7edf4] sticky right-0 bg-white group-hover:bg-[#f8fafc] z-10 transition-colors"
+                    className="px-4 py-3 text-left pr-4 border-b border-[#e7edf4] sticky right-0 bg-white group-hover:bg-[#f8fafc] z-10 hover:z-30 transition-colors"
 
                     style={{ boxShadow: "-4px 0 8px -2px rgba(0,0,0,0.06)" }}
                   >
@@ -508,9 +508,7 @@ function SubscriptionsPage() {
               <tr>
                 <td colSpan={8} className="px-6 py-12 text-center text-text-secondary">
                   <div className="flex flex-col items-center gap-2">
-                    <span className="text-4xl text-slate-300">📦</span>
                     <p className="font-medium">Chưa có gói dịch vụ nào</p>
-                    <p className="text-xs">Tạo gói dịch vụ đầu tiên của bạn</p>
                   </div>
                 </td>
               </tr>
@@ -590,7 +588,7 @@ function SubscriptionsPage() {
                   placeholder="Ví dụ: Gói Cao Cấp"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#258cf4]/20 focus:border-[#258cf4] transition-all"
                 />
               </div>
 
@@ -605,7 +603,7 @@ function SubscriptionsPage() {
                   maxLength={500}
                   rows={3}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all resize-none"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#258cf4]/20 focus:border-[#258cf4] transition-all resize-none"
                 />
               </div>
 
@@ -616,7 +614,7 @@ function SubscriptionsPage() {
                     type="number"
                     value={form.price}
                     onChange={(e) => setForm({ ...form, price: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#258cf4]/20 focus:border-[#258cf4] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
 
@@ -626,7 +624,7 @@ function SubscriptionsPage() {
                     type="number"
                     value={form.durationDays}
                     onChange={(e) => setForm({ ...form, durationDays: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#258cf4]/20 focus:border-[#258cf4] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
@@ -637,7 +635,7 @@ function SubscriptionsPage() {
                   type="number"
                   value={form.maxAdsPerPeriod}
                   onChange={(e) => setForm({ ...form, maxAdsPerPeriod: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5ab473]/20 focus:border-[#5ab473] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#258cf4]/20 focus:border-[#258cf4] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
             </div>
@@ -652,7 +650,7 @@ function SubscriptionsPage() {
               </button>
               <button
                 onClick={handleSubmit}
-                className="px-5 py-2.5 text-sm font-semibold text-white bg-[#5ab473] hover:bg-[#499A60] rounded-xl shadow-sm transition-colors"
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-[#258cf4] hover:bg-[#1d72cb] rounded-xl shadow-sm transition-colors"
               >
                 {editing ? "Lưu thay đổi" : "Tạo gói mới"}
               </button>

@@ -1,7 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import {
   LayoutDashboard,
-  Users,
   Calendar,
   Map,
   BarChart2,
@@ -86,14 +85,13 @@ function AdminLayout() {
         { to: '/admin/accounts', icon: UserCog, label: 'Quản lý tài khoản', exact: true },
         { to: '/admin/destinations', icon: Map, label: 'Quản lý địa điểm' },
         { to: '/admin/subscriptions', icon: CreditCard, label: 'Gói dịch vụ' },
-        { to: '/admin/profile', icon: Users, label: 'Hồ sơ' },
       ]}
 
       userName={userName}
       userRole={userRole}
       userAvatarUrl={userAvatar}
       searchPlaceholder="Tìm kiếm tài khoản, gói dịch vụ..."
-      themeColor="green"
+      themeColor="blue"
 
     />
 

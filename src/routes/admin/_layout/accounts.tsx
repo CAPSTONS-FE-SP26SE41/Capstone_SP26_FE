@@ -71,7 +71,7 @@ function FilterDropdown({
               onClick={() => {
                 onChange(opt)
               }}
-              className={`w-full text-left px-4 py-2 hover:bg-[#e9f5ed] hover:text-[#5ab473] transition-colors ${value === opt ? "bg-[#e9f5ed]/50 text-[#5ab473] font-medium" : "text-slate-700"}`}
+              className={`w-full text-left px-4 py-2 hover:bg-[#e6f0fa] hover:text-[#258cf4] transition-colors ${value === opt ? "bg-[#e6f0fa]/50 text-[#258cf4] font-medium" : "text-slate-700"}`}
             >
               {opt}
             </button>
@@ -264,7 +264,7 @@ function AccountsPage() {
           </div>
 
           {/* Action Button */}
-          <button className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors">
+          <button className="flex items-center gap-2 bg-[#258cf4] hover:bg-[#1d72cb] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors">
             <Plus size={18} />
             <span className="text-sm">Tạo tài khoản mới</span>
           </button>
