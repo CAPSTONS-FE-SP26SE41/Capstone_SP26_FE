@@ -20,6 +20,7 @@ import { Route as StaffLayoutIndexRouteImport } from './routes/staff/_layout/ind
 import { Route as PartnerLayoutIndexRouteImport } from './routes/partner/_layout/index'
 import { Route as AdminLayoutIndexRouteImport } from './routes/admin/_layout/index'
 import { Route as StaffLayoutPoisRouteImport } from './routes/staff/_layout/pois'
+import { Route as StaffLayoutPartnerRequestsRouteImport } from './routes/staff/_layout/partner-requests'
 import { Route as StaffLayoutLocationsRouteImport } from './routes/staff/_layout/locations'
 import { Route as StaffLayoutAdvertisementsRouteImport } from './routes/staff/_layout/advertisements'
 import { Route as PartnerLayoutStatsRouteImport } from './routes/partner/_layout/stats'
@@ -99,6 +100,12 @@ const StaffLayoutPoisRoute = StaffLayoutPoisRouteImport.update({
   path: '/pois',
   getParentRoute: () => StaffLayoutRoute,
 } as any)
+const StaffLayoutPartnerRequestsRoute =
+  StaffLayoutPartnerRequestsRouteImport.update({
+    id: '/partner-requests',
+    path: '/partner-requests',
+    getParentRoute: () => StaffLayoutRoute,
+  } as any)
 const StaffLayoutLocationsRoute = StaffLayoutLocationsRouteImport.update({
   id: '/locations',
   path: '/locations',
@@ -244,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/partner/stats': typeof PartnerLayoutStatsRoute
   '/staff/advertisements': typeof StaffLayoutAdvertisementsRoute
   '/staff/locations': typeof StaffLayoutLocationsRoute
+  '/staff/partner-requests': typeof StaffLayoutPartnerRequestsRoute
   '/staff/pois': typeof StaffLayoutPoisRouteWithChildren
   '/admin/': typeof AdminLayoutIndexRoute
   '/partner/': typeof PartnerLayoutIndexRoute
@@ -277,6 +285,7 @@ export interface FileRoutesByTo {
   '/partner/stats': typeof PartnerLayoutStatsRoute
   '/staff/advertisements': typeof StaffLayoutAdvertisementsRoute
   '/staff/locations': typeof StaffLayoutLocationsRoute
+  '/staff/partner-requests': typeof StaffLayoutPartnerRequestsRoute
   '/staff/pois': typeof StaffLayoutPoisRouteWithChildren
   '/admin': typeof AdminLayoutIndexRoute
   '/partner': typeof PartnerLayoutIndexRoute
@@ -314,6 +323,7 @@ export interface FileRoutesById {
   '/partner/_layout/stats': typeof PartnerLayoutStatsRoute
   '/staff/_layout/advertisements': typeof StaffLayoutAdvertisementsRoute
   '/staff/_layout/locations': typeof StaffLayoutLocationsRoute
+  '/staff/_layout/partner-requests': typeof StaffLayoutPartnerRequestsRoute
   '/staff/_layout/pois': typeof StaffLayoutPoisRouteWithChildren
   '/admin/_layout/': typeof AdminLayoutIndexRoute
   '/partner/_layout/': typeof PartnerLayoutIndexRoute
@@ -352,6 +362,7 @@ export interface FileRouteTypes {
     | '/partner/stats'
     | '/staff/advertisements'
     | '/staff/locations'
+    | '/staff/partner-requests'
     | '/staff/pois'
     | '/admin/'
     | '/partner/'
@@ -385,6 +396,7 @@ export interface FileRouteTypes {
     | '/partner/stats'
     | '/staff/advertisements'
     | '/staff/locations'
+    | '/staff/partner-requests'
     | '/staff/pois'
     | '/admin'
     | '/partner'
@@ -421,6 +433,7 @@ export interface FileRouteTypes {
     | '/partner/_layout/stats'
     | '/staff/_layout/advertisements'
     | '/staff/_layout/locations'
+    | '/staff/_layout/partner-requests'
     | '/staff/_layout/pois'
     | '/admin/_layout/'
     | '/partner/_layout/'
@@ -526,6 +539,13 @@ declare module '@tanstack/react-router' {
       path: '/pois'
       fullPath: '/staff/pois'
       preLoaderRoute: typeof StaffLayoutPoisRouteImport
+      parentRoute: typeof StaffLayoutRoute
+    }
+    '/staff/_layout/partner-requests': {
+      id: '/staff/_layout/partner-requests'
+      path: '/partner-requests'
+      fullPath: '/staff/partner-requests'
+      preLoaderRoute: typeof StaffLayoutPartnerRequestsRouteImport
       parentRoute: typeof StaffLayoutRoute
     }
     '/staff/_layout/locations': {
@@ -757,6 +777,7 @@ const StaffLayoutPoisRouteWithChildren = StaffLayoutPoisRoute._addFileChildren(
 interface StaffLayoutRouteChildren {
   StaffLayoutAdvertisementsRoute: typeof StaffLayoutAdvertisementsRoute
   StaffLayoutLocationsRoute: typeof StaffLayoutLocationsRoute
+  StaffLayoutPartnerRequestsRoute: typeof StaffLayoutPartnerRequestsRoute
   StaffLayoutPoisRoute: typeof StaffLayoutPoisRouteWithChildren
   StaffLayoutIndexRoute: typeof StaffLayoutIndexRoute
 }
@@ -764,6 +785,7 @@ interface StaffLayoutRouteChildren {
 const StaffLayoutRouteChildren: StaffLayoutRouteChildren = {
   StaffLayoutAdvertisementsRoute: StaffLayoutAdvertisementsRoute,
   StaffLayoutLocationsRoute: StaffLayoutLocationsRoute,
+  StaffLayoutPartnerRequestsRoute: StaffLayoutPartnerRequestsRoute,
   StaffLayoutPoisRoute: StaffLayoutPoisRouteWithChildren,
   StaffLayoutIndexRoute: StaffLayoutIndexRoute,
 }

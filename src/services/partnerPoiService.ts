@@ -54,7 +54,7 @@ export interface CreatePartnerPOIPayload {
   OpenHour: string
   CloseHour: string
   Is24Hours: boolean
-  VisitRecommendation: string
+  VisitRecommendation?: string
   GoogleMapLink: string
   IsIndoor: boolean
   Type: POIType
@@ -102,8 +102,8 @@ function normalizePOI(p: any): PartnerPOI {
     locationId: String(p?.LocationId ?? p?.locationId ?? ""),
     locationName: p?.LocationName ?? p?.locationName ?? null,
     districtId: String(p?.DistrictId ?? p?.districtId ?? ""),
-    poiPreferences: Array.isArray(p?.POIPreferences ?? p?.poiPreferences)
-      ? (p?.POIPreferences ?? p?.poiPreferences)
+    poiPreferences: Array.isArray(p?.POIPreferences ?? p?.poiPreferences ?? p?.Preferences ?? p?.preferences)
+      ? (p?.POIPreferences ?? p?.poiPreferences ?? p?.Preferences ?? p?.preferences)
       : [],
   }
 }
@@ -193,7 +193,9 @@ export const createPartnerPOI = async (
   formData.append("OpenHour", payload.OpenHour)
   formData.append("CloseHour", payload.CloseHour)
   formData.append("Is24Hours", String(payload.Is24Hours))
-  formData.append("VisitRecommendation", payload.VisitRecommendation)
+  if (payload.VisitRecommendation) {
+    formData.append("VisitRecommendation", payload.VisitRecommendation)
+  }
   formData.append("GoogleMapLink", payload.GoogleMapLink)
   formData.append("IsIndoor", String(payload.IsIndoor))
   formData.append("Type", payload.Type)
@@ -240,7 +242,7 @@ export const getMyPartnerPOIs = async (
   pageSize: number = 10
 ): Promise<PagedResult<PartnerPOI>> => {
   const data = await apiClient(
-    `/partner/pois/my?page=${page}&pageSize=${pageSize}`
+    `/partner/pois/my?page=${page}&pageSize=${pageSize}&_t=${Date.now()}`
   )
 
   // Handle both paged and array responses
@@ -270,7 +272,7 @@ export const getMyPartnerPOIById = async (
   id: string
 ): Promise<PartnerPOI | null> => {
   try {
-    const data = await apiClient(`/partner/pois/my/${id}`)
+    const data = await apiClient(`/partner/pois/my/${id}?_t=${Date.now()}`)
     if (!data) return null
     return normalizePOI(data)
   } catch {
@@ -371,4 +373,39 @@ export const requestReactivationMyPartnerPOI = async (
   )
 
   return normalizePOI(data?.poi ?? data)
+}
+
+export const createDistrict = async (
+  name: string,
+  locationId: string
+): Promise<District> => {
+  const data = await apiClient("/districts", {
+    method: "POST",
+    body: JSON.stringify({ name, locationId }),
+  })
+  return {
+    id: String(data?.Id ?? data?.id ?? ""),
+    name: String(data?.Name ?? data?.name ?? ""),
+  }
+}
+
+export const updateDistrict = async (
+  id: string,
+  name: string,
+  locationId: string
+): Promise<District> => {
+  const data = await apiClient(`/districts/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    body: JSON.stringify({ name, locationId }),
+  })
+  return {
+    id: String(data?.Id ?? data?.id ?? ""),
+    name: String(data?.Name ?? data?.name ?? ""),
+  }
+}
+
+export const deleteDistrict = async (id: string): Promise<void> => {
+  await apiClient(`/districts/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  })
 }

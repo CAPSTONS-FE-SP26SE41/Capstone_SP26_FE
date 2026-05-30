@@ -8,12 +8,14 @@ import CreateAdModal from '../../../components/partner/CreateAdModal'
 import { Ad } from '../../../types/ad'
 import { getMyAdvertisements, createAdvertisement, updateAdvertisement } from '../../../services/advertisementService'
 import { getMyActiveSubscription } from '../../../services/subscriptionService'
+import { useAlert } from '@/components/ui/AlertContext'
 
 export const Route = createFileRoute('/partner/_layout/advertisement')({
   component: PartnerAdvertisementPage,
 })
 
 function PartnerAdvertisementPage() {
+  const { showError } = useAlert()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingAd, setEditingAd] = useState<Ad | null>(null)
   const [ads, setAds] = useState<Ad[]>([])
@@ -89,7 +91,9 @@ function PartnerAdvertisementPage() {
             title: formData.promotion?.title ?? "",
             description: formData.promotion?.description,
             terms: formData.promotion?.terms,
+            limitSaveCount: formData.promotion?.limitSaveCount,
           },
+
         }, imageFile, videoFile)
       } else {
         await createAdvertisement({
@@ -102,7 +106,9 @@ function PartnerAdvertisementPage() {
             title: formData.promotion?.title ?? "",
             description: formData.promotion?.description,
             terms: formData.promotion?.terms,
+            limitSaveCount: formData.promotion?.limitSaveCount,
           },
+
         }, imageFile, videoFile)
       }
       setIsModalOpen(false)
@@ -110,7 +116,7 @@ function PartnerAdvertisementPage() {
       fetchAds()
     } catch (error) {
       console.error("Error submitting ad:", error)
-      alert("Có lỗi xảy ra khi xử lý quảng cáo. Vui lòng thử lại.")
+      showError("Có lỗi xảy ra khi xử lý quảng cáo. Vui lòng thử lại.")
     }
   }
 

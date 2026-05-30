@@ -71,7 +71,7 @@ function FilterDropdown({
               onClick={() => {
                 onChange(opt)
               }}
-              className={`w-full text-left px-4 py-2 hover:bg-[#e9f5ed] hover:text-[#5ab473] transition-colors ${value === opt ? "bg-[#e9f5ed]/50 text-[#5ab473] font-medium" : "text-slate-700"}`}
+              className={`w-full text-left px-4 py-2 hover:bg-[#e6f0fa] hover:text-[#258cf4] transition-colors ${value === opt ? "bg-[#e6f0fa]/50 text-[#258cf4] font-medium" : "text-slate-700"}`}
             >
               {opt}
             </button>
@@ -264,7 +264,7 @@ function AccountsPage() {
           </div>
 
           {/* Action Button */}
-          <button className="flex items-center gap-2 bg-[#5ab473] hover:bg-[#499A60] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors">
+          <button className="flex items-center gap-2 bg-[#258cf4] hover:bg-[#1d72cb] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors">
             <Plus size={18} />
             <span className="text-sm">Tạo tài khoản mới</span>
           </button>
@@ -362,20 +362,21 @@ function AccountsPage() {
 
                     {/* Actions */}
                     <td className="px-6 py-4 text-right pr-6">
-
-                      <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-                        <ToggleSwitch
-                          initialState={account.status === "Active"}
-                          onChange={(state) => {
-                            if (state) {
-                              handleActivate(account.id)
-                            } else {
-                              handleDisable(account.id)
-                            }
-                          }}
-                        />
-                      </div>
-
+                      {account.role.name.trim().toUpperCase() !== "ADMIN" &&
+                      account.role.name.trim().toUpperCase() !== "SUPERADMIN" ? (
+                        <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+                          <ToggleSwitch
+                            initialState={account.status === "Active"}
+                            onChange={(state) => {
+                              if (state) {
+                                handleActivate(account.id)
+                              } else {
+                                handleDisable(account.id)
+                              }
+                            }}
+                          />
+                        </div>
+                      ) : null}
                     </td>
 
                   </tr>
@@ -396,9 +397,7 @@ function AccountsPage() {
                         Không tìm thấy tài khoản nào
                       </p>
 
-                      <p className="text-xs">
-                        Tạo tài khoản mới để bắt đầu
-                      </p>
+
 
 
                     </div>

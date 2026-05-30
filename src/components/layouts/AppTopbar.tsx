@@ -1,4 +1,4 @@
-import { Bell, LogOut, Search } from 'lucide-react'
+import { LogOut, Search } from 'lucide-react'
 import { useLocation, useNavigate } from '@tanstack/react-router'
 import { logout } from '../../services/authService'
 
@@ -54,6 +54,7 @@ export default function AppTopbar({
 
   const getPageTitle = (path: string) => {
     // Staff
+    if (path.includes('/staff/partner-requests')) return 'Yêu cầu đối tác'
     if (path.includes('/staff/advertisements')) return 'Yêu cầu xét duyệt'
     if (path.includes('/staff/locations')) return 'Quản lý địa điểm'
     if (path.includes('/staff/pois')) return 'Quản lý POIs'
@@ -63,7 +64,7 @@ export default function AppTopbar({
     if (path.includes('/admin/accounts')) return 'Quản lý tài khoản'
     if (path.includes('/admin/analytics')) return 'Thống kê hệ thống'
     if (path.includes('/admin/bookings')) return 'Quản lý đơn đặt chỗ'
-    if (path.includes('/admin/destinations')) return 'Điểm đến phổ biến'
+    if (path.includes('/admin/destinations')) return 'Quản lý địa điểm'
     if (path.includes('/admin/settings')) return 'Cài đặt hệ thống'
     if (path.includes('/admin/subscriptions')) return 'Quản lý gói dịch vụ'
 
@@ -71,6 +72,7 @@ export default function AppTopbar({
     if (path.includes('/partner/stats')) return 'Thống kê kinh doanh'
     if (path.includes('/partner/poi')) return 'Quản lý địa điểm (POI)'
     if (path.includes('/partner/advertisement')) return 'Quản lý quảng cáo'
+    if (path.includes('/partner/packages')) return 'Gói dịch vụ'
     if (path.includes('/partner/subscriptions')) return 'Gói dịch vụ của tôi'
     if (path.includes('/partner/history')) return 'Lịch sử giao dịch'
     if (path.includes('/partner/profile')) return 'Hồ sơ doanh nghiệp'
@@ -83,7 +85,6 @@ export default function AppTopbar({
 
  
 
-  const hoverText = accentClasses.hoverText
   const ringColor = accentClasses.ring
 
   return (
@@ -116,10 +117,13 @@ export default function AppTopbar({
               navigate({ to: '/partner/profile' })
             } else if (location.href.includes('/admin')) {
               navigate({ to: '/admin/profile' })
+            } else if (location.href.includes('/staff')) {
+              // Manager chưa có trang profile riêng
             } else {
-              navigate({ to: '/profile' })
+              navigate({ to: '/profile' as any })
             }
           }}
+
 
           className="flex items-center gap-3 group transition-opacity hover:opacity-80"
         >

@@ -1,11 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useAlert } from '@/components/ui/AlertContext'
 
 export const Route = createFileRoute('/admin/_layout/settings')({
   component: AdminSettings,
 })
 
 function AdminSettings() {
+  const { showSuccess } = useAlert()
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -37,7 +39,7 @@ function AdminSettings() {
 
   const handleSubmit = () => {
     console.log('Saved settings:', form)
-    alert('Đã lưu cài đặt!')
+    showSuccess('Đã lưu cài đặt!')
   }
 
 

@@ -129,7 +129,7 @@ function PartnerHistoryPage() {
                           <span className="text-sm text-slate-600 font-medium">{t.paymentMethod}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-slate-500 text-sm whitespace-nowrap">{formatDate(t.paidAt || t.transactionDate)}</td>
+                      <td className="px-6 py-4 text-slate-500 text-sm whitespace-nowrap">{formatDate(t.paidAt || t.createdAt)}</td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(t.status)}`}>
                           {getStatusLabel(t.status)}

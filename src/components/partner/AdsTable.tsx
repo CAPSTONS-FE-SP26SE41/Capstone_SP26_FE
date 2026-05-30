@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ImageIcon, MapPin, Calendar, Tag, Eye, X, ExternalLink, Clock, FileText, Play, Pause, Loader2, Edit3 } from 'lucide-react';
 import { Ad } from '../../types/ad';
 import { activateMyAdvertisement, inactivateMyAdvertisement } from '../../services/advertisementService';
+import { useAlert } from '../ui/AlertContext';
 
 interface AdsTableProps {
   ads: Ad[];
@@ -40,6 +41,7 @@ const isValidImageUrl = (url?: string) => {
 };
 
 export default function AdsTable({ ads, poiNameMap = {}, onRefresh, onEdit }: AdsTableProps) {
+  const { showError } = useAlert();
   const [detailAd, setDetailAd] = useState<Ad | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
@@ -54,7 +56,7 @@ export default function AdsTable({ ads, poiNameMap = {}, onRefresh, onEdit }: Ad
       if (onRefresh) onRefresh();
     } catch (error: any) {
       console.error("Error toggling ad status", error);
-      alert(error?.response?.data?.message || "Có lỗi xảy ra khi cập nhật trạng thái.");
+      showError(error?.response?.data?.message || "Có lỗi xảy ra khi cập nhật trạng thái.");
     } finally {
       setActionLoadingId(null);
     }
@@ -126,7 +128,7 @@ export default function AdsTable({ ads, poiNameMap = {}, onRefresh, onEdit }: Ad
                         {typeof ad.promotion.saveCount === 'number' && (
                           <div className="flex items-center gap-1 mt-1 text-[11px] font-bold text-sky-600 bg-sky-50 w-fit px-1.5 py-0.5 rounded-md border border-sky-100">
                             <Tag size={10} className="fill-sky-600" />
-                            {ad.promotion.saveCount} lượt lưu
+                            {ad.promotion.saveCount} / {(ad.promotion.limitSaveCount ?? 0) > 0 ? ad.promotion.limitSaveCount : '∞'}
                           </div>
                         )}
                       </div>
@@ -251,23 +253,13 @@ function AdDetailModal({ ad, onClose, formatDate, poiNameMap }: AdDetailModalPro
       label: 'Lượt lưu ưu đãi',
       value: (
         <span className="font-bold text-sky-600">
-          {ad.promotion?.saveCount ?? 0} lượt
+          {ad.promotion?.saveCount ?? 0} / {ad.promotion?.limitSaveCount && ad.promotion.limitSaveCount > 0 ? ad.promotion.limitSaveCount : '∞'}
         </span>
       ),
     },
   ];
 
-  if (ad.imageUrl) {
-    infoRows.push({
-      icon: <ImageIcon size={16} />,
-      label: 'Hình ảnh',
-      value: (
-        <a href={ad.imageUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline truncate block max-w-xs">
-          Xem hình ảnh
-        </a>
-      ),
-    });
-  }
+
 
   if (ad.videoUrl) {
     infoRows.push({
@@ -282,77 +274,116 @@ function AdDetailModal({ ad, onClose, formatDate, poiNameMap }: AdDetailModalPro
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 p-0 md:p-4 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden mx-4">
-        <div className="max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full h-full md:h-[90vh] md:max-w-6xl rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden flex flex-col z-10">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
+        <div className="flex-shrink-0 px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
           <h2 className="text-lg font-bold text-slate-800">Chi tiết quảng cáo</h2>
-          <button onClick={onClose} className="p-2 hover:bg-red-100 rounded-lg transition-all">
-            <X size={20} className="text-slate-400" />
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-500">
+            <X size={20} />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
-          {/* Image + Title header */}
-          <div className="flex items-start gap-4">
-            {isValidImageUrl(ad.imageUrl) ? (
-              <img src={ad.imageUrl} alt={ad.title} className="h-24 w-24 rounded-2xl object-cover border border-slate-200 flex-shrink-0" />
-            ) : (
-              <div className="h-24 w-24 rounded-2xl bg-[#faeadd] flex items-center justify-center flex-shrink-0">
-                <ImageIcon size={32} className="text-[#e28743]" />
-              </div>
-            )}
-            <div className="min-w-0 flex-1 overflow-hidden">
-              <h3 className="text-xl font-bold text-slate-800 mb-1 break-words">{ad.title}</h3>
-              <div className="flex items-center gap-2 flex-wrap">
+        {/* Body */}
+        <div className="flex-1 min-h-0 p-6 flex flex-col md:grid md:grid-cols-2 md:gap-x-8 overflow-y-auto md:overflow-hidden relative">
+          
+          {/* Cột trái: Hình ảnh quảng cáo */}
+          <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4 flex flex-col">
+            <span className="text-sm font-semibold text-slate-700 block">Hình ảnh quảng cáo</span>
+            <div className="flex-1 min-h-[300px] md:min-h-0 w-full rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 relative group">
+              {isValidImageUrl(ad.imageUrl) ? (
+                <img
+                  src={ad.imageUrl}
+                  alt={ad.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-slate-400">
+                  <div className="text-center">
+                    <ImageIcon size={48} className="mx-auto text-slate-300 mb-2" />
+                    <p className="text-sm">Không có hình ảnh</p>
+                  </div>
+                </div>
+              )}
+              {ad.videoUrl && (
+                <a
+                  href={ad.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <span className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-sm font-semibold flex items-center gap-2">
+                    <ExternalLink size={16} /> Xem Video
+                  </span>
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* Cột phải: Thông tin chi tiết */}
+          <div className="space-y-6 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col">
+            
+            {/* Header info */}
+            <div>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Tiêu đề</span>
+              <h3 className="text-2xl font-extrabold text-slate-900 break-words">{ad.title}</h3>
+              <div className="mt-2 flex items-center gap-2">
                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusStyles[ad.status || ''] || 'bg-slate-100 text-slate-500'}`}>
                   {statusLabels[ad.status || ''] || ad.status || '—'}
                 </span>
               </div>
             </div>
-          </div>
 
-          {/* Info rows */}
-          <div className="space-y-3">
-            {infoRows.map((row, idx) => (
-              <div key={idx} className="flex items-start gap-3 py-2 border-b border-slate-100 last:border-0">
-                <div className="text-slate-400 mt-0.5 flex-shrink-0">{row.icon}</div>
-                <div className="min-w-0 flex-1 overflow-hidden">
-                  <p className="text-xs text-slate-400 font-medium mb-0.5">{row.label}</p>
-                  <div className="text-sm text-slate-700 font-medium break-words">{row.value}</div>
+            {/* Chi tiết từng hàng thông tin */}
+            <div className="space-y-4">
+              {infoRows.map((row, idx) => (
+                <div key={idx} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">{row.label}</span>
+                  <div className="text-sm text-slate-800 font-medium break-words leading-relaxed">{row.value}</div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Promotion */}
-          {ad.promotion?.title && (
-            <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
-              <div className="flex items-start gap-1.5 mb-1">
-                <Tag size={14} className="text-amber-600 mt-0.5 shrink-0" />
-                <p className="text-sm text-amber-700 font-bold break-words">{ad.promotion.title}</p>
-              </div>
-              {ad.promotion.description && (
-                <p className="text-sm text-amber-800 break-words">{ad.promotion.description}</p>
-              )}
-              {ad.promotion.terms && (
-                <p className="text-xs text-amber-600 mt-1 italic break-words">Điều kiện: {ad.promotion.terms}</p>
-              )}
+              ))}
             </div>
-          )}
 
-          {/* Actions */}
-          <div className="flex items-center justify-end pt-2">
-            <button
-              onClick={onClose}
-              className="px-6 py-2.5 border border-slate-200 rounded-xl text-slate-600 font-semibold hover:bg-slate-50 transition-all"
-            >
-              Đóng
-            </button>
+            {/* Khuyến mãi */}
+            {ad.promotion?.title && (
+              <div className="bg-amber-50 border border-amber-100 rounded-xl p-5 space-y-3 relative overflow-hidden flex-shrink-0">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-amber-100/50 rounded-full -mr-12 -mt-12 blur-2xl" />
+                <div className="flex items-center gap-1.5 text-amber-700 font-bold">
+                  <Tag size={16} />
+                  <span>Thông tin Khuyến mãi</span>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-amber-600 uppercase">Tiêu đề khuyến mãi</label>
+                  <p className="font-bold text-slate-800 text-base">{ad.promotion.title}</p>
+                </div>
+                {ad.promotion.description && (
+                  <div>
+                    <label className="text-xs font-bold text-amber-600 uppercase">Mô tả</label>
+                    <p className="text-sm text-slate-700 leading-relaxed">{ad.promotion.description}</p>
+                  </div>
+                )}
+                {ad.promotion.terms && (
+                  <div>
+                    <label className="text-xs font-bold text-amber-600 uppercase">Điều khoản & Điều kiện</label>
+                    <p className="text-xs text-amber-600 italic bg-white/50 p-3 rounded-lg border border-amber-100 mt-1">
+                      {ad.promotion.terms}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Footer */}
+        <div className="flex-shrink-0 px-6 py-4 border-t border-slate-200 flex justify-end bg-slate-50/50">
+          <button
+            onClick={onClose}
+            className="px-6 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors"
+          >
+            Đóng
+          </button>
         </div>
       </div>
     </div>
