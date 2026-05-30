@@ -2,6 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
 import { Edit2, Eye, Plus, Search, Trash2, Upload, X, ImageIcon, Tag, MapPin, Clock, ExternalLink } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 import {
   createStaffPOI,
@@ -31,7 +32,8 @@ function StaffPOIsPage() {
   const [pois, setPois] = useState<StaffPOI[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState("")
-  const [filterType, setFilterType] = useState<"all" | "system" | "partner">("all")
+  const [selectedCityId, setSelectedCityId] = useState("")
+  const [filterType, setFilterType] = useState<"system" | "partner">("system")
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [selectedPoi, setSelectedPoi] = useState<StaffPOI | null>(null)
@@ -66,6 +68,7 @@ function StaffPOIsPage() {
   })
 
   const [createImageFile, setCreateImageFile] = useState<File | null>(null)
+  const [createImagePreviewUrl, setCreateImagePreviewUrl] = useState<string>("")
   const [editingPoiId, setEditingPoiId] = useState("")
   const [editForm, setEditForm] = useState({
     Name: "",
@@ -113,6 +116,7 @@ function StaffPOIsPage() {
     setDistricts([])
     setFormErrors({})
     setCreateImageFile(null)
+    setCreateImagePreviewUrl("")
   }
 
   useEffect(() => {
@@ -156,7 +160,7 @@ function StaffPOIsPage() {
 
   useEffect(() => {
     setPage(1)
-  }, [query, pageSize, filterType])
+  }, [query, pageSize, filterType, selectedCityId])
 
   const filteredPois = useMemo(() => {
     // 1. Lọc theo filterType trước
@@ -167,35 +171,43 @@ function StaffPOIsPage() {
       result = pois.filter((p) => !!p.PartnerId)
     }
 
+    // Lọc theo thành phố
+    if (selectedCityId) {
+      result = result.filter((p) => String(p.LocationId) === selectedCityId)
+    }
+
     // 2. Sau đó lọc theo query tìm kiếm
     const q = query.trim().toLowerCase()
-    if (!q) return result
+    if (q) {
+      result = result.filter((p) => {
+        const haystack = [
+          p.Id,
+          p.Name,
+          p.LocationName,
+          p.ApproxCost,
+          p.Address,
+          String(p.Latitude),
+          String(p.Longitude),
+          p.IsIndoor ? "Trong nhà" : "Ngoài trời",
+          p.LocationId,
+          p.OpenHour,
+          p.CloseHour,
+          p.Is24Hours ? "24 giờ" : "",
+          p.VisitRecommendation,
+          p.ApproxCost,
+          p.GoogleMapLink,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase()
 
-    return result.filter((p) => {
-      const haystack = [
-        p.Id,
-        p.Name,
-        p.LocationName,
-        p.ApproxCost,
-        p.Address,
-        String(p.Latitude),
-        String(p.Longitude),
-        p.IsIndoor ? "Trong nhà" : "Ngoài trời",
-        p.LocationId,
-        p.OpenHour,
-        p.CloseHour,
-        p.Is24Hours ? "24 giờ" : "",
-        p.VisitRecommendation,
-        p.ApproxCost,
-        p.GoogleMapLink,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
+        return haystack.includes(q)
+      })
+    }
 
-      return haystack.includes(q)
-    })
-  }, [pois, query, filterType])
+    // Sắp xếp theo thứ tự chữ cái alphabet tiếng Việt (tránh phân biệt chữ hoa thường)
+    return [...result].sort((a, b) => a.Name.localeCompare(b.Name, "vi", { sensitivity: "base" }))
+  }, [pois, query, filterType, selectedCityId])
 
   useEffect(() => {
     if (!showEditModal) {
@@ -211,6 +223,21 @@ function StaffPOIsPage() {
 
     setEditImagePreviewUrl(editForm.POIImgUrl ?? "")
   }, [showEditModal, editImageFile, editForm.POIImgUrl])
+
+  useEffect(() => {
+    if (!showCreateModal) {
+      setCreateImagePreviewUrl("")
+      return
+    }
+
+    if (createImageFile) {
+      const url = URL.createObjectURL(createImageFile)
+      setCreateImagePreviewUrl(url)
+      return () => URL.revokeObjectURL(url)
+    }
+
+    setCreateImagePreviewUrl("")
+  }, [showCreateModal, createImageFile])
 
   const fallbackLocationOptions = useMemo(() => {
     const seen = new Set<string>()
@@ -272,8 +299,6 @@ function StaffPOIsPage() {
   }, [])
 
   useEffect(() => {
-    if (!showCreateModal || locationOptions.length > 0 || loadingLocations) return
-
     const fetchLocations = async () => {
       try {
         setLoadingLocations(true)
@@ -281,14 +306,13 @@ function StaffPOIsPage() {
         setLocationOptions(data)
       } catch (e) {
         console.error("Failed to fetch locations", e)
-        showToast("error", "Không tải được danh sách location")
       } finally {
         setLoadingLocations(false)
       }
     }
 
     fetchLocations()
-  }, [showCreateModal, showEditModal, locationOptions.length, loadingLocations])
+  }, [])
 
   useEffect(() => {
     const locId = showCreateModal ? createForm.LocationId : (showEditModal ? editForm.LocationId : null)
@@ -330,6 +354,12 @@ function StaffPOIsPage() {
   }
 
   const handleToggleStatus = async (poi: StaffPOI) => {
+    // Đối với các POI của đối tác, manager khi đã chuyển trạng thái thì không có quyền bật lại
+    if (poi.PartnerId && poi.Status !== "Active") {
+      showToast("error", "Đối tác cần phải gửi yêu cầu mở lại POI này")
+      return
+    }
+
     const currentStatus = poi.Status === "Active" ? "Active" : "Inactive"
     const nextStatus = currentStatus === "Active" ? "Inactive" : "Active"
     try {
@@ -618,10 +648,9 @@ function StaffPOIsPage() {
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-        {/* Removed Title */}
-
-        <div className="w-full sm:w-auto flex flex-wrap items-center gap-2">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        {/* Left side: Search & Action Buttons */}
+        <div className="w-full lg:w-auto flex flex-wrap items-center gap-2">
           <div className="relative w-full sm:w-[320px]">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -631,15 +660,20 @@ function StaffPOIsPage() {
               placeholder="Tìm theo tên, địa chỉ, thành phố..."
             />
           </div>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value as any)}
-            className="h-10 rounded-xl border border-slate-200 bg-white text-sm px-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            <option value="all">Tất cả POIs</option>
-            <option value="system">POIs hệ thống</option>
-            <option value="partner">POIs đối tác (Kinh doanh)</option>
-          </select>
+          <div className="relative w-full sm:w-[200px]">
+            <select
+              value={selectedCityId}
+              onChange={(e) => setSelectedCityId(e.target.value)}
+              className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer text-slate-700"
+            >
+              <option value="">Tất cả thành phố</option>
+              {mergedLocationOptions.map((loc) => (
+                <option key={loc.Id} value={loc.Id}>
+                  {loc.Name || "Không rõ"}
+                </option>
+              ))}
+            </select>
+          </div>
           <button
             onClick={() => setShowCreateModal(true)}
             className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-colors whitespace-nowrap"
@@ -666,6 +700,32 @@ function StaffPOIsPage() {
             />
           </label>
         </div>
+
+        {/* Right side: Subtabs Switcher */}
+        <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 h-10 items-center shadow-inner self-start lg:self-auto">
+          <button
+            type="button"
+            onClick={() => setFilterType("system")}
+            className={`h-8 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ease-in-out flex items-center justify-center whitespace-nowrap ${
+              filterType === "system"
+                ? "bg-white text-emerald-700 shadow-sm"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
+            }`}
+          >
+            POI hệ thống
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilterType("partner")}
+            className={`h-8 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ease-in-out flex items-center justify-center whitespace-nowrap ${
+              filterType === "partner"
+                ? "bg-white text-emerald-700 shadow-sm"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
+            }`}
+          >
+            POI đối tác
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -691,7 +751,7 @@ function StaffPOIsPage() {
           <div className="py-16 text-center text-slate-500">Đang tải POIs...</div>
         ) : filteredPois.length === 0 ? (
           <div className="py-16 text-center text-slate-500">
-            Không có POIs phù hợp với bộ lọc.
+            Không có POIs phù hợp.
           </div>
         ) : (
           <>
@@ -703,6 +763,9 @@ function StaffPOIsPage() {
                       <th className="px-6 py-4 text-left w-16">STT</th>
                       <th className="px-6 py-4 text-left min-w-[280px]">Tên</th>
                       <th className="px-6 py-4 text-left">Thành phố</th>
+                      {filterType === "partner" && (
+                        <th className="px-6 py-4 text-left">Đối tác</th>
+                      )}
                       <th className="px-6 py-4 text-left">Trong nhà</th>
                       <th className="px-6 py-4 text-right pr-12">Thao tác</th>
                     </tr>
@@ -728,6 +791,12 @@ function StaffPOIsPage() {
                           {p.LocationName || "—"}
                         </td>
 
+                        {filterType === "partner" && (
+                          <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap font-medium">
+                            {p.PartnerName || "—"}
+                          </td>
+                        )}
+
 
                         <td className="px-6 py-4">
                           <span
@@ -752,16 +821,18 @@ function StaffPOIsPage() {
                                 <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
                               </span>
                             </button>
-                            <button
-                              onClick={() => void openEditModal(p.Id)}
-                              className="group relative inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors"
-                            >
-                              <Edit2 size={16} />
-                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
-                                Chỉnh sửa
-                                <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
-                              </span>
-                            </button>
+                            {!p.PartnerId && (
+                              <button
+                                onClick={() => void openEditModal(p.Id)}
+                                className="group relative inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors"
+                              >
+                                <Edit2 size={16} />
+                                <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
+                                  Chỉnh sửa
+                                  <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                                </span>
+                              </button>
+                            )}
                             <div className="group relative inline-flex items-center justify-center">
                               <button
                                 type="button"
@@ -1053,8 +1124,92 @@ function StaffPOIsPage() {
               onSubmit={handleCreateSubmit}
               className="flex-1 min-h-0 p-6 flex flex-col md:grid md:grid-cols-2 md:gap-x-8 overflow-y-auto md:overflow-hidden relative"
             >
-              {/* Cột trái */}
-              <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4">
+              {/* Cột trái: Hình ảnh, Preferences, Gợi ý tham quan */}
+              <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4 flex flex-col h-full">
+                {/* Hình ảnh */}
+                <div className="space-y-2">
+                  <span className="text-sm text-slate-700 font-semibold block">Hình ảnh</span>
+                  <div className="flex items-center gap-3">
+                    <label className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 cursor-pointer hover:bg-slate-100 transition-all font-semibold">
+                      <Upload size={16} />
+                      Chọn ảnh
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null
+                          setCreateImageFile(file)
+                        }}
+                      />
+                    </label>
+                    {createImageFile && (
+                      <span className="text-xs text-slate-500 truncate max-w-[200px] bg-slate-50 border border-slate-100 px-2 py-1 rounded-lg">
+                        {createImageFile.name}
+                      </span>
+                    )}
+                  </div>
+                  {/* Image preview box */}
+                  <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 h-[280px] w-full relative">
+                    {createImagePreviewUrl ? (
+                      <img
+                        src={createImagePreviewUrl}
+                        alt={createForm.Name || "POI"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-slate-400 text-sm">
+                        Không có ảnh
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Nhãn Preferences */}
+                <div className="space-y-2">
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Nhãn (Preferences) <span className="text-slate-400 font-normal">(tối đa {MAX_PREFERENCES})</span>
+                  </label>
+                  {loadingPreferences ? (
+                    <p className="text-sm text-slate-500">Đang tải...</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      {preferencesList.map((pref) => {
+                        const isSelected = createForm.PoiPreferences.includes(pref.id)
+                        const canSelectMore = createForm.PoiPreferences.length < MAX_PREFERENCES
+                        const isDisabled = !isSelected && !canSelectMore
+                        return (
+                          <button
+                            type="button"
+                            key={pref.id}
+                            disabled={isDisabled}
+                            onClick={() => {
+                              if (isDisabled) return
+                              setCreateForm((prev) => ({
+                                ...prev,
+                                PoiPreferences: isSelected
+                                  ? prev.PoiPreferences.filter((p) => p !== pref.id)
+                                  : [...prev.PoiPreferences, pref.id],
+                              }))
+                            }}
+                            className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${isSelected
+                              ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                              : isDisabled
+                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-600 hover:text-emerald-600'
+                              }`}
+                          >
+                            {pref.name}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Cột phải: Các trường thông tin */}
+              <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <label className="text-sm text-slate-700 font-semibold block">
                     Tên <span className="text-red-400">*</span>
@@ -1197,79 +1352,9 @@ function StaffPOIsPage() {
                     Trong nhà
                   </label>
                 </div>
-              </div>
-
-              {/* Cột phải */}
-              <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col h-full">
-                {/* Hình ảnh */}
-                <div className="space-y-2">
-                  <span className="text-sm text-slate-700 font-semibold block">Hình ảnh</span>
-                  <div className="flex items-center gap-3">
-                    <label className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 cursor-pointer hover:bg-slate-100 transition-all font-semibold">
-                      <Upload size={16} />
-                      Chọn ảnh
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0] ?? null
-                          setCreateImageFile(file)
-                        }}
-                      />
-                    </label>
-                    {createImageFile && (
-                      <span className="text-xs text-slate-500 truncate max-w-[200px] bg-slate-50 border border-slate-100 px-2 py-1 rounded-lg">
-                        {createImageFile.name}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Nhãn Preferences */}
-                <div className="space-y-2">
-                  <label className="text-sm text-slate-700 font-semibold block">
-                    Nhãn (Preferences) <span className="text-slate-400 font-normal">(tối đa {MAX_PREFERENCES})</span>
-                  </label>
-                  {loadingPreferences ? (
-                    <p className="text-sm text-slate-500">Đang tải...</p>
-                  ) : (
-                    <div className="flex flex-wrap gap-1.5">
-                      {preferencesList.map((pref) => {
-                        const isSelected = createForm.PoiPreferences.includes(pref.id)
-                        const canSelectMore = createForm.PoiPreferences.length < MAX_PREFERENCES
-                        const isDisabled = !isSelected && !canSelectMore
-                        return (
-                          <button
-                            type="button"
-                            key={pref.id}
-                            disabled={isDisabled}
-                            onClick={() => {
-                              if (isDisabled) return
-                              setCreateForm((prev) => ({
-                                ...prev,
-                                PoiPreferences: isSelected
-                                  ? prev.PoiPreferences.filter((p) => p !== pref.id)
-                                  : [...prev.PoiPreferences, pref.id],
-                              }))
-                            }}
-                            className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${isSelected
-                              ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                              : isDisabled
-                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                                : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-600 hover:text-emerald-600'
-                              }`}
-                          >
-                            {pref.name}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
 
                 {/* Gợi ý tham quan */}
-                <div className="flex flex-col flex-1 min-h-[120px]">
+                <div className="flex flex-col">
                   <label className="text-sm text-slate-700 font-semibold block mb-1.5">
                     Gợi ý tham quan (VisitRecommendation)
                   </label>
@@ -1281,7 +1366,7 @@ function StaffPOIsPage() {
                         VisitRecommendation: e.target.value,
                       }))
                     }
-                    className="flex-1 min-h-[80px] md:min-h-0 w-full p-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700 resize-none"
+                    className="w-full p-3 h-24 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700 resize-none"
                     placeholder="VD: Nên đi vào buổi sáng để ngắm cảnh đẹp nhất..."
                   />
                 </div>
@@ -1339,8 +1424,92 @@ function StaffPOIsPage() {
               onSubmit={handleEditSubmit}
               className="flex-1 min-h-0 p-6 flex flex-col md:grid md:grid-cols-2 md:gap-x-8 overflow-y-auto md:overflow-hidden relative"
             >
-              {/* Cột trái */}
-              <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4">
+              {/* Cột trái: Hình ảnh, Preferences, Gợi ý tham quan */}
+              <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4 flex flex-col h-full">
+                {/* Hình ảnh */}
+                <div className="space-y-2">
+                  <span className="text-sm text-slate-700 font-semibold block">Hình ảnh</span>
+                  <div className="flex items-center gap-3">
+                    <label className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 cursor-pointer hover:bg-slate-100 transition-all font-semibold">
+                      <Upload size={16} />
+                      Chọn ảnh mới
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          handleSelectEditImage(e.target.files?.[0] ?? null)
+                          e.currentTarget.value = ""
+                        }}
+                      />
+                    </label>
+                    {editImageFile && (
+                      <span className="text-xs text-slate-500 truncate max-w-[200px] bg-slate-50 border border-slate-100 px-2 py-1 rounded-lg">
+                        {editImageFile.name}
+                      </span>
+                    )}
+                  </div>
+                  {/* Image preview box */}
+                  <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 h-[280px] w-full relative">
+                    {editImagePreviewUrl ? (
+                      <img
+                        src={editImagePreviewUrl}
+                        alt={editForm.Name || "POI"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-slate-400 text-sm">
+                        Không có ảnh
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Nhãn Preferences */}
+                <div className="space-y-2">
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    PoiPreferences <span className="text-slate-400 font-normal">(tối đa {MAX_PREFERENCES})</span>
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    {preferencesList.map((opt) => {
+                      const checked = editForm.PoiPreferences.some((p) => p.id === opt.id)
+                      const canSelectMore = editForm.PoiPreferences.length < MAX_PREFERENCES
+                      const isDisabled = !checked && !canSelectMore
+                      return (
+                        <label
+                          key={opt.id}
+                          className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 text-xs cursor-pointer transition-all ${isDisabled
+                            ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'
+                            : checked
+                              ? 'border-emerald-600 bg-emerald-50 text-emerald-700 font-semibold'
+                              : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                            }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            disabled={isDisabled}
+                            onChange={(e) => {
+                              const nextChecked = e.target.checked
+                              setEditForm((prev) => {
+                                const next = nextChecked
+                                  ? [...prev.PoiPreferences, opt]
+                                  : prev.PoiPreferences.filter((p) => p.id !== opt.id)
+                                return { ...prev, PoiPreferences: next }
+                              })
+                            }}
+                            className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
+                          />
+                          <span className="truncate">{opt.name}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Cột phải: Các trường thông tin */}
+              <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <label className="text-sm text-slate-700 font-semibold block">
                     Tên <span className="text-red-400">*</span>
@@ -1472,93 +1641,9 @@ function StaffPOIsPage() {
                     Trong nhà
                   </label>
                 </div>
-              </div>
-
-              {/* Cột phải */}
-              <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col h-full">
-                {/* Hình ảnh */}
-                <div className="space-y-2">
-                  <span className="text-sm text-slate-700 font-semibold block">Hình ảnh</span>
-                  <div className="flex items-center gap-3">
-                    <label className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 cursor-pointer hover:bg-slate-100 transition-all font-semibold">
-                      <Upload size={16} />
-                      Chọn ảnh mới
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          handleSelectEditImage(e.target.files?.[0] ?? null)
-                          e.currentTarget.value = ""
-                        }}
-                      />
-                    </label>
-                    {editImageFile && (
-                      <span className="text-xs text-slate-500 truncate max-w-[200px] bg-slate-50 border border-slate-100 px-2 py-1 rounded-lg">
-                        {editImageFile.name}
-                      </span>
-                    )}
-                  </div>
-                  {/* Image preview box */}
-                  <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 h-32">
-                    {editImagePreviewUrl ? (
-                      <img
-                        src={editImagePreviewUrl}
-                        alt={editForm.Name || "POI"}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="h-full flex items-center justify-center text-slate-400 text-sm">
-                        Không có ảnh
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Nhãn Preferences */}
-                <div className="space-y-2">
-                  <label className="text-sm text-slate-700 font-semibold block">
-                    PoiPreferences <span className="text-slate-400 font-normal">(tối đa {MAX_PREFERENCES})</span>
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                    {preferencesList.map((opt) => {
-                      const checked = editForm.PoiPreferences.some((p) => p.id === opt.id)
-                      const canSelectMore = editForm.PoiPreferences.length < MAX_PREFERENCES
-                      const isDisabled = !checked && !canSelectMore
-                      return (
-                        <label
-                          key={opt.id}
-                          className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 text-xs cursor-pointer transition-all ${isDisabled
-                            ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'
-                            : checked
-                              ? 'border-emerald-600 bg-emerald-50 text-emerald-700 font-semibold'
-                              : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                            }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            disabled={isDisabled}
-                            onChange={(e) => {
-                              const nextChecked = e.target.checked
-                              setEditForm((prev) => {
-                                const next = nextChecked
-                                  ? [...prev.PoiPreferences, opt]
-                                  : prev.PoiPreferences.filter((p) => p.id !== opt.id)
-                                return { ...prev, PoiPreferences: next }
-                              })
-                            }}
-                            className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
-                          />
-                          <span className="truncate">{opt.name}</span>
-                        </label>
-                      )
-                    })}
-                  </div>
-                </div>
 
                 {/* Gợi ý tham quan */}
-                <div className="flex flex-col flex-1 min-h-[120px]">
+                <div className="flex flex-col">
                   <label className="text-sm text-slate-700 font-semibold block mb-1.5">
                     Gợi ý tham quan (VisitRecommendation)
                   </label>
@@ -1570,7 +1655,7 @@ function StaffPOIsPage() {
                         VisitRecommendation: e.target.value,
                       }))
                     }
-                    className="flex-1 min-h-[80px] md:min-h-0 w-full p-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700 resize-none"
+                    className="w-full p-3 h-24 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700 resize-none"
                     placeholder="VD: Nên đi vào buổi sáng để ngắm cảnh đẹp nhất..."
                   />
                 </div>
@@ -1601,16 +1686,47 @@ function StaffPOIsPage() {
         </div>
       ) : null}
 
-      {toast ? (
-        <div
-          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${toast.type === "success"
-            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-            : "bg-rose-50 text-rose-700 border-rose-200"
-            }`}
-        >
-          {toast.message}
-        </div>
-      ) : null}
+      <div className="fixed top-4 left-0 right-0 flex justify-center pointer-events-none z-[9999]">
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={
+                toast.type === "error"
+                  ? {
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      x: [0, -12, 12, -12, 12, -6, 6, 0],
+                      transition: {
+                        x: { duration: 0.5, ease: "easeInOut" },
+                        default: { duration: 0.2 }
+                      }
+                    }
+                  : {
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      transition: { duration: 0.2 }
+                    }
+              }
+              exit={{ opacity: 0, y: -20, scale: 0.95, transition: { duration: 0.15 } }}
+              className={`pointer-events-auto px-5 py-3.5 rounded-2xl border shadow-xl text-sm font-semibold flex items-center gap-2.5 backdrop-blur-md max-w-[90vw] ${
+                toast.type === "success"
+                  ? "bg-emerald-50/90 text-emerald-800 border-emerald-200/60 shadow-emerald-100/50"
+                  : "bg-rose-50/90 text-rose-800 border-rose-200/60 shadow-rose-100/50"
+              }`}
+            >
+              {toast.type === "error" ? (
+                <span className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+              ) : (
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              )}
+              {toast.message}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }

@@ -64,7 +64,7 @@ export default function AppTopbar({
     if (path.includes('/admin/accounts')) return 'Quản lý tài khoản'
     if (path.includes('/admin/analytics')) return 'Thống kê hệ thống'
     if (path.includes('/admin/bookings')) return 'Quản lý đơn đặt chỗ'
-    if (path.includes('/admin/destinations')) return 'Điểm đến phổ biến'
+    if (path.includes('/admin/destinations')) return 'Quản lý địa điểm'
     if (path.includes('/admin/settings')) return 'Cài đặt hệ thống'
     if (path.includes('/admin/subscriptions')) return 'Quản lý gói dịch vụ'
 
@@ -72,6 +72,7 @@ export default function AppTopbar({
     if (path.includes('/partner/stats')) return 'Thống kê kinh doanh'
     if (path.includes('/partner/poi')) return 'Quản lý địa điểm (POI)'
     if (path.includes('/partner/advertisement')) return 'Quản lý quảng cáo'
+    if (path.includes('/partner/packages')) return 'Gói dịch vụ'
     if (path.includes('/partner/subscriptions')) return 'Gói dịch vụ của tôi'
     if (path.includes('/partner/history')) return 'Lịch sử giao dịch'
     if (path.includes('/partner/profile')) return 'Hồ sơ doanh nghiệp'

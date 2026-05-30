@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Plus, MapPin, Search, Edit2, Eye, EyeOff, Loader2, ChevronLeft, ChevronRight, Image as ImageIcon, X, ExternalLink, Clock, DollarSign, Navigation, Home, Ban, RotateCw } from 'lucide-react'
+import { Plus, MapPin, Search, Edit2, Eye, EyeOff, Loader2, ChevronLeft, ChevronRight, Image as ImageIcon, X, ExternalLink, Clock, DollarSign, Navigation, Home, Ban, RotateCw, Upload } from 'lucide-react'
 import { HubConnectionBuilder } from '@microsoft/signalr'
 import { useState, useEffect, useCallback } from 'react'
 import { ConfirmModal } from '../../../components/ui/ConfirmModal'
@@ -431,31 +431,21 @@ function PartnerPOIPage() {
           </div>
 
           {toast && (
-            <div
-              className={`fixed bottom-6 right-6 z-[100] max-w-sm w-full bg-white px-5 py-4 rounded-[8px] border shadow-[0_4px_12px_rgba(0,0,0,0.15)] animate-toast-in ${
-                toast.type === "success"
-                  ? "bg-emerald-50 border-emerald-100"
-                  : "bg-rose-50 border-rose-100 animate-toast-shake"
-              }`}
-            >
-              <div className="flex gap-3 pr-6">
-                <div className="flex-shrink-0 mt-0.5">
-                  {toast.type === "success" ? (
-                    <div className="h-5 w-5 rounded-full bg-emerald-500" />
-                  ) : (
-                    <Ban size={18} className="text-rose-500" />
-                  )}
-                </div>
-                <p className={`text-sm font-medium ${toast.type === "success" ? "text-emerald-800" : "text-rose-800"}`}>
-                  {toast.message}
-                </p>
-              </div>
-              <button 
-                onClick={() => setToast(null)}
-                className="absolute top-3 right-3 p-1 rounded-md hover:bg-black/5 transition-colors text-slate-400 hover:text-slate-600"
+            <div className="fixed top-4 left-0 right-0 flex justify-center pointer-events-none z-[9999]">
+              <div
+                className={`pointer-events-auto px-5 py-3 rounded-2xl border shadow-xl text-sm font-semibold flex items-center gap-2.5 backdrop-blur-md max-w-[90vw] ${
+                  toast.type === "success"
+                    ? "bg-emerald-50/90 text-emerald-800 border-emerald-200/60 shadow-emerald-100/50"
+                    : "bg-rose-50/90 text-rose-800 border-rose-200/60 shadow-rose-100/50 animate-toast-shake"
+                }`}
               >
-                <X size={16} />
-              </button>
+                {toast.type === "error" ? (
+                  <span className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
+                ) : (
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                )}
+                <span>{toast.message}</span>
+              </div>
             </div>
           )}
 
@@ -768,8 +758,81 @@ function POIFormModal({
         {/* Form */}
         <form onSubmit={handleFormSubmit} className="flex-1 min-h-0 p-6 flex flex-col md:grid md:grid-cols-2 md:gap-x-8 overflow-y-auto md:overflow-hidden relative">
           
-          {/* Cột trái */}
-          <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4">
+          {/* Cột trái: Hình ảnh, Preferences, Gợi ý tham quan */}
+          <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4 flex flex-col h-full">
+            {/* Hình ảnh */}
+            <div className="space-y-2">
+              <label className={labelClasses}>Hình ảnh</label>
+              <div className="flex items-center gap-3">
+                <label className="cursor-pointer inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 hover:bg-slate-100 font-semibold transition-all">
+                  <Upload size={16} />
+                  Chọn ảnh
+                  <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                </label>
+              </div>
+              {/* Image preview box */}
+              <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 h-[280px] w-full relative">
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="h-full flex items-center justify-center text-slate-400 text-sm">
+                    <div className="text-center">
+                      <ImageIcon size={48} className="mx-auto text-slate-300 mb-2" />
+                      <p>Không có hình ảnh</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Nhãn Preferences */}
+            <div>
+              <label className={labelClasses}>Nhãn (Preferences)</label>
+              {loadingPreferences ? (
+                <p className="text-sm text-slate-500">Đang tải...</p>
+              ) : (
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {preferencesList.map(pref => {
+                    const isSelected = poiPreferences.includes(pref.id)
+                    const isDisable = !isSelected && poiPreferences.length >= MAX_PREFERENCES
+                    return (
+                      <button
+                        type="button"
+                        key={pref.id}
+                        disabled={isDisable}
+                        onClick={() => {
+                          setPoiPreferences(prev => {
+                            if (isSelected) {
+                              return prev.filter(p => p !== pref.id)
+                            } else {
+                              return [...prev, pref.id]
+                            }
+                          })
+                        }}
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
+                          isSelected 
+                            ? 'bg-[#e28743] border-[#e28743] hover:bg-[#cf7632] hover:border-[#cf7632] text-white' 
+                            : isDisable
+                              ? 'bg-slate-50 text-slate-400 border-slate-200 opacity-50 cursor-not-allowed'
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-[#e28743] hover:text-[#e28743]'
+                        }`}
+                      >
+                        {pref.name}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+          </div>
+
+          {/* Cột phải: Các trường thông tin */}
+          <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4">
             {/* Tên POI & Loại hình */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -893,75 +956,14 @@ function POIFormModal({
                 <span className="text-sm text-slate-600 font-medium">Trong nhà</span>
               </label>
             </div>
-          </div>
-
-          {/* Cột phải */}
-          <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col h-full">
-            {/* Hình ảnh */}
-            <div>
-              <label className={labelClasses}>Hình ảnh</label>
-              <div className="flex items-center gap-4">
-                {imagePreview ? (
-                  <img src={imagePreview} alt="Preview" className="h-20 w-20 rounded-xl object-cover border border-slate-200" />
-                ) : (
-                  <div className="h-20 w-20 rounded-xl bg-slate-100 flex items-center justify-center">
-                    <ImageIcon size={28} className="text-slate-300" />
-                  </div>
-                )}
-                <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-xl text-sm font-medium transition-all">
-                  Chọn ảnh
-                  <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-                </label>
-              </div>
-            </div>
-
-            {/* Nhãn Preferences */}
-            <div>
-              <label className={labelClasses}>Nhãn (Preferences)</label>
-              {loadingPreferences ? (
-                <p className="text-sm text-slate-500">Đang tải...</p>
-              ) : (
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {preferencesList.map(pref => {
-                    const isSelected = poiPreferences.includes(pref.id)
-                    const isDisable = !isSelected && poiPreferences.length >= MAX_PREFERENCES
-                    return (
-                      <button
-                        type="button"
-                        key={pref.id}
-                        disabled={isDisable}
-                        onClick={() => {
-                          setPoiPreferences(prev => {
-                            if (isSelected) {
-                              return prev.filter(p => p !== pref.id)
-                            } else {
-                              return [...prev, pref.id]
-                            }
-                          })
-                        }}
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
-                          isSelected 
-                            ? 'bg-[#e28743] border-[#e28743] hover:bg-[#cf7632] hover:border-[#cf7632] text-white' 
-                            : isDisable
-                              ? 'bg-slate-50 text-slate-400 border-slate-200 opacity-50 cursor-not-allowed'
-                              : 'bg-white text-slate-600 border-slate-200 hover:border-[#e28743] hover:text-[#e28743]'
-                        }`}
-                      >
-                        {pref.name}
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
 
             {/* Gợi ý tham quan */}
-            <div className="flex flex-col flex-1 min-h-[120px]">
+            <div className="flex flex-col">
               <label className={labelClasses}>Gợi ý tham quan</label>
               <textarea
                 value={visitRecommendation}
                 onChange={(e) => setVisitRecommendation(e.target.value)}
-                className={`${inputClasses} flex-1 resize-none min-h-[80px] md:min-h-0`}
+                className={`${inputClasses} resize-none min-h-[100px]`}
                 placeholder="Nhập gợi ý cho du khách..."
               />
             </div>
@@ -1037,8 +1039,22 @@ function POIDetailModal({ poi, poiTypeOptions, preferencesList, onClose, onEdit 
         {/* Body 2 cột */}
         <div className="flex-1 min-h-0 p-6 flex flex-col md:grid md:grid-cols-2 md:gap-x-8 overflow-y-auto md:overflow-hidden relative">
           
-          {/* Cột trái: Các trường thông tin */}
-          <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4 flex flex-col">
+          {/* Cột trái: Hình ảnh */}
+          <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4 flex flex-col h-full">
+            <label className={labelClasses}>Hình ảnh</label>
+            <div className="flex-1 min-h-[300px] md:min-h-0 w-full rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 relative shadow-sm">
+              {poi.poiImgUrl ? (
+                <img src={poi.poiImgUrl} alt={poi.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-slate-300">
+                  <ImageIcon size={48} />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Cột phải: Các trường thông tin */}
+          <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col">
             
             {/* Tên POI & Loại hình */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1094,24 +1110,6 @@ function POIDetailModal({ poi, poiTypeOptions, preferencesList, onClose, onEdit 
             <div>
               <label className={labelClasses}>Môi trường</label>
               <div className={valClasses}>{poi.isIndoor ? 'Trong nhà' : 'Ngoài trời'}</div>
-            </div>
-          </div>
-
-          {/* Cột phải: Hình ảnh, Preferences, Gợi ý, Tọa độ */}
-          <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4 flex flex-col h-full">
-            
-            {/* Hình ảnh */}
-            <div>
-              <label className={labelClasses}>Hình ảnh</label>
-              <div className="w-full h-48 sm:h-56 rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 relative shadow-sm">
-                {poi.poiImgUrl ? (
-                  <img src={poi.poiImgUrl} alt={poi.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-300">
-                    <ImageIcon size={48} />
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* Nhãn Preferences */}
