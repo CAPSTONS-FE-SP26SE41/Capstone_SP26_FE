@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
-import { Package, CreditCard, Loader2, Ban, X } from 'lucide-react'
+import { Package, CreditCard, Loader2, Ban, X, Sparkles, Check } from 'lucide-react'
 import { getMySubscriptions, getSubscriptions } from '../../../services/subscriptionService'
 import { createPayment, PaymentResponse } from '../../../services/paymentService'
 import PaymentModal from '../../../components/partner/PaymentModal'
@@ -261,27 +261,84 @@ function PartnerPackagePage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
-          {availablePkgs.length > 0 ? availablePkgs.map((pkg: any, i: number) => (
-            <div key={i} className={`bg-white rounded-2xl border border-slate-200 p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow h-full`}>
-              <h4 className="text-xl font-bold text-slate-800 mb-1 line-clamp-1 overflow-hidden" title={pkg.title || pkg.Title}>{pkg.title || pkg.Title}</h4>
-              <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-2xl font-bold text-[#e28743]">{new Intl.NumberFormat('vi-VN').format(pkg.price || pkg.Price)} VND</span>
-                <span className="text-slate-400 text-sm">/ {pkg.durationDays || pkg.DurationDays} ngày</span>
-              </div>
-              <p className="text-slate-600 font-medium mb-4">Tối đa {pkg.maxAdsPerPeriod || pkg.MaxAdsPerPeriod} quảng cáo</p>
-              <div className="text-sm border border-slate-100 mb-6 bg-slate-50 p-4 rounded-xl flex-1">
-                <ExpandableDescription text={pkg.description || pkg.Description || ""} />
-              </div>
-              <button 
-                disabled={isProcessing}
-                onClick={() => handleBuyPackage(pkg.packageId || pkg.PackageId || pkg.id)}
-                className={`w-full py-3 rounded-xl font-bold transition-colors bg-[#e28743] text-white hover:bg-[#cf7632] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-auto`}
+          {availablePkgs.length > 0 ? availablePkgs.map((pkg: any, i: number) => {
+            const descLines = (pkg.description || pkg.Description || "")
+              .split('\n')
+              .map((line: string) => line.trim())
+              .filter((line: string) => line.length > 0);
+            
+            return (
+              <div 
+                key={i} 
+                className="bg-gradient-to-br from-[#258cf4] to-[#3b59e9] rounded-[24px] p-7 flex flex-col shadow-xl shadow-blue-500/10 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 relative overflow-hidden h-full min-h-[420px]"
               >
-                {isProcessing && <Loader2 size={18} className="animate-spin" />}
-                Mua gói
-              </button>
-            </div>
-          )) : (
+                {/* Decorative glowing sphere in background */}
+                <div className="absolute -right-16 -top-16 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+                
+                {/* Header row */}
+                <div className="flex justify-between items-center mb-6">
+                  <span className="bg-white/20 backdrop-blur-sm text-white font-semibold text-[11px] px-3.5 py-1 rounded-full uppercase tracking-wider">
+                    {pkg.durationDays || pkg.DurationDays} Ngày
+                  </span>
+                  <Sparkles size={20} className="text-yellow-300 animate-pulse" />
+                </div>
+                
+                {/* Title and Price */}
+                <h4 className="text-2xl font-bold text-white mb-2 tracking-tight line-clamp-1" title={pkg.title || pkg.Title}>
+                  {pkg.title || pkg.Title}
+                </h4>
+                
+                <div className="flex items-baseline gap-1 mb-5">
+                  <span className="text-3xl font-extrabold text-white">
+                    {new Intl.NumberFormat('vi-VN').format(pkg.price || pkg.Price)}
+                  </span>
+                  <span className="text-white/80 text-sm font-semibold">VNĐ</span>
+                </div>
+
+                <div className="border-t border-white/20 my-2" />
+
+                {/* Features List */}
+                <div className="space-y-3.5 my-6 flex-1">
+                  <div className="flex items-start gap-3 text-white/95 text-sm">
+                    <div className="h-5 w-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5 border border-white/10">
+                      <Check size={12} className="text-white" />
+                    </div>
+                    <span className="leading-tight">
+                      Số quảng cáo tối đa: <strong className="text-white font-bold">{pkg.maxAdsPerPeriod || pkg.MaxAdsPerPeriod}</strong>
+                    </span>
+                  </div>
+
+                  {descLines.length > 0 ? (
+                    descLines.map((line: string, idx: number) => (
+                      <div key={idx} className="flex items-start gap-3 text-white/95 text-sm">
+                        <div className="h-5 w-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5 border border-white/10">
+                          <Check size={12} className="text-white" />
+                        </div>
+                        <span className="leading-normal">{line}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex items-start gap-3 text-white/70 text-sm italic">
+                      <div className="h-5 w-5 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5 border border-white/5">
+                        <Check size={12} className="text-white/70" />
+                      </div>
+                      <span className="leading-tight">Chưa có mô tả đặc quyền...</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Register Button */}
+                <button 
+                  disabled={isProcessing}
+                  onClick={() => handleBuyPackage(pkg.packageId || pkg.PackageId || pkg.id)}
+                  className="w-full py-4 bg-white hover:bg-slate-50 text-[#258cf4] font-bold rounded-2xl shadow-lg shadow-blue-900/10 hover:shadow-xl hover:shadow-blue-900/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isProcessing && <Loader2 size={18} className="animate-spin text-[#258cf4]" />}
+                  ĐĂNG KÝ NGAY
+                </button>
+              </div>
+            )
+          }) : (
             <div className="col-span-full py-20 text-center">
               <p className="text-slate-400 italic">Hiện tại chưa có gói dịch vụ nào được mở bán.</p>
             </div>
@@ -301,31 +358,21 @@ function PartnerPackagePage() {
       )}
 
       {toast && (
-        <div
-          className={`fixed bottom-6 right-6 z-[100] max-w-sm w-full bg-white px-5 py-4 rounded-[8px] border shadow-[0_4px_12px_rgba(0,0,0,0.15)] animate-toast-in ${
-            toast.type === "success"
-              ? "bg-emerald-50 border-emerald-100"
-              : "bg-rose-50 border-rose-100 animate-toast-shake"
-          }`}
-        >
-          <div className="flex gap-3 pr-6">
-            <div className="flex-shrink-0 mt-0.5">
-              {toast.type === "success" ? (
-                <div className="h-5 w-5 rounded-full bg-emerald-500" />
-              ) : (
-                <Ban size={18} className="text-rose-500" />
-              )}
-            </div>
-            <p className={`text-sm font-medium ${toast.type === "success" ? "text-emerald-800" : "text-rose-800"}`}>
-              {toast.message}
-            </p>
-          </div>
-          <button 
-            onClick={() => setToast(null)}
-            className="absolute top-3 right-3 p-1 rounded-md hover:bg-black/5 transition-colors text-slate-400 hover:text-slate-600"
+        <div className="fixed top-4 left-0 right-0 flex justify-center pointer-events-none z-[9999]">
+          <div
+            className={`pointer-events-auto px-5 py-3 rounded-2xl border shadow-xl text-sm font-semibold flex items-center gap-2.5 backdrop-blur-md max-w-[90vw] ${
+              toast.type === "success"
+                ? "bg-emerald-50/90 text-emerald-800 border-emerald-200/60 shadow-emerald-100/50"
+                : "bg-rose-50/90 text-rose-800 border-rose-200/60 shadow-rose-100/50 animate-toast-shake"
+            }`}
           >
-            <X size={16} />
-          </button>
+            {toast.type === "error" ? (
+              <span className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
+            ) : (
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            )}
+            <span>{toast.message}</span>
+          </div>
         </div>
       )}
     </div>

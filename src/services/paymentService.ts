@@ -13,6 +13,7 @@ export interface PaymentResponse {
   amount: number;
   qrCodeUrl: string;
   status: string;
+  expiresAt?: string;
 }
 
 export const createPayment = async (data: CreatePaymentRequest): Promise<PaymentResponse> => {
@@ -49,6 +50,7 @@ export interface PaymentHistoryItem {
   code: any;
   paidAt: string;
   accountId: string;
+  createdAt?: string;
 }
 
 export const getPaymentHistory = async (page: number = 1, pageSize: number = 10) => {

@@ -2,6 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
 import { Edit2, Eye, Plus, Search, Trash2, Upload, X, ImageIcon, Tag, MapPin, Clock, ExternalLink } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 import {
   createStaffPOI,
@@ -353,6 +354,12 @@ function StaffPOIsPage() {
   }
 
   const handleToggleStatus = async (poi: StaffPOI) => {
+    // Đối với các POI của đối tác, manager khi đã chuyển trạng thái thì không có quyền bật lại
+    if (poi.PartnerId && poi.Status !== "Active") {
+      showToast("error", "Đối tác cần phải gửi yêu cầu mở lại POI này")
+      return
+    }
+
     const currentStatus = poi.Status === "Active" ? "Active" : "Inactive"
     const nextStatus = currentStatus === "Active" ? "Inactive" : "Active"
     try {
@@ -1679,16 +1686,47 @@ function StaffPOIsPage() {
         </div>
       ) : null}
 
-      {toast ? (
-        <div
-          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${toast.type === "success"
-            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-            : "bg-rose-50 text-rose-700 border-rose-200"
-            }`}
-        >
-          {toast.message}
-        </div>
-      ) : null}
+      <div className="fixed top-4 left-0 right-0 flex justify-center pointer-events-none z-[9999]">
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={
+                toast.type === "error"
+                  ? {
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      x: [0, -12, 12, -12, 12, -6, 6, 0],
+                      transition: {
+                        x: { duration: 0.5, ease: "easeInOut" },
+                        default: { duration: 0.2 }
+                      }
+                    }
+                  : {
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      transition: { duration: 0.2 }
+                    }
+              }
+              exit={{ opacity: 0, y: -20, scale: 0.95, transition: { duration: 0.15 } }}
+              className={`pointer-events-auto px-5 py-3.5 rounded-2xl border shadow-xl text-sm font-semibold flex items-center gap-2.5 backdrop-blur-md max-w-[90vw] ${
+                toast.type === "success"
+                  ? "bg-emerald-50/90 text-emerald-800 border-emerald-200/60 shadow-emerald-100/50"
+                  : "bg-rose-50/90 text-rose-800 border-rose-200/60 shadow-rose-100/50"
+              }`}
+            >
+              {toast.type === "error" ? (
+                <span className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+              ) : (
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              )}
+              {toast.message}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useMemo, useState, type FormEvent } from "react"
-import { Edit2, Eye, Plus, Search, Trash2, Upload, X } from "lucide-react"
+import { Edit2, Eye, Plus, Search, Trash2, Upload, X, MapPin } from "lucide-react"
 
 import {
   createStaffLocation,
@@ -11,6 +11,13 @@ import {
   type StaffLocation,
   updateStaffLocation,
 } from "../../../services/poiService"
+import {
+  getDistrictsByLocationId,
+  createDistrict,
+  updateDistrict,
+  deleteDistrict,
+  type District,
+} from "../../../services/partnerPoiService"
 
 export const Route = createFileRoute("/admin/_layout/destinations")({
   component: AdminDestinations,
@@ -38,6 +45,16 @@ function AdminDestinations() {
     Longitude: "",
   })
 
+  // District state
+  const [showDistrictModal, setShowDistrictModal] = useState(false)
+  const [selectedLocForDistrict, setSelectedLocForDistrict] = useState<StaffLocation | null>(null)
+  const [districts, setDistricts] = useState<District[]>([])
+  const [loadingDistricts, setLoadingDistricts] = useState(false)
+  const [districtNameInput, setDistrictNameInput] = useState("")
+  const [editingDistrict, setEditingDistrict] = useState<District | null>(null)
+  const [editingDistrictName, setEditingDistrictName] = useState("")
+  const [savingDistrict, setSavingDistrict] = useState(false)
+
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message })
   }
@@ -48,6 +65,84 @@ function AdminDestinations() {
       Latitude: "",
       Longitude: "",
     })
+  }
+
+  const openDistrictModal = async (loc: StaffLocation) => {
+    setSelectedLocForDistrict(loc)
+    setShowDistrictModal(true)
+    setLoadingDistricts(true)
+    setDistrictNameInput("")
+    setEditingDistrict(null)
+    try {
+      const data = await getDistrictsByLocationId(loc.LocationId)
+      setDistricts(data)
+    } catch (e) {
+      console.error("Failed to fetch districts", e)
+      showToast("error", "Không tải được danh sách quận huyện")
+    } finally {
+      setLoadingDistricts(false)
+    }
+  }
+
+  const handleCreateDistrict = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!selectedLocForDistrict) return
+    const name = districtNameInput.trim()
+    if (!name) {
+      showToast("error", "Tên quận huyện không được để trống")
+      return
+    }
+
+    try {
+      setSavingDistrict(true)
+      const newD = await createDistrict(name, selectedLocForDistrict.LocationId)
+      setDistricts((prev) => [...prev, newD])
+      setDistrictNameInput("")
+      showToast("success", "Thêm quận huyện thành công")
+    } catch (e) {
+      console.error("Failed to create district", e)
+      showToast("error", "Thêm quận huyện thất bại")
+    } finally {
+      setSavingDistrict(false)
+    }
+  }
+
+  const handleUpdateDistrict = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!selectedLocForDistrict || !editingDistrict) return
+    const name = editingDistrictName.trim()
+    if (!name) {
+      showToast("error", "Tên quận huyện không được để trống")
+      return
+    }
+
+    try {
+      setSavingDistrict(true)
+      const updated = await updateDistrict(editingDistrict.id, name, selectedLocForDistrict.LocationId)
+      setDistricts((prev) => prev.map((d) => (d.id === editingDistrict.id ? updated : d)))
+      setEditingDistrict(null)
+      setEditingDistrictName("")
+      showToast("success", "Cập nhật quận huyện thành công")
+    } catch (e) {
+      console.error("Failed to update district", e)
+      showToast("error", "Cập nhật quận huyện thất bại")
+    } finally {
+      setSavingDistrict(false)
+    }
+  }
+
+  const handleDeleteDistrict = async (district: District) => {
+    const ok = window.confirm(`Bạn có chắc chắn muốn xóa quận huyện "${district.name}"?`)
+    if (!ok) return
+
+    try {
+      await deleteDistrict(district.id)
+      setDistricts((prev) => prev.filter((d) => d.id !== district.id))
+      showToast("success", "Xóa quận huyện thành công")
+    } catch (e) {
+      console.error("Failed to delete district", e)
+      showToast("error", "Xóa quận huyện thất bại")
+    }
   }
 
   const reloadLocations = async () => {
@@ -342,6 +437,17 @@ function AdminDestinations() {
                               <Edit2 size={16} />
                               <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
                                 Chỉnh sửa
+                                <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                              </span>
+                            </button>
+
+                            <button
+                              onClick={() => openDistrictModal(loc)}
+                              className="group relative inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors"
+                            >
+                              <MapPin size={16} />
+                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-50">
+                                Quản lý quận huyện
                                 <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
                               </span>
                             </button>
@@ -642,15 +748,168 @@ function AdminDestinations() {
         </div>
       ) : null}
 
+      {showDistrictModal && selectedLocForDistrict ? (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm p-4 flex items-center justify-center">
+          <div className="w-full max-w-xl rounded-2xl bg-white border border-slate-200/80 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
+            {/* Modal Header */}
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-blue-50 text-[#258cf4] flex items-center justify-center border border-blue-100/50 shadow-inner">
+                  <MapPin size={20} className="animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 leading-tight">Quản lý Quận/Huyện</h3>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-xs text-slate-400">Tỉnh thành:</span>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50/80 text-[#258cf4] border border-blue-100/30">
+                      {selectedLocForDistrict.LocationName}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowDistrictModal(false)
+                  setSelectedLocForDistrict(null)
+                  setDistricts([])
+                }}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200/50"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto flex-1 space-y-6">
+              {/* Form to add district */}
+              <div className="bg-slate-50/50 border border-slate-200/60 p-4 rounded-2xl">
+                <form onSubmit={handleCreateDistrict} className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      value={districtNameInput}
+                      onChange={(e) => setDistrictNameInput(e.target.value)}
+                      placeholder="Nhập tên quận/huyện mới..."
+                      className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-[#258cf4]/20 focus:border-[#258cf4] text-sm transition-all placeholder:text-slate-400"
+                      disabled={savingDistrict}
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={savingDistrict}
+                    className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-[#258cf4] hover:bg-[#1d72cb] text-white text-sm font-semibold transition-all shadow-sm shadow-blue-100 hover:shadow-md hover:shadow-blue-200/50 active:scale-[0.98] disabled:opacity-60"
+                  >
+                    <Plus size={16} />
+                    Thêm mới
+                  </button>
+                </form>
+              </div>
+
+              {/* Districts List */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-bold text-slate-800">
+                    Danh sách quận huyện
+                  </p>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                    {districts.length} đơn vị
+                  </span>
+                </div>
+                
+                {loadingDistricts ? (
+                  <div className="py-12 flex flex-col items-center justify-center gap-2 text-slate-400 text-sm">
+                    <div className="h-6 w-6 border-2 border-[#258cf4] border-t-transparent rounded-full animate-spin"></div>
+                    <span>Đang tải dữ liệu...</span>
+                  </div>
+                ) : districts.length === 0 ? (
+                  <div className="py-12 text-center text-slate-400 text-sm bg-slate-50/50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2">
+                    <MapPin size={24} className="text-slate-300" />
+                    <span>Chưa có quận/huyện nào được tạo.</span>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100 border border-slate-200/80 rounded-2xl overflow-hidden bg-white max-h-[300px] overflow-y-auto shadow-sm shadow-slate-100/50 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+                    {districts.map((d) => (
+                      <div key={d.id} className="flex items-center justify-between p-3.5 hover:bg-slate-50/60 transition-colors group">
+                        {editingDistrict?.id === d.id ? (
+                          <form onSubmit={handleUpdateDistrict} className="flex-1 flex gap-2 mr-2">
+                            <input
+                              value={editingDistrictName}
+                              onChange={(e) => setEditingDistrictName(e.target.value)}
+                              className="flex-1 h-9 px-3 rounded-xl border border-[#258cf4] bg-white outline-none focus:ring-2 focus:ring-[#258cf4]/20 text-sm"
+                              required
+                              autoFocus
+                            />
+                            <button
+                              type="submit"
+                              disabled={savingDistrict}
+                              className="h-9 px-3.5 rounded-xl bg-[#258cf4] text-white text-xs font-semibold hover:bg-[#1d72cb] transition-colors shadow-sm active:scale-[0.98]"
+                            >
+                              Lưu
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingDistrict(null)
+                                setEditingDistrictName("")
+                              }}
+                              className="h-9 px-3.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors"
+                            >
+                              Hủy
+                            </button>
+                          </form>
+                        ) : (
+                          <>
+                            <div className="flex items-center gap-2.5">
+                              <div className="h-1.5 w-1.5 rounded-full bg-slate-300 group-hover:bg-[#258cf4] transition-colors"></div>
+                              <span className="text-sm font-semibold text-slate-700">{d.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-150">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingDistrict(d)
+                                  setEditingDistrictName(d.name)
+                                }}
+                                className="h-8 w-8 inline-flex items-center justify-center rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-100/50 transition-all"
+                              >
+                                <Edit2 size={14} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteDistrict(d)}
+                                className="h-8 w-8 inline-flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100/50 transition-all"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {toast ? (
-        <div
-          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium animate-in fade-in slide-in-from-top-4 duration-200 ${
-            toast.type === "success"
-              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-              : "bg-rose-50 text-rose-700 border-rose-200"
-          }`}
-        >
-          {toast.message}
+        <div className="fixed top-4 left-0 right-0 flex justify-center pointer-events-none z-[9999]">
+          <div
+            className={`pointer-events-auto px-5 py-3 rounded-2xl border shadow-xl text-sm font-semibold flex items-center gap-2.5 backdrop-blur-md max-w-[90vw] ${
+              toast.type === "success"
+                ? "bg-emerald-50/90 text-emerald-800 border-emerald-200/60 shadow-emerald-100/50"
+                : "bg-rose-50/90 text-rose-800 border-rose-200/60 shadow-rose-100/50 animate-toast-shake"
+            }`}
+          >
+            {toast.type === "error" ? (
+              <span className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
+            ) : (
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            )}
+            <span>{toast.message}</span>
+          </div>
         </div>
       ) : null}
     </div>

@@ -368,14 +368,21 @@ function StaffPOIDetailPage() {
       </div>
 
       {toast ? (
-        <div
-          className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ${
-            toast.type === "success"
-              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-              : "bg-rose-50 text-rose-700 border-rose-200"
-          }`}
-        >
-          {toast.message}
+        <div className="fixed top-4 left-0 right-0 flex justify-center pointer-events-none z-[9999]">
+          <div
+            className={`pointer-events-auto px-5 py-3 rounded-2xl border shadow-xl text-sm font-semibold flex items-center gap-2.5 backdrop-blur-md max-w-[90vw] ${
+              toast.type === "success"
+                ? "bg-emerald-50/90 text-emerald-800 border-emerald-200/60 shadow-emerald-100/50"
+                : "bg-rose-50/90 text-rose-800 border-rose-200/60 shadow-rose-100/50 animate-toast-shake"
+            }`}
+          >
+            {toast.type === "error" ? (
+              <span className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
+            ) : (
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            )}
+            <span>{toast.message}</span>
+          </div>
         </div>
       ) : null}
     </div>

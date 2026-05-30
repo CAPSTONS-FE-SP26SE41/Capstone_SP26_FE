@@ -431,31 +431,21 @@ function PartnerPOIPage() {
           </div>
 
           {toast && (
-            <div
-              className={`fixed bottom-6 right-6 z-[100] max-w-sm w-full bg-white px-5 py-4 rounded-[8px] border shadow-[0_4px_12px_rgba(0,0,0,0.15)] animate-toast-in ${
-                toast.type === "success"
-                  ? "bg-emerald-50 border-emerald-100"
-                  : "bg-rose-50 border-rose-100 animate-toast-shake"
-              }`}
-            >
-              <div className="flex gap-3 pr-6">
-                <div className="flex-shrink-0 mt-0.5">
-                  {toast.type === "success" ? (
-                    <div className="h-5 w-5 rounded-full bg-emerald-500" />
-                  ) : (
-                    <Ban size={18} className="text-rose-500" />
-                  )}
-                </div>
-                <p className={`text-sm font-medium ${toast.type === "success" ? "text-emerald-800" : "text-rose-800"}`}>
-                  {toast.message}
-                </p>
-              </div>
-              <button 
-                onClick={() => setToast(null)}
-                className="absolute top-3 right-3 p-1 rounded-md hover:bg-black/5 transition-colors text-slate-400 hover:text-slate-600"
+            <div className="fixed top-4 left-0 right-0 flex justify-center pointer-events-none z-[9999]">
+              <div
+                className={`pointer-events-auto px-5 py-3 rounded-2xl border shadow-xl text-sm font-semibold flex items-center gap-2.5 backdrop-blur-md max-w-[90vw] ${
+                  toast.type === "success"
+                    ? "bg-emerald-50/90 text-emerald-800 border-emerald-200/60 shadow-emerald-100/50"
+                    : "bg-rose-50/90 text-rose-800 border-rose-200/60 shadow-rose-100/50 animate-toast-shake"
+                }`}
               >
-                <X size={16} />
-              </button>
+                {toast.type === "error" ? (
+                  <span className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
+                ) : (
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                )}
+                <span>{toast.message}</span>
+              </div>
             </div>
           )}
 

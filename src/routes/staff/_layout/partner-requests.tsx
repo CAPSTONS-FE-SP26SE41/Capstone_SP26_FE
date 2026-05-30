@@ -31,6 +31,10 @@ function PartnerRequestsPage() {
   // License Preview Modal states
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
 
+  // Detail Modal states
+  const [detailRequest, setDetailRequest] = useState<PartnerRequestResponse | null>(null)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+
   // Toast notifications
   const [toast, setToast] = useState<{
     type: "success" | "error"
@@ -239,6 +243,19 @@ function PartnerRequestsPage() {
                       <td className="px-6 py-4">
                         <div className="flex justify-end gap-2">
                           <button
+                            onClick={() => {
+                              setDetailRequest(req)
+                              setIsDetailModalOpen(true)
+                            }}
+                            className="group relative flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-colors shadow-sm"
+                          >
+                            <Eye size={16} />
+                            <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max rounded-md bg-slate-800 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm whitespace-nowrap z-[90]">
+                              Xem chi tiết
+                              <span className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></span>
+                            </span>
+                          </button>
+                          <button
                             onClick={() => handleOpenReviewModal(req, true)}
                             className="group relative flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors shadow-sm"
                           >
@@ -385,6 +402,186 @@ function PartnerRequestsPage() {
         )}
       </AnimatePresence>
 
+      {/* Detail Modal */}
+      <AnimatePresence>
+        {isDetailModalOpen && detailRequest && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md"
+            onClick={() => setIsDetailModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-white rounded-[28px] shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col border border-slate-100 max-h-[90vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-100/50">
+                    <FileText size={20} className="stroke-[2.5]" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 leading-tight">Chi tiết đơn đăng ký đối tác</h3>
+                    <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                      Gửi ngày: {new Date(detailRequest.createdAt).toLocaleString("vi-VN")}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsDetailModalOpen(false)}
+                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-160px)]">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  {/* Left Column: Info (5 cols) */}
+                  <div className="lg:col-span-5 space-y-6">
+                    {/* 1. Account Information */}
+                    <div className="space-y-3">
+                      <h4 className="text-xs uppercase font-bold tracking-wider text-slate-400">Thông tin người đại diện</h4>
+                      <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-100/80 space-y-3">
+                        <div>
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Họ và tên</span>
+                          <span className="text-sm font-bold text-slate-800 mt-0.5 block">{detailRequest.accountName}</span>
+                        </div>
+                        <div className="border-t border-slate-200/50 pt-2.5">
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Email tài khoản</span>
+                          <span className="text-sm font-bold text-slate-800 mt-0.5 block break-all">{detailRequest.accountEmail}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 2. Business Information */}
+                    <div className="space-y-3">
+                      <h4 className="text-xs uppercase font-bold tracking-wider text-slate-400">Thông tin doanh nghiệp</h4>
+                      <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-100/80 space-y-3">
+                        <div>
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Tên doanh nghiệp</span>
+                          <span className="text-sm font-bold text-slate-800 mt-0.5 block">{detailRequest.businessName}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 border-t border-slate-200/50 pt-2.5">
+                          <div>
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Số điện thoại</span>
+                            <span className="text-sm font-bold text-slate-800 mt-0.5 block">{detailRequest.businessPhone || "—"}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Email liên hệ</span>
+                            <span className="text-sm font-bold text-slate-800 mt-0.5 block break-all">{detailRequest.businessEmail || "—"}</span>
+                          </div>
+                        </div>
+                        <div className="border-t border-slate-200/50 pt-2.5">
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Địa chỉ doanh nghiệp</span>
+                          <span className="text-sm font-bold text-slate-800 mt-0.5 block leading-relaxed">{detailRequest.businessAddress || "—"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: License (7 cols) */}
+                  <div className="lg:col-span-7 space-y-3 lg:border-l lg:border-slate-100 lg:pl-8">
+                    <h4 className="text-xs uppercase font-bold tracking-wider text-slate-400">Giấy phép kinh doanh</h4>
+                    {detailRequest.businessLicenseUrl ? (
+                      isImageLink(detailRequest.businessLicenseUrl) ? (
+                        <div className="space-y-3">
+                          <div 
+                            className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center group cursor-pointer h-[350px] lg:h-[420px]"
+                            onClick={() => {
+                              setPreviewImageUrl(detailRequest.businessLicenseUrl)
+                            }}
+                          >
+                            <img
+                              src={detailRequest.businessLicenseUrl}
+                              alt="Giấy phép kinh doanh"
+                              className="max-h-full max-w-full object-contain hover:scale-[1.01] transition-transform duration-300"
+                            />
+                            <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white gap-2 font-bold text-xs">
+                              <Eye size={16} /> Click để xem kích thước đầy đủ
+                            </div>
+                          </div>
+                          <div className="flex justify-end">
+                            <a
+                              href={detailRequest.businessLicenseUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-750 bg-indigo-50 hover:bg-indigo-100/70 px-3.5 py-2 rounded-xl transition-all"
+                            >
+                              Mở ảnh trong tab mới <ExternalLink size={12} />
+                            </a>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                          <div className="flex items-center gap-3">
+                            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100/50">
+                              <FileText size={20} />
+                            </div>
+                            <div>
+                              <span className="text-[10px] uppercase tracking-wider text-slate-400 block">Định dạng tài liệu</span>
+                              <span className="text-sm font-bold text-slate-800 block mt-0.5">Tài liệu giấy phép (PDF/Word/Khác)</span>
+                            </div>
+                          </div>
+                          <a
+                            href={detailRequest.businessLicenseUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-750 bg-indigo-50 hover:bg-indigo-100/70 px-4 py-2.5 rounded-xl border border-indigo-100/50 transition-all shadow-sm"
+                          >
+                            Tải xuống tài liệu <ExternalLink size={12} />
+                          </a>
+                        </div>
+                      )
+                    ) : (
+                      <div className="text-center p-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-400 text-sm">
+                        Không có tài liệu hoặc hình ảnh giấy phép nào được tải lên.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-3 sm:justify-between items-center">
+                <button
+                  onClick={() => setIsDetailModalOpen(false)}
+                  className="w-full sm:w-auto h-11 px-6 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                >
+                  Đóng
+                </button>
+                <div className="w-full sm:w-auto flex gap-3">
+                  <button
+                    onClick={() => {
+                      setIsDetailModalOpen(false)
+                      handleOpenReviewModal(detailRequest, false)
+                    }}
+                    className="flex-1 sm:flex-none h-11 px-6 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-sm font-bold transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <X size={16} /> Từ chối
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsDetailModalOpen(false)
+                      handleOpenReviewModal(detailRequest, true)
+                    }}
+                    className="flex-1 sm:flex-none h-11 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition-all shadow-md shadow-emerald-100 hover:shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <Check size={16} /> Phê duyệt đối tác
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* License Preview Modal */}
       <AnimatePresence>
         {previewImageUrl && (
@@ -424,14 +621,21 @@ function PartnerRequestsPage() {
 
       {/* Toast */}
       {toast && (
-        <div
-          className={`fixed bottom-4 right-4 z-[9999] px-4 py-3 rounded-xl shadow-lg border transition-all animate-bounce ${
-            toast.type === "success"
-              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-              : "bg-rose-50 border-rose-200 text-rose-800"
-          }`}
-        >
-          {toast.message}
+        <div className="fixed top-4 left-0 right-0 flex justify-center pointer-events-none z-[9999]">
+          <div
+            className={`pointer-events-auto px-5 py-3 rounded-2xl border shadow-xl text-sm font-semibold flex items-center gap-2.5 backdrop-blur-md max-w-[90vw] ${
+              toast.type === "success"
+                ? "bg-emerald-50/90 text-emerald-800 border-emerald-200/60 shadow-emerald-100/50"
+                : "bg-rose-50/90 text-rose-800 border-rose-200/60 shadow-rose-100/50 animate-toast-shake"
+            }`}
+          >
+            {toast.type === "error" ? (
+              <span className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
+            ) : (
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            )}
+            <span>{toast.message}</span>
+          </div>
         </div>
       )}
     </div>

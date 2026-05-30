@@ -374,3 +374,38 @@ export const requestReactivationMyPartnerPOI = async (
 
   return normalizePOI(data?.poi ?? data)
 }
+
+export const createDistrict = async (
+  name: string,
+  locationId: string
+): Promise<District> => {
+  const data = await apiClient("/districts", {
+    method: "POST",
+    body: JSON.stringify({ name, locationId }),
+  })
+  return {
+    id: String(data?.Id ?? data?.id ?? ""),
+    name: String(data?.Name ?? data?.name ?? ""),
+  }
+}
+
+export const updateDistrict = async (
+  id: string,
+  name: string,
+  locationId: string
+): Promise<District> => {
+  const data = await apiClient(`/districts/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    body: JSON.stringify({ name, locationId }),
+  })
+  return {
+    id: String(data?.Id ?? data?.id ?? ""),
+    name: String(data?.Name ?? data?.name ?? ""),
+  }
+}
+
+export const deleteDistrict = async (id: string): Promise<void> => {
+  await apiClient(`/districts/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  })
+}
