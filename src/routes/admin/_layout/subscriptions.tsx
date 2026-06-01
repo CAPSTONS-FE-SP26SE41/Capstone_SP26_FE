@@ -720,7 +720,7 @@ function SubscriptionsPage() {
                           form.description.split('\n').filter(line => line.trim() !== '').map((line, idx) => (
                             <div key={idx} className="flex items-start gap-2">
                               <CheckCircle2 size={15} className="text-emerald-300 shrink-0 mt-0.5" />
-                              <span className="text-xs text-blue-50 font-medium line-clamp-2 break-all">{line}</span>
+                              <span className="text-xs text-blue-50 font-medium line-clamp-2 break-words">{line}</span>
                             </div>
                           ))
                         ) : (
