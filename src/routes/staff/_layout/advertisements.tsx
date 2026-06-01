@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { Check, X, ExternalLink, ChevronUp, ChevronDown, Eye, Image } from "lucide-react"
+import { Check, X, ExternalLink, ChevronUp, ChevronDown, Eye, Image, Maximize2 } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 import { createPortal } from "react-dom"
 import {
@@ -61,6 +61,7 @@ function AdvertisementsPage() {
   const [selectedPoiDetail, setSelectedPoiDetail] = useState<StaffPOI | null>(null)
   const [isPoiDetailModalOpen, setIsPoiDetailModalOpen] = useState(false)
   const [fetchingPoiDetail, setFetchingPoiDetail] = useState(false)
+  const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null)
 
   const [expandedAccountIds, setExpandedAccountIds] = useState<Record<string, boolean>>({})
   const [partnerAds, setPartnerAds] = useState<Record<string, Advertisement[]>>({})
@@ -792,7 +793,7 @@ function AdvertisementsPage() {
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
+            className="bg-white rounded-2xl shadow-2xl w-[800px] h-[700px] max-w-[95vw] max-h-[90vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -811,13 +812,22 @@ function AdvertisementsPage() {
               {/* Left side: Image */}
               <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4 flex flex-col h-full">
                 <span className="text-sm font-semibold text-slate-700 block">Hình ảnh POI</span>
-                <div className="flex-1 min-h-[300px] md:min-h-0 w-full rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 relative group shadow-sm">
+                <div 
+                  className="flex-1 min-h-[300px] md:min-h-0 w-full rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 relative group shadow-sm cursor-pointer"
+                  onClick={() => setFullscreenImageUrl(selectedPoiDetail.POIImgUrl)}
+                >
                   {selectedPoiDetail.POIImgUrl ? (
-                    <img
-                      src={selectedPoiDetail.POIImgUrl}
-                      alt={selectedPoiDetail.Name}
-                      className="w-full h-full object-cover"
-                    />
+                    <>
+                      <img
+                        src={selectedPoiDetail.POIImgUrl}
+                        alt={selectedPoiDetail.Name}
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 text-white font-medium text-sm">
+                        <Maximize2 size={24} className="animate-bounce" />
+                        <span className="bg-slate-900/60 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm">Xem ảnh đầy đủ</span>
+                      </div>
+                    </>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400">
                       <div className="text-center">
@@ -925,6 +935,38 @@ function AdvertisementsPage() {
               </button>
             </div>
           </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    {/* Fullscreen Image Preview Modal */}
+    <AnimatePresence>
+      {fullscreenImageUrl && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 cursor-zoom-out"
+          onClick={() => setFullscreenImageUrl(null)}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setFullscreenImageUrl(null)}
+            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors z-[10001] cursor-pointer shadow-lg backdrop-blur-md"
+          >
+            <X size={24} />
+          </button>
+          
+          <motion.img
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            src={fullscreenImageUrl}
+            alt="POI Fullscreen Preview"
+            className="max-w-[95vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl border border-white/10 cursor-default"
+            onClick={(e) => e.stopPropagation()}
+          />
         </motion.div>
       )}
     </AnimatePresence>
