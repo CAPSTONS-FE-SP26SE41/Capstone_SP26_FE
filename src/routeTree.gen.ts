@@ -10,25 +10,25 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as StaffLoginRouteImport } from './routes/staff/login'
-import { Route as StaffLayoutRouteImport } from './routes/staff/_layout'
 import { Route as PartnerLoginRouteImport } from './routes/partner/login'
 import { Route as PartnerLayoutRouteImport } from './routes/partner/_layout'
+import { Route as ManagerLoginRouteImport } from './routes/manager/login'
+import { Route as ManagerLayoutRouteImport } from './routes/manager/_layout'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminLayoutRouteImport } from './routes/admin/_layout'
-import { Route as StaffLayoutIndexRouteImport } from './routes/staff/_layout/index'
 import { Route as PartnerLayoutIndexRouteImport } from './routes/partner/_layout/index'
+import { Route as ManagerLayoutIndexRouteImport } from './routes/manager/_layout/index'
 import { Route as AdminLayoutIndexRouteImport } from './routes/admin/_layout/index'
-import { Route as StaffLayoutPoisRouteImport } from './routes/staff/_layout/pois'
-import { Route as StaffLayoutPartnerRequestsRouteImport } from './routes/staff/_layout/partner-requests'
-import { Route as StaffLayoutLocationsRouteImport } from './routes/staff/_layout/locations'
-import { Route as StaffLayoutAdvertisementsRouteImport } from './routes/staff/_layout/advertisements'
 import { Route as PartnerLayoutStatsRouteImport } from './routes/partner/_layout/stats'
 import { Route as PartnerLayoutProfileRouteImport } from './routes/partner/_layout/profile'
 import { Route as PartnerLayoutPoiRouteImport } from './routes/partner/_layout/poi'
 import { Route as PartnerLayoutPackagesRouteImport } from './routes/partner/_layout/packages'
 import { Route as PartnerLayoutHistoryRouteImport } from './routes/partner/_layout/history'
 import { Route as PartnerLayoutAdvertisementRouteImport } from './routes/partner/_layout/advertisement'
+import { Route as ManagerLayoutPoisRouteImport } from './routes/manager/_layout/pois'
+import { Route as ManagerLayoutPartnerRequestsRouteImport } from './routes/manager/_layout/partner-requests'
+import { Route as ManagerLayoutLocationsRouteImport } from './routes/manager/_layout/locations'
+import { Route as ManagerLayoutAdvertisementsRouteImport } from './routes/manager/_layout/advertisements'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
@@ -40,7 +40,7 @@ import { Route as AdminLayoutBookingsRouteImport } from './routes/admin/_layout/
 import { Route as AdminLayoutAnalyticsRouteImport } from './routes/admin/_layout/analytics'
 import { Route as AdminLayoutAccountsRouteImport } from './routes/admin/_layout/accounts'
 import { Route as DemoStartSsrIndexRouteImport } from './routes/demo/start.ssr.index'
-import { Route as StaffLayoutPoisIdRouteImport } from './routes/staff/_layout/pois.$id'
+import { Route as ManagerLayoutPoisIdRouteImport } from './routes/manager/_layout/pois.$id'
 import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr.spa-mode'
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
@@ -48,16 +48,6 @@ import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ss
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StaffLoginRoute = StaffLoginRouteImport.update({
-  id: '/staff/login',
-  path: '/staff/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StaffLayoutRoute = StaffLayoutRouteImport.update({
-  id: '/staff/_layout',
-  path: '/staff',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartnerLoginRoute = PartnerLoginRouteImport.update({
@@ -70,6 +60,16 @@ const PartnerLayoutRoute = PartnerLayoutRouteImport.update({
   path: '/partner',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ManagerLoginRoute = ManagerLoginRouteImport.update({
+  id: '/manager/login',
+  path: '/manager/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManagerLayoutRoute = ManagerLayoutRouteImport.update({
+  id: '/manager/_layout',
+  path: '/manager',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
@@ -80,43 +80,21 @@ const AdminLayoutRoute = AdminLayoutRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StaffLayoutIndexRoute = StaffLayoutIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => StaffLayoutRoute,
-} as any)
 const PartnerLayoutIndexRoute = PartnerLayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PartnerLayoutRoute,
+} as any)
+const ManagerLayoutIndexRoute = ManagerLayoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ManagerLayoutRoute,
 } as any)
 const AdminLayoutIndexRoute = AdminLayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminLayoutRoute,
 } as any)
-const StaffLayoutPoisRoute = StaffLayoutPoisRouteImport.update({
-  id: '/pois',
-  path: '/pois',
-  getParentRoute: () => StaffLayoutRoute,
-} as any)
-const StaffLayoutPartnerRequestsRoute =
-  StaffLayoutPartnerRequestsRouteImport.update({
-    id: '/partner-requests',
-    path: '/partner-requests',
-    getParentRoute: () => StaffLayoutRoute,
-  } as any)
-const StaffLayoutLocationsRoute = StaffLayoutLocationsRouteImport.update({
-  id: '/locations',
-  path: '/locations',
-  getParentRoute: () => StaffLayoutRoute,
-} as any)
-const StaffLayoutAdvertisementsRoute =
-  StaffLayoutAdvertisementsRouteImport.update({
-    id: '/advertisements',
-    path: '/advertisements',
-    getParentRoute: () => StaffLayoutRoute,
-  } as any)
 const PartnerLayoutStatsRoute = PartnerLayoutStatsRouteImport.update({
   id: '/stats',
   path: '/stats',
@@ -147,6 +125,28 @@ const PartnerLayoutAdvertisementRoute =
     id: '/advertisement',
     path: '/advertisement',
     getParentRoute: () => PartnerLayoutRoute,
+  } as any)
+const ManagerLayoutPoisRoute = ManagerLayoutPoisRouteImport.update({
+  id: '/pois',
+  path: '/pois',
+  getParentRoute: () => ManagerLayoutRoute,
+} as any)
+const ManagerLayoutPartnerRequestsRoute =
+  ManagerLayoutPartnerRequestsRouteImport.update({
+    id: '/partner-requests',
+    path: '/partner-requests',
+    getParentRoute: () => ManagerLayoutRoute,
+  } as any)
+const ManagerLayoutLocationsRoute = ManagerLayoutLocationsRouteImport.update({
+  id: '/locations',
+  path: '/locations',
+  getParentRoute: () => ManagerLayoutRoute,
+} as any)
+const ManagerLayoutAdvertisementsRoute =
+  ManagerLayoutAdvertisementsRouteImport.update({
+    id: '/advertisements',
+    path: '/advertisements',
+    getParentRoute: () => ManagerLayoutRoute,
   } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
   id: '/demo/start/server-funcs',
@@ -204,10 +204,10 @@ const DemoStartSsrIndexRoute = DemoStartSsrIndexRouteImport.update({
   path: '/demo/start/ssr/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StaffLayoutPoisIdRoute = StaffLayoutPoisIdRouteImport.update({
+const ManagerLayoutPoisIdRoute = ManagerLayoutPoisIdRouteImport.update({
   id: '/$id',
   path: '/$id',
-  getParentRoute: () => StaffLayoutPoisRoute,
+  getParentRoute: () => ManagerLayoutPoisRoute,
 } as any)
 const DemoStartSsrSpaModeRoute = DemoStartSsrSpaModeRouteImport.update({
   id: '/demo/start/ssr/spa-mode',
@@ -229,10 +229,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminLayoutRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/manager': typeof ManagerLayoutRouteWithChildren
+  '/manager/login': typeof ManagerLoginRoute
   '/partner': typeof PartnerLayoutRouteWithChildren
   '/partner/login': typeof PartnerLoginRoute
-  '/staff': typeof StaffLayoutRouteWithChildren
-  '/staff/login': typeof StaffLoginRoute
   '/admin/accounts': typeof AdminLayoutAccountsRoute
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/bookings': typeof AdminLayoutBookingsRoute
@@ -243,30 +243,30 @@ export interface FileRoutesByFullPath {
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/manager/advertisements': typeof ManagerLayoutAdvertisementsRoute
+  '/manager/locations': typeof ManagerLayoutLocationsRoute
+  '/manager/partner-requests': typeof ManagerLayoutPartnerRequestsRoute
+  '/manager/pois': typeof ManagerLayoutPoisRouteWithChildren
   '/partner/advertisement': typeof PartnerLayoutAdvertisementRoute
   '/partner/history': typeof PartnerLayoutHistoryRoute
   '/partner/packages': typeof PartnerLayoutPackagesRoute
   '/partner/poi': typeof PartnerLayoutPoiRoute
   '/partner/profile': typeof PartnerLayoutProfileRoute
   '/partner/stats': typeof PartnerLayoutStatsRoute
-  '/staff/advertisements': typeof StaffLayoutAdvertisementsRoute
-  '/staff/locations': typeof StaffLayoutLocationsRoute
-  '/staff/partner-requests': typeof StaffLayoutPartnerRequestsRoute
-  '/staff/pois': typeof StaffLayoutPoisRouteWithChildren
   '/admin/': typeof AdminLayoutIndexRoute
+  '/manager/': typeof ManagerLayoutIndexRoute
   '/partner/': typeof PartnerLayoutIndexRoute
-  '/staff/': typeof StaffLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
-  '/staff/pois/$id': typeof StaffLayoutPoisIdRoute
+  '/manager/pois/$id': typeof ManagerLayoutPoisIdRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/login': typeof AdminLoginRoute
+  '/manager/login': typeof ManagerLoginRoute
   '/partner/login': typeof PartnerLoginRoute
-  '/staff/login': typeof StaffLoginRoute
   '/admin/accounts': typeof AdminLayoutAccountsRoute
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/bookings': typeof AdminLayoutBookingsRoute
@@ -277,23 +277,23 @@ export interface FileRoutesByTo {
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/manager/advertisements': typeof ManagerLayoutAdvertisementsRoute
+  '/manager/locations': typeof ManagerLayoutLocationsRoute
+  '/manager/partner-requests': typeof ManagerLayoutPartnerRequestsRoute
+  '/manager/pois': typeof ManagerLayoutPoisRouteWithChildren
   '/partner/advertisement': typeof PartnerLayoutAdvertisementRoute
   '/partner/history': typeof PartnerLayoutHistoryRoute
   '/partner/packages': typeof PartnerLayoutPackagesRoute
   '/partner/poi': typeof PartnerLayoutPoiRoute
   '/partner/profile': typeof PartnerLayoutProfileRoute
   '/partner/stats': typeof PartnerLayoutStatsRoute
-  '/staff/advertisements': typeof StaffLayoutAdvertisementsRoute
-  '/staff/locations': typeof StaffLayoutLocationsRoute
-  '/staff/partner-requests': typeof StaffLayoutPartnerRequestsRoute
-  '/staff/pois': typeof StaffLayoutPoisRouteWithChildren
   '/admin': typeof AdminLayoutIndexRoute
+  '/manager': typeof ManagerLayoutIndexRoute
   '/partner': typeof PartnerLayoutIndexRoute
-  '/staff': typeof StaffLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
-  '/staff/pois/$id': typeof StaffLayoutPoisIdRoute
+  '/manager/pois/$id': typeof ManagerLayoutPoisIdRoute
   '/demo/start/ssr': typeof DemoStartSsrIndexRoute
 }
 export interface FileRoutesById {
@@ -301,10 +301,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin/_layout': typeof AdminLayoutRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/manager/_layout': typeof ManagerLayoutRouteWithChildren
+  '/manager/login': typeof ManagerLoginRoute
   '/partner/_layout': typeof PartnerLayoutRouteWithChildren
   '/partner/login': typeof PartnerLoginRoute
-  '/staff/_layout': typeof StaffLayoutRouteWithChildren
-  '/staff/login': typeof StaffLoginRoute
   '/admin/_layout/accounts': typeof AdminLayoutAccountsRoute
   '/admin/_layout/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/_layout/bookings': typeof AdminLayoutBookingsRoute
@@ -315,23 +315,23 @@ export interface FileRoutesById {
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/manager/_layout/advertisements': typeof ManagerLayoutAdvertisementsRoute
+  '/manager/_layout/locations': typeof ManagerLayoutLocationsRoute
+  '/manager/_layout/partner-requests': typeof ManagerLayoutPartnerRequestsRoute
+  '/manager/_layout/pois': typeof ManagerLayoutPoisRouteWithChildren
   '/partner/_layout/advertisement': typeof PartnerLayoutAdvertisementRoute
   '/partner/_layout/history': typeof PartnerLayoutHistoryRoute
   '/partner/_layout/packages': typeof PartnerLayoutPackagesRoute
   '/partner/_layout/poi': typeof PartnerLayoutPoiRoute
   '/partner/_layout/profile': typeof PartnerLayoutProfileRoute
   '/partner/_layout/stats': typeof PartnerLayoutStatsRoute
-  '/staff/_layout/advertisements': typeof StaffLayoutAdvertisementsRoute
-  '/staff/_layout/locations': typeof StaffLayoutLocationsRoute
-  '/staff/_layout/partner-requests': typeof StaffLayoutPartnerRequestsRoute
-  '/staff/_layout/pois': typeof StaffLayoutPoisRouteWithChildren
   '/admin/_layout/': typeof AdminLayoutIndexRoute
+  '/manager/_layout/': typeof ManagerLayoutIndexRoute
   '/partner/_layout/': typeof PartnerLayoutIndexRoute
-  '/staff/_layout/': typeof StaffLayoutIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
-  '/staff/_layout/pois/$id': typeof StaffLayoutPoisIdRoute
+  '/manager/_layout/pois/$id': typeof ManagerLayoutPoisIdRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
 }
 export interface FileRouteTypes {
@@ -340,10 +340,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin/login'
+    | '/manager'
+    | '/manager/login'
     | '/partner'
     | '/partner/login'
-    | '/staff'
-    | '/staff/login'
     | '/admin/accounts'
     | '/admin/analytics'
     | '/admin/bookings'
@@ -354,30 +354,30 @@ export interface FileRouteTypes {
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/manager/advertisements'
+    | '/manager/locations'
+    | '/manager/partner-requests'
+    | '/manager/pois'
     | '/partner/advertisement'
     | '/partner/history'
     | '/partner/packages'
     | '/partner/poi'
     | '/partner/profile'
     | '/partner/stats'
-    | '/staff/advertisements'
-    | '/staff/locations'
-    | '/staff/partner-requests'
-    | '/staff/pois'
     | '/admin/'
+    | '/manager/'
     | '/partner/'
-    | '/staff/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
-    | '/staff/pois/$id'
+    | '/manager/pois/$id'
     | '/demo/start/ssr/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin/login'
+    | '/manager/login'
     | '/partner/login'
-    | '/staff/login'
     | '/admin/accounts'
     | '/admin/analytics'
     | '/admin/bookings'
@@ -388,33 +388,33 @@ export interface FileRouteTypes {
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/manager/advertisements'
+    | '/manager/locations'
+    | '/manager/partner-requests'
+    | '/manager/pois'
     | '/partner/advertisement'
     | '/partner/history'
     | '/partner/packages'
     | '/partner/poi'
     | '/partner/profile'
     | '/partner/stats'
-    | '/staff/advertisements'
-    | '/staff/locations'
-    | '/staff/partner-requests'
-    | '/staff/pois'
     | '/admin'
+    | '/manager'
     | '/partner'
-    | '/staff'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
-    | '/staff/pois/$id'
+    | '/manager/pois/$id'
     | '/demo/start/ssr'
   id:
     | '__root__'
     | '/'
     | '/admin/_layout'
     | '/admin/login'
+    | '/manager/_layout'
+    | '/manager/login'
     | '/partner/_layout'
     | '/partner/login'
-    | '/staff/_layout'
-    | '/staff/login'
     | '/admin/_layout/accounts'
     | '/admin/_layout/analytics'
     | '/admin/_layout/bookings'
@@ -425,23 +425,23 @@ export interface FileRouteTypes {
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/manager/_layout/advertisements'
+    | '/manager/_layout/locations'
+    | '/manager/_layout/partner-requests'
+    | '/manager/_layout/pois'
     | '/partner/_layout/advertisement'
     | '/partner/_layout/history'
     | '/partner/_layout/packages'
     | '/partner/_layout/poi'
     | '/partner/_layout/profile'
     | '/partner/_layout/stats'
-    | '/staff/_layout/advertisements'
-    | '/staff/_layout/locations'
-    | '/staff/_layout/partner-requests'
-    | '/staff/_layout/pois'
     | '/admin/_layout/'
+    | '/manager/_layout/'
     | '/partner/_layout/'
-    | '/staff/_layout/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
-    | '/staff/_layout/pois/$id'
+    | '/manager/_layout/pois/$id'
     | '/demo/start/ssr/'
   fileRoutesById: FileRoutesById
 }
@@ -449,10 +449,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminLayoutRoute: typeof AdminLayoutRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
+  ManagerLayoutRoute: typeof ManagerLayoutRouteWithChildren
+  ManagerLoginRoute: typeof ManagerLoginRoute
   PartnerLayoutRoute: typeof PartnerLayoutRouteWithChildren
   PartnerLoginRoute: typeof PartnerLoginRoute
-  StaffLayoutRoute: typeof StaffLayoutRouteWithChildren
-  StaffLoginRoute: typeof StaffLoginRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
   DemoStartServerFuncsRoute: typeof DemoStartServerFuncsRoute
@@ -471,20 +471,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/staff/login': {
-      id: '/staff/login'
-      path: '/staff/login'
-      fullPath: '/staff/login'
-      preLoaderRoute: typeof StaffLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/staff/_layout': {
-      id: '/staff/_layout'
-      path: '/staff'
-      fullPath: '/staff'
-      preLoaderRoute: typeof StaffLayoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/partner/login': {
       id: '/partner/login'
       path: '/partner/login'
@@ -497,6 +483,20 @@ declare module '@tanstack/react-router' {
       path: '/partner'
       fullPath: '/partner'
       preLoaderRoute: typeof PartnerLayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manager/login': {
+      id: '/manager/login'
+      path: '/manager/login'
+      fullPath: '/manager/login'
+      preLoaderRoute: typeof ManagerLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manager/_layout': {
+      id: '/manager/_layout'
+      path: '/manager'
+      fullPath: '/manager'
+      preLoaderRoute: typeof ManagerLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/login': {
@@ -513,13 +513,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/staff/_layout/': {
-      id: '/staff/_layout/'
-      path: '/'
-      fullPath: '/staff/'
-      preLoaderRoute: typeof StaffLayoutIndexRouteImport
-      parentRoute: typeof StaffLayoutRoute
-    }
     '/partner/_layout/': {
       id: '/partner/_layout/'
       path: '/'
@@ -527,40 +520,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PartnerLayoutIndexRouteImport
       parentRoute: typeof PartnerLayoutRoute
     }
+    '/manager/_layout/': {
+      id: '/manager/_layout/'
+      path: '/'
+      fullPath: '/manager/'
+      preLoaderRoute: typeof ManagerLayoutIndexRouteImport
+      parentRoute: typeof ManagerLayoutRoute
+    }
     '/admin/_layout/': {
       id: '/admin/_layout/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminLayoutIndexRouteImport
       parentRoute: typeof AdminLayoutRoute
-    }
-    '/staff/_layout/pois': {
-      id: '/staff/_layout/pois'
-      path: '/pois'
-      fullPath: '/staff/pois'
-      preLoaderRoute: typeof StaffLayoutPoisRouteImport
-      parentRoute: typeof StaffLayoutRoute
-    }
-    '/staff/_layout/partner-requests': {
-      id: '/staff/_layout/partner-requests'
-      path: '/partner-requests'
-      fullPath: '/staff/partner-requests'
-      preLoaderRoute: typeof StaffLayoutPartnerRequestsRouteImport
-      parentRoute: typeof StaffLayoutRoute
-    }
-    '/staff/_layout/locations': {
-      id: '/staff/_layout/locations'
-      path: '/locations'
-      fullPath: '/staff/locations'
-      preLoaderRoute: typeof StaffLayoutLocationsRouteImport
-      parentRoute: typeof StaffLayoutRoute
-    }
-    '/staff/_layout/advertisements': {
-      id: '/staff/_layout/advertisements'
-      path: '/advertisements'
-      fullPath: '/staff/advertisements'
-      preLoaderRoute: typeof StaffLayoutAdvertisementsRouteImport
-      parentRoute: typeof StaffLayoutRoute
     }
     '/partner/_layout/stats': {
       id: '/partner/_layout/stats'
@@ -603,6 +575,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/partner/advertisement'
       preLoaderRoute: typeof PartnerLayoutAdvertisementRouteImport
       parentRoute: typeof PartnerLayoutRoute
+    }
+    '/manager/_layout/pois': {
+      id: '/manager/_layout/pois'
+      path: '/pois'
+      fullPath: '/manager/pois'
+      preLoaderRoute: typeof ManagerLayoutPoisRouteImport
+      parentRoute: typeof ManagerLayoutRoute
+    }
+    '/manager/_layout/partner-requests': {
+      id: '/manager/_layout/partner-requests'
+      path: '/partner-requests'
+      fullPath: '/manager/partner-requests'
+      preLoaderRoute: typeof ManagerLayoutPartnerRequestsRouteImport
+      parentRoute: typeof ManagerLayoutRoute
+    }
+    '/manager/_layout/locations': {
+      id: '/manager/_layout/locations'
+      path: '/locations'
+      fullPath: '/manager/locations'
+      preLoaderRoute: typeof ManagerLayoutLocationsRouteImport
+      parentRoute: typeof ManagerLayoutRoute
+    }
+    '/manager/_layout/advertisements': {
+      id: '/manager/_layout/advertisements'
+      path: '/advertisements'
+      fullPath: '/manager/advertisements'
+      preLoaderRoute: typeof ManagerLayoutAdvertisementsRouteImport
+      parentRoute: typeof ManagerLayoutRoute
     }
     '/demo/start/server-funcs': {
       id: '/demo/start/server-funcs'
@@ -681,12 +681,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoStartSsrIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/staff/_layout/pois/$id': {
-      id: '/staff/_layout/pois/$id'
+    '/manager/_layout/pois/$id': {
+      id: '/manager/_layout/pois/$id'
       path: '/$id'
-      fullPath: '/staff/pois/$id'
-      preLoaderRoute: typeof StaffLayoutPoisIdRouteImport
-      parentRoute: typeof StaffLayoutPoisRoute
+      fullPath: '/manager/pois/$id'
+      preLoaderRoute: typeof ManagerLayoutPoisIdRouteImport
+      parentRoute: typeof ManagerLayoutPoisRoute
     }
     '/demo/start/ssr/spa-mode': {
       id: '/demo/start/ssr/spa-mode'
@@ -738,6 +738,37 @@ const AdminLayoutRouteWithChildren = AdminLayoutRoute._addFileChildren(
   AdminLayoutRouteChildren,
 )
 
+interface ManagerLayoutPoisRouteChildren {
+  ManagerLayoutPoisIdRoute: typeof ManagerLayoutPoisIdRoute
+}
+
+const ManagerLayoutPoisRouteChildren: ManagerLayoutPoisRouteChildren = {
+  ManagerLayoutPoisIdRoute: ManagerLayoutPoisIdRoute,
+}
+
+const ManagerLayoutPoisRouteWithChildren =
+  ManagerLayoutPoisRoute._addFileChildren(ManagerLayoutPoisRouteChildren)
+
+interface ManagerLayoutRouteChildren {
+  ManagerLayoutAdvertisementsRoute: typeof ManagerLayoutAdvertisementsRoute
+  ManagerLayoutLocationsRoute: typeof ManagerLayoutLocationsRoute
+  ManagerLayoutPartnerRequestsRoute: typeof ManagerLayoutPartnerRequestsRoute
+  ManagerLayoutPoisRoute: typeof ManagerLayoutPoisRouteWithChildren
+  ManagerLayoutIndexRoute: typeof ManagerLayoutIndexRoute
+}
+
+const ManagerLayoutRouteChildren: ManagerLayoutRouteChildren = {
+  ManagerLayoutAdvertisementsRoute: ManagerLayoutAdvertisementsRoute,
+  ManagerLayoutLocationsRoute: ManagerLayoutLocationsRoute,
+  ManagerLayoutPartnerRequestsRoute: ManagerLayoutPartnerRequestsRoute,
+  ManagerLayoutPoisRoute: ManagerLayoutPoisRouteWithChildren,
+  ManagerLayoutIndexRoute: ManagerLayoutIndexRoute,
+}
+
+const ManagerLayoutRouteWithChildren = ManagerLayoutRoute._addFileChildren(
+  ManagerLayoutRouteChildren,
+)
+
 interface PartnerLayoutRouteChildren {
   PartnerLayoutAdvertisementRoute: typeof PartnerLayoutAdvertisementRoute
   PartnerLayoutHistoryRoute: typeof PartnerLayoutHistoryRoute
@@ -762,46 +793,14 @@ const PartnerLayoutRouteWithChildren = PartnerLayoutRoute._addFileChildren(
   PartnerLayoutRouteChildren,
 )
 
-interface StaffLayoutPoisRouteChildren {
-  StaffLayoutPoisIdRoute: typeof StaffLayoutPoisIdRoute
-}
-
-const StaffLayoutPoisRouteChildren: StaffLayoutPoisRouteChildren = {
-  StaffLayoutPoisIdRoute: StaffLayoutPoisIdRoute,
-}
-
-const StaffLayoutPoisRouteWithChildren = StaffLayoutPoisRoute._addFileChildren(
-  StaffLayoutPoisRouteChildren,
-)
-
-interface StaffLayoutRouteChildren {
-  StaffLayoutAdvertisementsRoute: typeof StaffLayoutAdvertisementsRoute
-  StaffLayoutLocationsRoute: typeof StaffLayoutLocationsRoute
-  StaffLayoutPartnerRequestsRoute: typeof StaffLayoutPartnerRequestsRoute
-  StaffLayoutPoisRoute: typeof StaffLayoutPoisRouteWithChildren
-  StaffLayoutIndexRoute: typeof StaffLayoutIndexRoute
-}
-
-const StaffLayoutRouteChildren: StaffLayoutRouteChildren = {
-  StaffLayoutAdvertisementsRoute: StaffLayoutAdvertisementsRoute,
-  StaffLayoutLocationsRoute: StaffLayoutLocationsRoute,
-  StaffLayoutPartnerRequestsRoute: StaffLayoutPartnerRequestsRoute,
-  StaffLayoutPoisRoute: StaffLayoutPoisRouteWithChildren,
-  StaffLayoutIndexRoute: StaffLayoutIndexRoute,
-}
-
-const StaffLayoutRouteWithChildren = StaffLayoutRoute._addFileChildren(
-  StaffLayoutRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminLayoutRoute: AdminLayoutRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
+  ManagerLayoutRoute: ManagerLayoutRouteWithChildren,
+  ManagerLoginRoute: ManagerLoginRoute,
   PartnerLayoutRoute: PartnerLayoutRouteWithChildren,
   PartnerLoginRoute: PartnerLoginRoute,
-  StaffLayoutRoute: StaffLayoutRouteWithChildren,
-  StaffLoginRoute: StaffLoginRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,
   DemoStartServerFuncsRoute: DemoStartServerFuncsRoute,

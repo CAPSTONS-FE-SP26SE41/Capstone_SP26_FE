@@ -39,7 +39,7 @@ type Advertisement = {
   }
 }
 
-export const Route = createFileRoute("/staff/_layout/advertisements")({
+export const Route = createFileRoute("/manager/_layout/advertisements")({
   component: AdvertisementsPage,
 })
 

@@ -1,4 +1,5 @@
 import { Outlet } from '@tanstack/react-router'
+import { useState } from 'react'
 import AppSidebar, { type NavItem, type SidebarBrand } from './AppSidebar'
 import AppTopbar from './AppTopbar'
 
@@ -23,6 +24,7 @@ export default function DashboardLayout({
   showSearch = false,
   themeColor = 'green',
 }: DashboardLayoutProps) {
+  const [collapsed, setCollapsed] = useState(false)
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -30,6 +32,8 @@ export default function DashboardLayout({
         brand={brand}
         navItems={navItems}
         themeColor={themeColor}
+        collapsed={collapsed}
+        onToggle={() => setCollapsed(prev => !prev)}
       />
 
       <div className="flex-1 flex flex-col">
