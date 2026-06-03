@@ -4,6 +4,7 @@ import { Ad } from '../../types/ad';
 import { getMyPartnerPOIs } from '../../services/partnerPoiService';
 import { CustomSelect } from '../ui/CustomSelect';
 import { useAlert } from '../ui/AlertContext';
+import { DateTimePicker } from '../ui/DateTimePicker';
 
 interface CreateAdModalProps {
   isOpen: boolean;
@@ -88,6 +89,18 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit, initialData }
     e.preventDefault();
     if (!newAdForm.poiId) {
       showWarning("Vui lòng chọn Điểm tham quan (POI)!");
+      return;
+    }
+    if (!newAdForm.startDate) {
+      showWarning("Vui lòng chọn Ngày bắt đầu!");
+      return;
+    }
+    if (!newAdForm.endDate) {
+      showWarning("Vui lòng chọn Ngày kết thúc!");
+      return;
+    }
+    if (newAdForm.startDate >= newAdForm.endDate) {
+      showWarning("Ngày bắt đầu phải trước ngày kết thúc!");
       return;
     }
     onSubmit({
@@ -221,11 +234,22 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit, initialData }
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Ngày bắt đầu *</label>
-                  <input required type="datetime-local" value={newAdForm.startDate} onChange={e => setNewAdForm({ ...newAdForm, startDate: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all font-medium text-[#e28743]" />
+                  <DateTimePicker
+                    value={newAdForm.startDate}
+                    onChange={(val) => setNewAdForm({ ...newAdForm, startDate: val })}
+                    theme="orange"
+                    placeholder="Chọn ngày bắt đầu"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Ngày kết thúc *</label>
-                  <input required type="datetime-local" value={newAdForm.endDate} onChange={e => setNewAdForm({ ...newAdForm, endDate: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-[#e28743]/10 focus:border-[#e28743] transition-all font-medium text-[#e28743]" />
+                  <DateTimePicker
+                    value={newAdForm.endDate}
+                    onChange={(val) => setNewAdForm({ ...newAdForm, endDate: val })}
+                    theme="orange"
+                    placeholder="Chọn ngày kết thúc"
+                    align="right"
+                  />
                 </div>
               </div>
             </div>

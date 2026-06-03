@@ -31,6 +31,7 @@ import {
 } from "recharts"
 
 import { getManagerDashboardStats, ManagerDashboardResponse } from "../../../services/managerStatisticService"
+import { DateRangePicker } from "../../../components/ui/DateRangePicker"
 
 export const Route = createFileRoute("/manager/_layout/")({
   component: StaffDashboard,
@@ -87,33 +88,13 @@ function StaffDashboard() {
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <Activity size={20} className="text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900">Thống kê tổng quan</h2>
-            </div>
-          </div>
-        </div>
+      <div className="flex flex-col md:flex-row justify-end md:items-end gap-4">
         <div className="flex flex-col sm:flex-row gap-3 items-center">
-          <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
-            <input
-              type="date"
-              value={dateRange.start}
-              onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
-              className="bg-transparent text-slate-700 text-sm rounded-lg focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 block p-2 outline-none transition-all"
-            />
-            <span className="text-slate-300 font-light">→</span>
-            <input
-              type="date"
-              value={dateRange.end}
-              onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
-              className="bg-transparent text-slate-700 text-sm rounded-lg focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 block p-2 outline-none transition-all"
-            />
-          </div>
+          <DateRangePicker
+            value={{ start: dateRange.start, end: dateRange.end }}
+            onChange={(range) => setDateRange(range)}
+            theme="emerald"
+          />
 
           <select
             value={period}
@@ -247,7 +228,7 @@ function StaffDashboard() {
           </div>
           <div className={`h-64 transition-opacity duration-300 [&_.recharts-wrapper]:!outline-none [&_.recharts-surface]:!outline-none ${isLoading ? "opacity-50" : "opacity-100"}`}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.topPoiCategories} layout="vertical" margin={{ left: 20 }} style={{ outline: "none" }}>
+              <BarChart data={stats.topPoiCategories.slice(0, 5)} layout="vertical" margin={{ left: 20 }} style={{ outline: "none" }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
                 <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 11 }} />
                 <YAxis type="category" dataKey="categoryName" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 12, fontWeight: 500 }} width={100} />
@@ -261,7 +242,7 @@ function StaffDashboard() {
                   }}
                 />
                 <Bar dataKey="count" name="Số lượng" fill="#6366f1" radius={[0, 8, 8, 0]} barSize={24}>
-                  {stats.topPoiCategories.map((_, index) => (
+                  {stats.topPoiCategories.slice(0, 5).map((_, index) => (
                     <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
                   ))}
                 </Bar>
@@ -446,9 +427,8 @@ function StaffDashboard() {
             {zoomedChart === "categories" && (
               <>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                    <Sparkles className="text-indigo-500" size={20} />
-                    Phân bổ danh mục POI (Phóng to)
+                  <h3 className="text-xl font-bold text-slate-900">
+                    Phân bổ danh mục POI (Chi tiết)
                   </h3>
                   <p className="text-sm text-slate-500 mt-1">Biểu đồ cơ cấu số lượng POI theo từng danh mục</p>
                 </div>
