@@ -17,6 +17,7 @@ import {
   Cell,
 } from 'recharts'
 import { getAdminDashboardStats, AdminDashboardResponse } from '../../../services/adminStatisticService'
+import { DateRangePicker } from '../../../components/ui/DateRangePicker'
 
 export const Route = createFileRoute('/admin/_layout/analytics')({
   component: AdminAnalytics,
@@ -71,21 +72,12 @@ function AdminAnalytics() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row gap-3 items-center">
-        <div className="flex items-center gap-2">
-          <input 
-            type="date" 
-            value={dateRange.start}
-            onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-            className="bg-white border border-[#e7edf4] text-text-main text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none shadow-sm transition-all"
+          <DateRangePicker
+            value={{ start: dateRange.start, end: dateRange.end }}
+            onChange={(range) => setDateRange(range)}
+            theme="blue"
+            align="left"
           />
-          <span className="text-text-secondary">-</span>
-          <input 
-            type="date" 
-            value={dateRange.end}
-            onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-            className="bg-white border border-[#e7edf4] text-text-main text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none shadow-sm transition-all"
-          />
-        </div>
         
         <select 
           value={period} 

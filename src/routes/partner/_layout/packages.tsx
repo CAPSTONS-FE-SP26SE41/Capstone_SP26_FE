@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
-import { Package, CreditCard, Loader2, Ban, X, Sparkles, Check } from 'lucide-react'
+import { Package, CreditCard, Loader2, Ban, X, Sparkles, Check, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { getMySubscriptions, getSubscriptions } from '../../../services/subscriptionService'
 import { createPayment, PaymentResponse } from '../../../services/paymentService'
 import PaymentModal from '../../../components/partner/PaymentModal'
@@ -47,6 +47,44 @@ function ExpandableDescription({ text }: { text: string }) {
   )
 }
 
+const getCardStyle = (index: number, title: string) => {
+  const normalizedTitle = title?.toLowerCase() || '';
+  if (normalizedTitle.includes('nâng cao') || normalizedTitle.includes('premium') || index === 2) {
+    return {
+      gradient: 'from-[#ff7e5f] via-[#feb47b] to-[#86a8e7]', // Sunset with sky breeze
+      shadow: 'shadow-[#ff7e5f]/15 hover:shadow-[#feb47b]/25',
+      btnText: 'text-[#ff7e5f]',
+      tag: '🔥 Phổ biến nhất',
+      circle: 'bg-violet-400/20'
+    }
+  }
+  if (normalizedTitle.includes('dài hạn') || normalizedTitle.includes('pro') || index === 1) {
+    return {
+      gradient: 'from-[#ff4e50] to-[#f9d423]', // Warm fire glow
+      shadow: 'shadow-[#ff4e50]/15 hover:shadow-[#f9d423]/25',
+      btnText: 'text-[#ff4e50]',
+      tag: '🌟 Đáng giá nhất',
+      circle: 'bg-yellow-400/20'
+    }
+  }
+  if (normalizedTitle.includes('khởi nghiệp') || index === 0) {
+    return {
+      gradient: 'from-[#e28743] via-[#e6985d] to-[#f2b98f]', // Warm gold/orange gradient
+      shadow: 'shadow-[#e28743]/15 hover:shadow-[#e6985d]/25',
+      btnText: 'text-[#e28743]',
+      tag: '🌱 Khởi đầu tốt',
+      circle: 'bg-amber-300/20'
+    }
+  }
+  return {
+    gradient: 'from-[#f857a6] to-[#ff5858]', // Elegant coral/pink red
+    shadow: 'shadow-[#f857a6]/15 hover:shadow-[#ff5858]/25',
+    btnText: 'text-[#f857a6]',
+    tag: '⚡ Giá tốt nhất',
+    circle: 'bg-pink-300/20'
+  }
+}
+
 function PartnerPackagePage() {
   const { tab } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
@@ -64,11 +102,10 @@ function PartnerPackagePage() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [paymentData, setPaymentData] = useState<PaymentResponse | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
-  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null)
+  const [errorModal, setErrorModal] = useState<{ type: "success" | "error"; message: string } | null>(null)
 
   const showToast = (type: "success" | "error", message: string) => {
-    setToast({ type, message })
-    setTimeout(() => setToast(null), 3000)
+    setErrorModal({ type, message })
   }
 
   const fetchData = async () => {
@@ -216,33 +253,124 @@ function PartnerPackagePage() {
       ) : activeTab === 'my-packages' ? (
         <div className="space-y-6 animate-in fade-in duration-300">
           {mySubs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mySubs.map((sub: any, i: number) => (
-                <div key={i} className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-                  <div className="flex justify-between items-start mb-4">
-                    <h4 className="text-lg font-bold text-slate-800">{sub.packageTitle || sub.SubscriptionPackage?.Title || "Gói quảng cáo"}</h4>
-                    {getStatusBadge(sub)}
+            <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {mySubs.map((sub: any, i: number) => {
+                const adsUsed = sub.adsUsed ?? sub.AdsUsed ?? 0
+                const maxAds = sub.maxAds ?? sub.MaxAds ?? 0
+                const adsPct = maxAds > 0 ? Math.min(Math.round(adsUsed / maxAds * 100), 100) : 0
+                const startDate = sub.createdAt || sub.CreatedAt
+                const expiredDate = sub.expiredAt || sub.ExpiredAt
+                const daysLeft = expiredDate
+                  ? Math.max(0, Math.ceil((new Date(expiredDate).getTime() - Date.now()) / 86400000))
+                  : null
+                const isExpiringSoon = daysLeft !== null && daysLeft <= 7 && daysLeft > 0
+                const isExpired = daysLeft === 0
+
+                return (
+                  <div key={i} className="bg-white rounded-3xl border border-slate-200/80 shadow-xl shadow-slate-100/50 overflow-hidden relative group">
+                    {/* Glowing background highlights */}
+                    <div className="absolute -right-20 -top-20 w-48 h-48 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full blur-3xl opacity-10 pointer-events-none group-hover:opacity-15 transition-opacity" />
+                    <div className="absolute -left-20 -bottom-20 w-48 h-48 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full blur-3xl opacity-5 pointer-events-none" />
+
+                    {/* Gradient top bar */}
+                    <div className="h-2 bg-gradient-to-r from-[#e28743] via-[#ff7e5f] to-[#feb47b]" />
+
+                    <div className="p-8">
+                      {/* Title & Status */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20 text-white shrink-0">
+                            <Package size={26} />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-slate-900">
+                              {sub.packageTitle || sub.SubscriptionPackage?.Title || "Gói quảng cáo"}
+                            </h3>
+                            <p className="text-xs text-slate-400 mt-1">Gói dịch vụ đang kích hoạt trên hệ thống</p>
+                          </div>
+                        </div>
+                        <div className="flex justify-start sm:justify-end">
+                          {getStatusBadge(sub)}
+                        </div>
+                      </div>
+
+                      {/* Main grid: Left details, Right circular/big status */}
+                      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
+                        {/* Remaining days card */}
+                        <div className={`md:col-span-2 rounded-2xl p-5 flex flex-col justify-center items-center text-center border ${
+                          isExpired ? 'bg-rose-50/50 border-rose-100 text-rose-900'
+                          : isExpiringSoon ? 'bg-amber-50/50 border-amber-100 text-amber-900'
+                          : 'bg-emerald-50/50 border-emerald-100/80 text-emerald-950'
+                        }`}>
+                          <span className="text-3xl mb-2">{isExpired ? '⏰' : isExpiringSoon ? '⚠️' : '✅'}</span>
+                          <span className="text-xs font-semibold uppercase tracking-wider opacity-60">
+                            {isExpired ? 'Đã hết hạn' : isExpiringSoon ? 'Sắp hết hạn' : 'Thời gian còn lại'}
+                          </span>
+                          {!isExpired && daysLeft !== null ? (
+                            <div className="mt-3">
+                              <span className="text-4xl font-extrabold tracking-tight">
+                                {daysLeft}
+                              </span>
+                              <span className="text-sm font-medium ml-1">ngày</span>
+                            </div>
+                          ) : (
+                            <span className="text-lg font-bold mt-2">0 ngày</span>
+                          )}
+                        </div>
+
+                        {/* Date parameters */}
+                        <div className="md:col-span-3 bg-slate-50/50 border border-slate-100 rounded-2xl p-5 flex flex-col justify-center space-y-4">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-slate-500 flex items-center gap-2">
+                              📅 Ngày kích hoạt:
+                            </span>
+                            <span className="font-semibold text-slate-700 bg-white px-3 py-1 rounded-xl border border-slate-200/40 shadow-xs">
+                              {formatDate(startDate)}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-slate-500 flex items-center gap-2">
+                              📆 Ngày hết hạn:
+                            </span>
+                            <span className={`font-semibold bg-white px-3 py-1 rounded-xl border border-slate-200/40 shadow-xs ${isExpiringSoon || isExpired ? 'text-amber-600' : 'text-slate-700'}`}>
+                              {formatDate(expiredDate)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Progress: Ads count */}
+                      <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6">
+                        <div className="flex justify-between items-center mb-3">
+                          <div>
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Hạn mức quảng cáo khả dụng</span>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Số lượng chiến dịch quảng cáo đã tạo trên tổng số tối đa</p>
+                          </div>
+                          <span className={`text-base font-extrabold ${adsPct >= 100 ? 'text-rose-600' : adsPct >= 70 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                            {adsUsed} / {maxAds} <span className="text-xs font-semibold text-slate-400">quảng cáo</span>
+                          </span>
+                        </div>
+                        <div className="h-3 bg-slate-200 rounded-full overflow-hidden shadow-inner">
+                          <div
+                            className={`h-full rounded-full transition-all duration-1000 ${
+                              adsPct >= 100 ? 'bg-gradient-to-r from-rose-400 to-rose-600'
+                              : adsPct >= 70 ? 'bg-gradient-to-r from-amber-400 to-orange-500'
+                              : 'bg-gradient-to-r from-emerald-400 to-teal-500'
+                            }`}
+                            style={{ width: `${adsPct}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between items-center mt-3 text-xs">
+                          <span className="text-slate-500">Đã sử dụng: <strong className="text-slate-700 font-bold">{adsPct}%</strong></span>
+                          <span className={`font-semibold ${adsPct >= 100 ? 'text-rose-600' : 'text-slate-600'}`}>
+                            {adsPct >= 100 ? 'Đã hết lượt' : `Còn lại ${maxAds - adsUsed} lượt`}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-2 mb-6 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Ngày đăng ký:</span>
-                      <span className="font-semibold text-slate-700">{formatDate(sub.createdAt || sub.CreatedAt)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Ngày hết hạn:</span>
-                      <span className="font-semibold text-slate-700">
-                        {formatDate(sub.expiredAt || sub.ExpiredAt)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Giới hạn quảng cáo:</span>
-                      <span className={`font-semibold ${sub.adsUsed >= sub.maxAds ? 'text-amber-600' : 'text-slate-700'}`}>
-                        {sub.adsUsed ?? sub.AdsUsed ?? 0} / {sub.maxAds || sub.MaxAds}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm">
@@ -267,29 +395,34 @@ function PartnerPackagePage() {
               .map((line: string) => line.trim())
               .filter((line: string) => line.length > 0);
             
+            const style = getCardStyle(i, pkg.title || pkg.Title)
+
             return (
               <div 
                 key={i} 
-                className="bg-gradient-to-br from-[#258cf4] to-[#3b59e9] rounded-[24px] p-7 flex flex-col shadow-xl shadow-blue-500/10 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 relative overflow-hidden h-full min-h-[420px]"
+                className={`bg-gradient-to-br ${style.gradient} rounded-[24px] p-7 flex flex-col shadow-xl ${style.shadow} transition-all duration-300 relative overflow-hidden h-full min-h-[420px] hover:scale-[1.02]`}
               >
                 {/* Decorative glowing sphere in background */}
-                <div className="absolute -right-16 -top-16 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+                <div className={`absolute -right-16 -top-16 w-36 h-36 rounded-full blur-2xl pointer-events-none ${style.circle}`} />
+                <div className="absolute -left-12 -bottom-12 w-28 h-28 bg-white/5 rounded-full blur-xl pointer-events-none" />
                 
                 {/* Header row */}
                 <div className="flex justify-between items-center mb-6">
-                  <span className="bg-white/20 backdrop-blur-sm text-white font-semibold text-[11px] px-3.5 py-1 rounded-full uppercase tracking-wider">
+                  <span className="bg-white/20 backdrop-blur-sm text-white font-semibold text-[11px] px-3.5 py-1.5 rounded-full uppercase tracking-wider border border-white/10">
                     {pkg.durationDays || pkg.DurationDays} Ngày
                   </span>
-                  <Sparkles size={20} className="text-yellow-300 animate-pulse" />
+                  <span className="bg-white/25 backdrop-blur-sm text-white font-bold text-[11px] px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-1 shadow-sm">
+                    {style.tag}
+                  </span>
                 </div>
                 
                 {/* Title and Price */}
-                <h4 className="text-2xl font-bold text-white mb-2 tracking-tight line-clamp-1" title={pkg.title || pkg.Title}>
+                <h4 className="text-2xl font-bold text-white mb-2 tracking-tight line-clamp-1 drop-shadow-sm" title={pkg.title || pkg.Title}>
                   {pkg.title || pkg.Title}
                 </h4>
                 
                 <div className="flex items-baseline gap-1 mb-5">
-                  <span className="text-3xl font-extrabold text-white">
+                  <span className="text-3xl font-extrabold text-white drop-shadow-sm">
                     {new Intl.NumberFormat('vi-VN').format(pkg.price || pkg.Price)}
                   </span>
                   <span className="text-white/80 text-sm font-semibold">VNĐ</span>
@@ -300,7 +433,7 @@ function PartnerPackagePage() {
                 {/* Features List */}
                 <div className="space-y-3.5 my-6 flex-1">
                   <div className="flex items-start gap-3 text-white/95 text-sm">
-                    <div className="h-5 w-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5 border border-white/10">
+                    <div className="h-5 w-5 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center flex-shrink-0 mt-0.5 border border-white/10">
                       <Check size={12} className="text-white" />
                     </div>
                     <span className="leading-tight">
@@ -311,7 +444,7 @@ function PartnerPackagePage() {
                   {descLines.length > 0 ? (
                     descLines.map((line: string, idx: number) => (
                       <div key={idx} className="flex items-start gap-3 text-white/95 text-sm">
-                        <div className="h-5 w-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5 border border-white/10">
+                        <div className="h-5 w-5 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center flex-shrink-0 mt-0.5 border border-white/10">
                           <Check size={12} className="text-white" />
                         </div>
                         <span className="leading-normal">{line}</span>
@@ -331,9 +464,9 @@ function PartnerPackagePage() {
                 <button 
                   disabled={isProcessing}
                   onClick={() => handleBuyPackage(pkg.packageId || pkg.PackageId || pkg.id)}
-                  className="w-full py-4 bg-white hover:bg-slate-50 text-[#258cf4] font-bold rounded-2xl shadow-lg shadow-blue-900/10 hover:shadow-xl hover:shadow-blue-900/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`w-full py-4 bg-white hover:bg-slate-50 ${style.btnText} font-bold rounded-2xl shadow-lg hover:shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-auto disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                  {isProcessing && <Loader2 size={18} className="animate-spin text-[#258cf4]" />}
+                  {isProcessing && <Loader2 size={18} className={`animate-spin ${style.btnText}`} />}
                   ĐĂNG KÝ NGAY
                 </button>
               </div>
@@ -357,21 +490,59 @@ function PartnerPackagePage() {
         />
       )}
 
-      {toast && (
-        <div className="fixed top-4 left-0 right-0 flex justify-center pointer-events-none z-[9999]">
+      {errorModal && (
+        <div
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+          style={{ animation: 'fadeIn 0.2s ease-out' }}
+          onClick={() => setErrorModal(null)}
+        >
           <div
-            className={`pointer-events-auto px-5 py-3 rounded-2xl border shadow-xl text-sm font-semibold flex items-center gap-2.5 backdrop-blur-md max-w-[90vw] ${
-              toast.type === "success"
-                ? "bg-emerald-50/90 text-emerald-800 border-emerald-200/60 shadow-emerald-100/50"
-                : "bg-rose-50/90 text-rose-800 border-rose-200/60 shadow-rose-100/50 animate-toast-shake"
-            }`}
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden"
+            style={{ animation: 'slideUp 0.3s cubic-bezier(0.16,1,0.3,1)' }}
+            onClick={(e) => e.stopPropagation()}
           >
-            {toast.type === "error" ? (
-              <span className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
-            ) : (
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-            )}
-            <span>{toast.message}</span>
+            {/* Modal top color bar */}
+            <div className={`h-1.5 w-full ${
+              errorModal.type === 'error'
+                ? 'bg-gradient-to-r from-rose-400 to-red-500'
+                : 'bg-gradient-to-r from-emerald-400 to-teal-500'
+            }`} />
+
+            <div className="p-8">
+              {/* Icon */}
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 ${
+                errorModal.type === 'error'
+                  ? 'bg-rose-50 text-rose-500'
+                  : 'bg-emerald-50 text-emerald-500'
+              }`}>
+                {errorModal.type === 'error'
+                  ? <AlertTriangle size={32} strokeWidth={1.8} />
+                  : <CheckCircle2 size={32} strokeWidth={1.8} />
+                }
+              </div>
+
+              {/* Title */}
+              <h3 className="text-lg font-bold text-slate-900 text-center mb-2">
+                {errorModal.type === 'error' ? 'Không thể thực hiện' : 'Thành công'}
+              </h3>
+
+              {/* Message */}
+              <p className="text-sm text-slate-500 text-center leading-relaxed">
+                {errorModal.message}
+              </p>
+
+              {/* Action button */}
+              <button
+                onClick={() => setErrorModal(null)}
+                className={`mt-7 w-full py-3.5 rounded-2xl font-semibold text-sm transition-all active:scale-[0.98] ${
+                  errorModal.type === 'error'
+                    ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/20'
+                    : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
+                }`}
+              >
+                Đã hiểu
+              </button>
+            </div>
           </div>
         </div>
       )}

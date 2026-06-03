@@ -9,7 +9,7 @@ import {
   type PartnerRequestResponse
 } from "../../../services/partnerRequestService"
 
-export const Route = createFileRoute("/staff/_layout/partner-requests")({
+export const Route = createFileRoute("/manager/_layout/partner-requests")({
   component: PartnerRequestsPage,
 })
 

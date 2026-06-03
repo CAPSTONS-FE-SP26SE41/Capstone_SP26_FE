@@ -10,7 +10,7 @@ import {
   uploadStaffPOIImage,
 } from "../../../services/poiService"
 
-export const Route = createFileRoute("/staff/_layout/pois/$id")({
+export const Route = createFileRoute("/manager/_layout/pois/$id")({
   component: StaffPOIDetailPage,
 })
 
@@ -149,7 +149,7 @@ function StaffPOIDetailPage() {
       }, selectedImageFile)
 
       sessionStorage.setItem("staff_poi_success_message", "Cập nhật POI thành công")
-      navigate({ to: "/staff/pois" })
+      navigate({ to: "/manager/pois" })
     } catch (e) {
       console.error("Failed to update POI", e)
       const message = e instanceof Error ? e.message : String(e)
@@ -173,7 +173,7 @@ function StaffPOIDetailPage() {
           <p className="text-sm text-slate-500 mt-1">ID: {id}</p>
         </div>
         <Link
-          to="/staff/pois"
+          to="/manager/pois"
           className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50"
         >
           <ArrowLeft size={16} />

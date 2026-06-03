@@ -27,7 +27,7 @@ export function AlertModal({
     if (typeof window === 'undefined') return 'emerald';
     const path = window.location.pathname;
     if (path.startsWith('/partner')) return 'orange';
-    if (path.startsWith('/staff')) return 'emerald';
+    if (path.startsWith('/manager')) return 'emerald';
     if (path.startsWith('/admin')) return 'emerald'; // admin uses green/emerald
     return 'blue'; // default theme
   };

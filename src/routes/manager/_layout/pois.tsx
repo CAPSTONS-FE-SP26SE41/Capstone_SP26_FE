@@ -20,7 +20,7 @@ import {
 import { getDistrictsByLocationId, getPreferences, type District, type POIPreference } from "../../../services/partnerPoiService"
 import { CustomSelect } from "../../../components/ui/CustomSelect"
 
-export const Route = createFileRoute("/staff/_layout/pois")({
+export const Route = createFileRoute("/manager/_layout/pois")({
   component: StaffPOIsPage,
 })
 
@@ -147,7 +147,7 @@ function StaffPOIsPage() {
           // Token hết hạn/không hợp lệ -> ép đăng nhập lại.
           localStorage.removeItem("manager_token")
           localStorage.removeItem("admin_token")
-          navigate({ to: "/staff/login" })
+          navigate({ to: "/manager/login" })
           return
         }
       } finally {
@@ -397,7 +397,7 @@ function StaffPOIsPage() {
       if (status === 401) {
         localStorage.removeItem("manager_token")
         localStorage.removeItem("admin_token")
-        navigate({ to: "/staff/login" })
+        navigate({ to: "/manager/login" })
         return
       }
       showToast("error", "Không tải được chi tiết POI")
@@ -456,7 +456,7 @@ function StaffPOIsPage() {
       if (status === 401) {
         localStorage.removeItem("manager_token")
         localStorage.removeItem("admin_token")
-        navigate({ to: "/staff/login" })
+        navigate({ to: "/manager/login" })
         return
       }
       showToast("error", "Không tải được dữ liệu chỉnh sửa")
@@ -740,7 +740,7 @@ function StaffPOIsPage() {
             </p>
           </div>
           <Link
-            to="/staff/pois"
+            to="/manager/pois"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold"
           >
             Làm mới

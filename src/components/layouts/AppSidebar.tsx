@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { type LucideIcon } from 'lucide-react'
+import { type LucideIcon, PanelLeftClose, PanelLeft } from 'lucide-react'
 
 export type NavItem = {
   to: string
@@ -18,12 +18,16 @@ type AppSidebarProps = {
   brand: SidebarBrand
   navItems: NavItem[]
   themeColor?: string
+  collapsed?: boolean
+  onToggle?: () => void
 }
 
 export default function AppSidebar({
   brand,
   navItems,
   themeColor = 'green',
+  collapsed = false,
+  onToggle,
 }: AppSidebarProps) {
   const BrandIcon = brand.icon
   const accentMap = {
@@ -64,27 +68,32 @@ export default function AppSidebar({
   const hoverContent = accentClasses.hoverText
 
   return (
-    <aside className="w-72 bg-white border-r border-slate-200 flex flex-col">
-
+    <aside
+      className={`bg-white border-r border-slate-200 flex flex-col transition-all duration-300 ease-in-out ${
+        collapsed ? 'w-[72px]' : 'w-72'
+      }`}
+    >
       {/* Logo / Brand */}
-      <div className="p-6">
-        <div className="flex items-center gap-3">
-          <div className={`${brandBg} flex items-center justify-center rounded-xl h-10 w-10`}>
+      <div className={`p-4 ${collapsed ? 'px-3' : 'p-6'}`}>
+        <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
+          <div className={`${brandBg} flex items-center justify-center rounded-xl h-10 w-10 shrink-0`}>
             <BrandIcon size={24} className={primaryText} />
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-slate-800">
-              {brand.name}
-            </h1>
-            <p className="text-xs text-slate-500">
-              {brand.subtitle}
-            </p>
-          </div>
+          {!collapsed && (
+            <div className="overflow-hidden">
+              <h1 className="text-lg font-bold text-slate-800 whitespace-nowrap">
+                {brand.name}
+              </h1>
+              <p className="text-xs text-slate-500 whitespace-nowrap">
+                {brand.subtitle}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Nav Items */}
-      <nav className="flex-1 px-4 space-y-1">
+      <nav className={`flex-1 ${collapsed ? 'px-2' : 'px-4'} space-y-1`}>
         {navItems.map((item) => {
           const Icon = item.icon
           return (
@@ -95,24 +104,45 @@ export default function AppSidebar({
                 exact: item.exact ?? false,
                 includeSearch: false
               }}
-              className={`group flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-medium transition-all ${hoverBg} ${hoverContent}`}
+              className={`group flex items-center ${collapsed ? 'justify-center' : 'gap-3'} ${collapsed ? 'px-0 py-3' : 'px-4 py-3'} rounded-xl text-slate-600 font-medium transition-all ${hoverBg} ${hoverContent} relative`}
               activeProps={{
                 className:
-                  `active group flex items-center gap-3 px-4 py-3 rounded-xl ${activeBg} ${activeHoverBg} text-white font-semibold`,
+                  `active group flex items-center ${collapsed ? 'justify-center' : 'gap-3'} ${collapsed ? 'px-0 py-3' : 'px-4 py-3'} rounded-xl ${activeBg} ${activeHoverBg} text-white font-semibold`,
               }}
+              title={collapsed ? item.label : undefined}
             >
               <Icon
                 size={20}
-                className={`transition-colors text-slate-500 group-hover:text-white group-[.active]:text-white`}
+                className={`transition-colors text-slate-500 group-hover:text-white group-[.active]:text-white shrink-0`}
               />
-              <span className={`text-sm transition-colors text-slate-600 group-hover:text-white group-[.active]:text-white`}>
-                {item.label}
-              </span>
+              {!collapsed && (
+                <span className={`text-sm transition-colors text-slate-600 group-hover:text-white group-[.active]:text-white whitespace-nowrap`}>
+                  {item.label}
+                </span>
+              )}
             </Link>
           )
           
         })}
       </nav>
+
+      {/* Toggle Button */}
+      <div className={`p-3 border-t border-slate-100 ${collapsed ? 'flex justify-center' : ''}`}>
+        <button
+          onClick={onToggle}
+          className="flex items-center gap-2 w-full justify-center py-2.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+          title={collapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
+        >
+          {collapsed ? (
+            <PanelLeft size={20} />
+          ) : (
+            <>
+              <PanelLeftClose size={18} />
+              <span className="text-xs font-medium">Thu gọn</span>
+            </>
+          )}
+        </button>
+      </div>
     </aside>
   )
 }

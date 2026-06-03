@@ -74,7 +74,7 @@ function LoginPortalPage() {
         localStorage.setItem("role", role)
         localStorage.setItem("user_name", name)
         localStorage.setItem("user_role", "Manager")
-        navigate({ to: "/staff" })
+        navigate({ to: "/manager" })
         return
       }
 
