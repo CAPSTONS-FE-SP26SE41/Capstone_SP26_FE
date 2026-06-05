@@ -744,34 +744,41 @@ function POIFormModal({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full h-full md:h-[90vh] md:max-w-6xl overflow-hidden mx-0 md:mx-4 flex flex-col">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full h-full md:h-[90vh] md:max-w-6xl overflow-hidden mx-0 md:mx-4 flex flex-col z-10 animate-in fade-in duration-200">
         {/* Header */}
-        <div className="flex-shrink-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-lg font-bold text-slate-800">
+        <div className="flex-shrink-0 px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-white">
+          <h2 className="text-xl font-bold text-[#1e293b]">
             {isEditing ? 'Chỉnh sửa POI' : 'Thêm POI mới'}
           </h2>
-          <button onClick={onClose} className="group p-2 hover:bg-red-100 rounded-lg transition-all">
-            <X size={20} className="text-slate-400 transition-colors" />
+          <button 
+            type="button"
+            onClick={onClose} 
+            className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600"
+          >
+            <X size={20} />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleFormSubmit} className="flex-1 min-h-0 p-6 flex flex-col md:grid md:grid-cols-2 md:gap-x-8 overflow-y-auto md:overflow-hidden relative">
-          
-          {/* Cột trái: Hình ảnh, Preferences, Gợi ý tham quan */}
-          <div className="space-y-4 md:overflow-y-auto md:p-1 md:pr-4 flex flex-col h-full">
+        <form 
+          onSubmit={handleFormSubmit} 
+          className="flex-1 min-h-0 flex flex-col md:grid md:grid-cols-2 overflow-hidden relative bg-white"
+        >
+          {/* Cột trái: Hình ảnh, Preferences */}
+          <div className="p-8 space-y-6 overflow-y-auto border-r border-slate-100 flex flex-col h-full scrollbar-thin">
             {/* Hình ảnh */}
-            <div className="space-y-2">
-              <label className={labelClasses}>Hình ảnh</label>
-              <div className="flex items-center gap-3">
-                <label className="cursor-pointer inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 hover:bg-slate-100 font-semibold transition-all">
-                  <Upload size={16} />
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-700 font-bold block">Hình ảnh</span>
+                <label className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 transition-all cursor-pointer shadow-sm">
+                  <Upload size={14} />
                   Chọn ảnh
                   <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
                 </label>
               </div>
+              
               {/* Image preview box */}
-              <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 h-[280px] w-full relative">
+              <div className="rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 h-[300px] w-full relative shadow-inner flex items-center justify-center">
                 {imagePreview ? (
                   <img
                     src={imagePreview}
@@ -779,23 +786,23 @@ function POIFormModal({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="h-full flex items-center justify-center text-slate-400 text-sm">
-                    <div className="text-center">
-                      <ImageIcon size={48} className="mx-auto text-slate-300 mb-2" />
-                      <p>Không có hình ảnh</p>
-                    </div>
+                  <div className="text-center text-slate-400">
+                    <ImageIcon size={40} className="mx-auto mb-2 text-slate-300" />
+                    <span className="text-xs">Không có hình ảnh</span>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Nhãn Preferences */}
-            <div>
-              <label className={labelClasses}>Nhãn (Preferences)</label>
+            <div className="space-y-3">
+              <label className="text-sm text-slate-700 font-bold block">
+                Nhãn (Preferences) <span className="text-slate-400 font-normal text-xs">(tối đa {MAX_PREFERENCES})</span>
+              </label>
               {loadingPreferences ? (
-                <p className="text-sm text-slate-500">Đang tải...</p>
+                <p className="text-xs text-slate-500">Đang tải...</p>
               ) : (
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                <div className="flex flex-wrap gap-2">
                   {preferencesList.map(pref => {
                     const isSelected = poiPreferences.includes(pref.id)
                     const isDisable = !isSelected && poiPreferences.length >= MAX_PREFERENCES
@@ -813,11 +820,11 @@ function POIFormModal({
                             }
                           })
                         }}
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
                           isSelected 
-                            ? 'bg-[#e28743] border-[#e28743] hover:bg-[#cf7632] hover:border-[#cf7632] text-white' 
+                            ? 'bg-[#e28743] text-white border-transparent hover:bg-[#cf7632] shadow-sm' 
                             : isDisable
-                              ? 'bg-slate-50 text-slate-400 border-slate-200 opacity-50 cursor-not-allowed'
+                              ? 'bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed'
                               : 'bg-white text-slate-600 border-slate-200 hover:border-[#e28743] hover:text-[#e28743]'
                         }`}
                       >
@@ -828,46 +835,39 @@ function POIFormModal({
                 </div>
               )}
             </div>
-
           </div>
 
           {/* Cột phải: Các trường thông tin */}
-          <div className="space-y-4 mt-6 md:mt-0 md:overflow-y-auto md:p-1 md:pl-4">
-            {/* Tên POI & Loại hình */}
+          <div className="p-8 space-y-5 overflow-y-auto flex flex-col h-full scrollbar-thin">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className={labelClasses}>Tên POI <span className="text-red-400">*</span></label>
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={inputClasses} placeholder="Nhập tên POI" required />
+              <div className="space-y-1.5">
+                <span className="text-xs text-slate-500 font-bold block">Tên POI <span className="text-red-500">*</span></span>
+                <input 
+                  type="text" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50/50 outline-none focus:ring-2 focus:ring-[#e28743]/20 focus:border-[#e28743] transition-all text-slate-700 text-sm" 
+                  placeholder="Nhập tên POI" 
+                  required 
+                />
               </div>
-              <div>
-                <label className={labelClasses}>Loại hình <span className="text-red-400">*</span></label>
-                <select value={type} onChange={(e) => setType(e.target.value as POIType)} className={inputClasses}>
-                  <option value="">-- Chọn loại hình --</option>
-                  {loadingPoiTypes ? (
-                    <option value="">Đang tải...</option>
-                  ) : (
-                    poiTypeOptions.length > 0 ? (
-                      poiTypeOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))
-                    ) : (
-                      Object.entries(fallbackTypeLabels).map(([value, label]) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))
-                    )
-                  )}
-                </select>
-              </div>
-            </div>
 
-            {/* Thành phố & Quận huyện */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className={labelClasses}>Thành phố (City) <span className="text-red-400">*</span></label>
+              <div className="space-y-1.5">
+                <span className="text-xs text-slate-500 font-bold block">Loại hình <span className="text-red-500">*</span></span>
+                <CustomSelect
+                  value={type}
+                  onChange={(val: string) => setType(val as POIType)}
+                  options={
+                    poiTypeOptions.length > 0 
+                      ? poiTypeOptions 
+                      : Object.entries(fallbackTypeLabels).map(([value, label]) => ({ value, label }))
+                  }
+                  placeholder={loadingPoiTypes ? "Đang tải..." : "-- Chọn Loại hình --"}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <span className="text-xs text-slate-500 font-bold block">Thành phố (City) <span className="text-red-500">*</span></span>
                 <CustomSelect 
                   value={locationId} 
                   onChange={(val) => {
@@ -881,8 +881,9 @@ function POIFormModal({
                 />
                 {formErrors.locationId && <p className="text-red-500 text-xs mt-1">{formErrors.locationId}</p>}
               </div>
-              <div>
-                <label className={labelClasses}>Quận huyện (District) <span className="text-red-400">*</span></label>
+
+              <div className="space-y-1.5">
+                <span className="text-xs text-slate-500 font-bold block">Quận huyện (District) <span className="text-red-500">*</span></span>
                 <CustomSelect 
                   value={districtId} 
                   onChange={(val) => {
@@ -898,90 +899,123 @@ function POIFormModal({
               </div>
             </div>
 
-            {/* Địa chỉ */}
-            <div>
-              <label className={labelClasses}>Địa chỉ <span className="text-red-400">*</span></label>
-              <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className={inputClasses} placeholder="Nhập số nhà, tên đường..." required />
+            <div className="space-y-1.5">
+              <span className="text-xs text-slate-500 font-bold block">Địa chỉ <span className="text-red-500">*</span></span>
+              <input 
+                type="text" 
+                value={address} 
+                onChange={(e) => setAddress(e.target.value)} 
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50/50 outline-none focus:ring-2 focus:ring-[#e28743]/20 focus:border-[#e28743] transition-all text-slate-700 text-sm" 
+                placeholder="Nhập số nhà, tên đường..." 
+                required 
+              />
             </div>
 
-            {/* Chi phí & Link Google Map */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className={labelClasses}>Chi phí ước tính</label>
-                <input type="text" value={approxCost} onChange={(e) => setApproxCost(e.target.value)} className={inputClasses} placeholder="VD: 100,000 - 200,000 VND" />
+              <div className="space-y-1.5">
+                <span className="text-xs text-slate-500 font-bold block">Chi phí ước tính</span>
+                <input 
+                  type="text" 
+                  value={approxCost} 
+                  onChange={(e) => setApproxCost(e.target.value)} 
+                  className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50/50 outline-none focus:ring-2 focus:ring-[#e28743]/20 focus:border-[#e28743] transition-all text-slate-700 text-sm" 
+                  placeholder="VD: 100,000 - 200,000 VND" 
+                />
               </div>
-              <div>
-                <label className={labelClasses}>Link Google Map</label>
-                <input type="text" value={googleMapLink} onChange={(e) => setGoogleMapLink(e.target.value)} className={inputClasses} placeholder="https://maps.google.com/..." />
+
+              <div className="space-y-1.5">
+                <span className="text-xs text-slate-500 font-bold block">Link Google Map</span>
+                <input 
+                  type="text" 
+                  value={googleMapLink} 
+                  onChange={(e) => setGoogleMapLink(e.target.value)} 
+                  className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50/50 outline-none focus:ring-2 focus:ring-[#e28743]/20 focus:border-[#e28743] transition-all text-slate-700 text-sm" 
+                  placeholder="https://maps.google.com/..." 
+                />
               </div>
             </div>
 
-            {/* Thời gian mở cửa */}
-            <div>
-              <label className={labelClasses}>Thời gian mở cửa</label>
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
+            <div className="space-y-3 border-t border-slate-100 pt-4">
+              <span className="text-xs text-slate-500 font-bold block">Thời gian mở cửa</span>
+              
+              <div className="flex flex-wrap gap-4">
+                <label className="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={is24Hours}
                     onChange={(e) => setIs24Hours(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-[#e28743] focus:ring-[#e28743]"
+                    className="h-4 w-4 rounded border-slate-300 text-[#e28743] focus:ring-[#e28743]"
                   />
-                  <span className="text-sm text-slate-600 font-medium">Mở 24 giờ</span>
+                  <span className="text-xs font-semibold text-slate-600">Mở 24 giờ</span>
+                </label>
+
+                <label className="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isIndoor}
+                    onChange={(e) => setIsIndoor(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-[#e28743] focus:ring-[#e28743]"
+                  />
+                  <span className="text-xs font-semibold text-slate-600">Trong nhà (Indoor)</span>
                 </label>
               </div>
-              {!is24Hours && (
-                <div className="grid grid-cols-2 gap-4 mt-2">
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-1">Giờ mở</label>
-                    <input type="time" value={openHour} onChange={(e) => setOpenHour(e.target.value)} className={inputClasses} />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-1">Giờ đóng</label>
-                    <input type="time" value={closeHour} onChange={(e) => setCloseHour(e.target.value)} className={inputClasses} />
+
+              <div className={`grid grid-cols-2 gap-4 transition-opacity duration-200 ${is24Hours ? 'opacity-40 pointer-events-none' : ''}`}>
+                <div className="space-y-1.5 relative">
+                  <span className="text-[11px] text-slate-400 font-bold block">Giờ mở</span>
+                  <div className="relative">
+                    <input 
+                      type="time" 
+                      value={openHour} 
+                      disabled={is24Hours}
+                      onChange={(e) => setOpenHour(e.target.value)} 
+                      className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50/50 outline-none focus:ring-2 focus:ring-[#e28743]/20 focus:border-[#e28743] transition-all text-slate-700 text-sm" 
+                    />
                   </div>
                 </div>
-              )}
-            </div>
 
-            {/* Checkboxes: Trong nhà */}
-            <div className="flex items-center gap-6">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isIndoor}
-                  onChange={(e) => setIsIndoor(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-[#e28743] focus:ring-[#e28743]"
-                />
-                <span className="text-sm text-slate-600 font-medium">Trong nhà</span>
-              </label>
+                <div className="space-y-1.5 relative">
+                  <span className="text-[11px] text-slate-400 font-bold block">Giờ đóng</span>
+                  <div className="relative">
+                    <input 
+                      type="time" 
+                      value={closeHour} 
+                      disabled={is24Hours}
+                      onChange={(e) => setCloseHour(e.target.value)} 
+                      className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50/50 outline-none focus:ring-2 focus:ring-[#e28743]/20 focus:border-[#e28743] transition-all text-slate-700 text-sm" 
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Gợi ý tham quan */}
-            <div className="flex flex-col">
-              <label className={labelClasses}>Gợi ý tham quan</label>
+            <div className="space-y-1.5 border-t border-slate-100 pt-4">
+              <label className="text-xs text-slate-500 font-bold block">
+                Gợi ý tham quan (VisitRecommendation)
+              </label>
               <textarea
                 value={visitRecommendation}
                 onChange={(e) => setVisitRecommendation(e.target.value)}
-                className={`${inputClasses} resize-none min-h-[100px]`}
+                className="w-full p-3 h-20 rounded-xl border border-slate-200 bg-slate-50/50 outline-none focus:ring-2 focus:ring-[#e28743]/20 focus:border-[#e28743] transition-all text-slate-700 text-sm resize-none"
                 placeholder="Nhập gợi ý cho du khách..."
               />
             </div>
           </div>
 
           {/* Actions Footer */}
-          <div className="col-span-2 flex-shrink-0 bg-white border-t border-slate-200 pt-4 mt-6 flex items-center justify-end gap-3">
+          <div className="col-span-2 flex-shrink-0 px-8 py-4 border-t border-slate-100 flex items-center justify-end gap-3 bg-slate-50/50 z-10">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 border border-slate-200 rounded-xl text-slate-600 font-semibold hover:bg-slate-50 transition-all"
+              className="px-6 py-2 h-10 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors font-semibold text-sm shadow-sm"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#e28743] hover:bg-[#cf7632] text-white rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="flex items-center gap-2 px-6 py-2 h-10 rounded-xl bg-[#e28743] hover:bg-[#cf7632] text-white font-semibold disabled:opacity-60 transition-colors text-sm shadow-sm"
             >
               {submitting && <Loader2 size={16} className="animate-spin" />}
               {isEditing ? 'Cập nhật' : 'Tạo POI'}

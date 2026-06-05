@@ -8,6 +8,7 @@ import {
   UserCog,
   CreditCard,
   Receipt,
+  Sliders,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import DashboardLayout from '../../components/layouts/DashboardLayout'
@@ -87,6 +88,7 @@ function AdminLayout() {
         { to: '/admin/destinations', icon: Map, label: 'Quản lý địa điểm' },
         { to: '/admin/subscriptions', icon: CreditCard, label: 'Gói dịch vụ' },
         { to: '/admin/transactions', icon: Receipt, label: 'Lịch sử giao dịch' },
+        { to: '/admin/preferences', icon: Sliders, label: 'Sở thích hệ thống' },
       ]}
 
       userName={userName}

@@ -350,6 +350,7 @@ export type CreateStaffPOIPayload = {
   ApproxCost: string
   OpenHour: string
   CloseHour: string
+  Is24Hours?: boolean
   GoogleMapLink: string
   IsIndoor: boolean
   LocationId: string
@@ -384,6 +385,9 @@ export const createStaffPOI = async (
   formData.append("DistrictId", payload.DistrictId)
   formData.append("GoogleMapLink", payload.GoogleMapLink)
   formData.append("IsIndoor", String(payload.IsIndoor))
+  if (payload.Is24Hours !== undefined) {
+    formData.append("Is24Hours", String(payload.Is24Hours))
+  }
   formData.append("Type", payload.Type)
 if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
     formData.append("VisitRecommendation", payload.VisitRecommendation.trim())
@@ -441,6 +445,7 @@ export type UpdateStaffPOIPayload = {
   ApproxCost: string
   OpenHour: string
   CloseHour: string
+  Is24Hours?: boolean
   GoogleMapLink: string
   IsIndoor: boolean
   POIImgUrl: string
@@ -474,6 +479,9 @@ export const updateStaffPOI = async (
   formData.append("DistrictId", payload.DistrictId ?? "")
   formData.append("GoogleMapLink", payload.GoogleMapLink ?? "")
   formData.append("IsIndoor", String(Boolean(payload.IsIndoor)))
+  if (payload.Is24Hours !== undefined) {
+    formData.append("Is24Hours", String(payload.Is24Hours))
+  }
   if (payload.Type) {
     formData.append("Type", payload.Type)
   }

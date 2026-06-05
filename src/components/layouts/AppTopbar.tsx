@@ -68,6 +68,7 @@ export default function AppTopbar({
     if (path.includes('/admin/settings')) return 'Cài đặt hệ thống'
     if (path.includes('/admin/subscriptions')) return 'Quản lý gói dịch vụ'
     if (path.includes('/admin/transactions')) return 'Lịch sử giao dịch'
+    if (path.includes('/admin/preferences')) return 'Quản lý sở thích'
 
     // Partner
     if (path.includes('/partner/stats')) return 'Thống kê kinh doanh'
