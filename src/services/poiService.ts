@@ -1,4 +1,5 @@
 import { apiClient } from "../../api/apiClient"
+import { type POIType } from "./partnerPoiService"
 
 export const getRecommendedPOI = async (limit: number = 10) => {
   return apiClient(`/pois/recommended?limit=${limit}`)
@@ -33,6 +34,7 @@ export type StaffPOI = {
   PartnerId?: string
   PartnerName?: string
   PoiPreferences?: string[]
+  Type: POIType
 
   // Một số backend có thể trả thêm, nhưng không bắt buộc
   LocationName?: string
@@ -195,6 +197,7 @@ function normalizeStaffPOI(p: any): StaffPOI {
     PoiPreferences: poiPreferencesNormalized,
     LocationName: p?.LocationName ?? p?.locationName,
     OpeningHours: String(p?.OpeningHours ?? openingHours ?? ""),
+    Type: (p?.Type ?? p?.type ?? "Attraction") as POIType,
   }
 }
 
@@ -356,7 +359,7 @@ export type CreateStaffPOIPayload = {
   VisitRecommendation?: string
   // Backend đang map sang Dictionary/Map, nên có thể truyền array object {id,name} hoặc array string
   PoiPreferences?: Array<string | { id: string; name: string }>
-
+  Type: POIType
 }
 
 export const createStaffPOI = async (
@@ -381,6 +384,7 @@ export const createStaffPOI = async (
   formData.append("DistrictId", payload.DistrictId)
   formData.append("GoogleMapLink", payload.GoogleMapLink)
   formData.append("IsIndoor", String(payload.IsIndoor))
+  formData.append("Type", payload.Type)
 if (payload.VisitRecommendation && payload.VisitRecommendation.trim().length > 0) {
     formData.append("VisitRecommendation", payload.VisitRecommendation.trim())
   }
@@ -446,6 +450,7 @@ export type UpdateStaffPOIPayload = {
   PartnerId?: string
   VisitRecommendation?: string
   PoiPreferences?: Array<string | { id: string; name: string }>
+  Type?: POIType
 }
 
 export const updateStaffPOI = async (
@@ -469,6 +474,9 @@ export const updateStaffPOI = async (
   formData.append("DistrictId", payload.DistrictId ?? "")
   formData.append("GoogleMapLink", payload.GoogleMapLink ?? "")
   formData.append("IsIndoor", String(Boolean(payload.IsIndoor)))
+  if (payload.Type) {
+    formData.append("Type", payload.Type)
+  }
 
   if (imageFile) {
     formData.append("POIImgUrl", imageFile)

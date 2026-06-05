@@ -17,7 +17,7 @@ import {
   inactivateStaffPOI,
   activateStaffPOI,
 } from "../../../services/poiService"
-import { getDistrictsByLocationId, getPreferences, type District, type POIPreference } from "../../../services/partnerPoiService"
+import { getDistrictsByLocationId, getPreferences, type District, type POIPreference, getPOITypes, type POIType, type POITypeOption } from "../../../services/partnerPoiService"
 import { CustomSelect } from "../../../components/ui/CustomSelect"
 
 export const Route = createFileRoute("/manager/_layout/pois")({
@@ -48,6 +48,8 @@ function StaffPOIsPage() {
   const [locationOptions, setLocationOptions] = useState<StaffLocationOption[]>([])
   const [preferencesList, setPreferencesList] = useState<POIPreference[]>([])
   const [loadingPreferences, setLoadingPreferences] = useState(false)
+  const [poiTypesList, setPoiTypesList] = useState<POITypeOption[]>([])
+  const [loadingPoiTypes, setLoadingPoiTypes] = useState(false)
   const [toast, setToast] = useState<{
     type: "success" | "error"
     message: string
@@ -65,6 +67,7 @@ function StaffPOIsPage() {
     POIImgUrl: "",
     LocationId: "",
     DistrictId: "",
+    Type: "Attraction" as POIType,
   })
 
   const [createImageFile, setCreateImageFile] = useState<File | null>(null)
@@ -85,6 +88,7 @@ function StaffPOIsPage() {
     DistrictId: "",
     Status: "",
     PartnerId: "",
+    Type: "Attraction" as POIType,
   })
 
 
@@ -111,6 +115,7 @@ function StaffPOIsPage() {
       POIImgUrl: "",
       LocationId: "",
       DistrictId: "",
+      Type: "Attraction" as POIType,
     })
 
     setDistricts([])
@@ -131,7 +136,19 @@ function StaffPOIsPage() {
         setLoadingPreferences(false)
       }
     }
+    const fetchPoiTypes = async () => {
+      setLoadingPoiTypes(true)
+      try {
+        const data = await getPOITypes()
+        setPoiTypesList(data)
+      } catch (e) {
+        console.error("Failed to fetch POI types", e)
+      } finally {
+        setLoadingPoiTypes(false)
+      }
+    }
     fetchPreferences()
+    fetchPoiTypes()
   }, [])
 
   useEffect(() => {
@@ -446,6 +463,7 @@ function StaffPOIsPage() {
         DistrictId: detail.DistrictId ?? "",
         Status: detail.Status !== undefined ? String(detail.Status) : "",
         PartnerId: detail.PartnerId ?? "",
+        Type: detail.Type || ("Attraction" as POIType),
       })
 
       setEditImageFile(null)
@@ -514,6 +532,7 @@ function StaffPOIsPage() {
           : undefined,
         LocationId: createForm.LocationId.trim(),
         DistrictId: createForm.DistrictId.trim(),
+        Type: createForm.Type,
       }, createImageFile)
 
 
@@ -601,6 +620,7 @@ function StaffPOIsPage() {
         DistrictId: editForm.DistrictId.trim(),
         Status: editForm.Status || undefined,
         PartnerId: editForm.PartnerId || undefined,
+        Type: editForm.Type,
       }, editImageFile)
 
 
@@ -998,6 +1018,13 @@ function StaffPOIsPage() {
                   </div>
 
                   <div className="border-b border-slate-100 pb-3">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Loại POI</span>
+                    <div className="text-sm text-slate-800 font-medium break-words leading-relaxed">
+                      {poiTypesList.find(t => t.value === selectedPoi.Type)?.label || selectedPoi.Type || "—"}
+                    </div>
+                  </div>
+
+                  <div className="border-b border-slate-100 pb-3">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Chi phí gần đúng</span>
                     <div className="text-sm text-slate-800 font-medium break-words leading-relaxed">
                       {selectedPoi.ApproxCost || "—"}
@@ -1276,6 +1303,23 @@ function StaffPOIsPage() {
                       />
                     </div>
                     {formErrors.districtId && <p className="text-red-500 text-xs mt-1">{formErrors.districtId}</p>}
+                  </label>
+
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Loại POI <span className="text-red-400">*</span>
+                    <div className="mt-1.5">
+                      <CustomSelect
+                        value={createForm.Type}
+                        onChange={(val: string) => {
+                          setCreateForm((prev) => ({
+                            ...prev,
+                            Type: val as POIType,
+                          }))
+                        }}
+                        options={poiTypesList}
+                        placeholder={loadingPoiTypes ? "Đang tải..." : "-- Chọn Loại POI --"}
+                      />
+                    </div>
                   </label>
 
                   <label className="text-sm text-slate-700 font-semibold block">
@@ -1573,6 +1617,23 @@ function StaffPOIsPage() {
                       />
                     </div>
                     {formErrors.districtId && <p className="text-red-500 text-xs mt-1">{formErrors.districtId}</p>}
+                  </label>
+
+                  <label className="text-sm text-slate-700 font-semibold block">
+                    Loại POI <span className="text-red-400">*</span>
+                    <div className="mt-1.5">
+                      <CustomSelect
+                        value={editForm.Type}
+                        onChange={(val: string) => {
+                          setEditForm((prev) => ({
+                            ...prev,
+                            Type: val as POIType,
+                          }))
+                        }}
+                        options={poiTypesList}
+                        placeholder={loadingPoiTypes ? "Đang tải..." : "-- Chọn Loại POI --"}
+                      />
+                    </div>
                   </label>
 
                   <label className="text-sm text-slate-700 font-semibold block">

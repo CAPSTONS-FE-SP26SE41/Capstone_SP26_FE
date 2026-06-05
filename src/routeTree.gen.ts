@@ -32,6 +32,7 @@ import { Route as ManagerLayoutAdvertisementsRouteImport } from './routes/manage
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
+import { Route as AdminLayoutTransactionsRouteImport } from './routes/admin/_layout/transactions'
 import { Route as AdminLayoutSubscriptionsRouteImport } from './routes/admin/_layout/subscriptions'
 import { Route as AdminLayoutSettingsRouteImport } from './routes/admin/_layout/settings'
 import { Route as AdminLayoutProfileRouteImport } from './routes/admin/_layout/profile'
@@ -163,6 +164,11 @@ const DemoApiNamesRoute = DemoApiNamesRouteImport.update({
   path: '/demo/api/names',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLayoutTransactionsRoute = AdminLayoutTransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => AdminLayoutRoute,
+} as any)
 const AdminLayoutSubscriptionsRoute =
   AdminLayoutSubscriptionsRouteImport.update({
     id: '/subscriptions',
@@ -240,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/admin/profile': typeof AdminLayoutProfileRoute
   '/admin/settings': typeof AdminLayoutSettingsRoute
   '/admin/subscriptions': typeof AdminLayoutSubscriptionsRoute
+  '/admin/transactions': typeof AdminLayoutTransactionsRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
@@ -274,6 +281,7 @@ export interface FileRoutesByTo {
   '/admin/profile': typeof AdminLayoutProfileRoute
   '/admin/settings': typeof AdminLayoutSettingsRoute
   '/admin/subscriptions': typeof AdminLayoutSubscriptionsRoute
+  '/admin/transactions': typeof AdminLayoutTransactionsRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
@@ -312,6 +320,7 @@ export interface FileRoutesById {
   '/admin/_layout/profile': typeof AdminLayoutProfileRoute
   '/admin/_layout/settings': typeof AdminLayoutSettingsRoute
   '/admin/_layout/subscriptions': typeof AdminLayoutSubscriptionsRoute
+  '/admin/_layout/transactions': typeof AdminLayoutTransactionsRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
@@ -351,6 +360,7 @@ export interface FileRouteTypes {
     | '/admin/profile'
     | '/admin/settings'
     | '/admin/subscriptions'
+    | '/admin/transactions'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
@@ -385,6 +395,7 @@ export interface FileRouteTypes {
     | '/admin/profile'
     | '/admin/settings'
     | '/admin/subscriptions'
+    | '/admin/transactions'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
@@ -422,6 +433,7 @@ export interface FileRouteTypes {
     | '/admin/_layout/profile'
     | '/admin/_layout/settings'
     | '/admin/_layout/subscriptions'
+    | '/admin/_layout/transactions'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
@@ -625,6 +637,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoApiNamesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/_layout/transactions': {
+      id: '/admin/_layout/transactions'
+      path: '/transactions'
+      fullPath: '/admin/transactions'
+      preLoaderRoute: typeof AdminLayoutTransactionsRouteImport
+      parentRoute: typeof AdminLayoutRoute
+    }
     '/admin/_layout/subscriptions': {
       id: '/admin/_layout/subscriptions'
       path: '/subscriptions'
@@ -720,6 +739,7 @@ interface AdminLayoutRouteChildren {
   AdminLayoutProfileRoute: typeof AdminLayoutProfileRoute
   AdminLayoutSettingsRoute: typeof AdminLayoutSettingsRoute
   AdminLayoutSubscriptionsRoute: typeof AdminLayoutSubscriptionsRoute
+  AdminLayoutTransactionsRoute: typeof AdminLayoutTransactionsRoute
   AdminLayoutIndexRoute: typeof AdminLayoutIndexRoute
 }
 
@@ -731,6 +751,7 @@ const AdminLayoutRouteChildren: AdminLayoutRouteChildren = {
   AdminLayoutProfileRoute: AdminLayoutProfileRoute,
   AdminLayoutSettingsRoute: AdminLayoutSettingsRoute,
   AdminLayoutSubscriptionsRoute: AdminLayoutSubscriptionsRoute,
+  AdminLayoutTransactionsRoute: AdminLayoutTransactionsRoute,
   AdminLayoutIndexRoute: AdminLayoutIndexRoute,
 }
 

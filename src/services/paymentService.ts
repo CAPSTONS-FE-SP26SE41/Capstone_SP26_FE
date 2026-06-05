@@ -50,9 +50,32 @@ export interface PaymentHistoryItem {
   code: any;
   paidAt: string;
   accountId: string;
+  accountEmail: string;
   createdAt?: string;
 }
 
 export const getPaymentHistory = async (page: number = 1, pageSize: number = 10) => {
   return apiClient(`/payments/history?page=${page}&pageSize=${pageSize}`);
+}
+
+export interface TransactionPagedResponse {
+  items: PaymentHistoryItem[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+export const getAllTransactions = async (
+  page: number = 1,
+  pageSize: number = 15,
+  status?: string,
+  sortOrder?: string
+): Promise<TransactionPagedResponse> => {
+  const params = new URLSearchParams()
+  params.append("page", page.toString())
+  params.append("pageSize", pageSize.toString())
+  if (status) params.append("status", status)
+  if (sortOrder) params.append("sortOrder", sortOrder)
+  return apiClient(`/payments/admin/all-transactions?${params.toString()}`)
 }
