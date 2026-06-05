@@ -30,3 +30,5 @@ const config = defineConfig({
 })
 
 export default config
+// Trigger reload: Preferences route added
+

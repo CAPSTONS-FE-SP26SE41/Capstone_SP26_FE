@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState, useRef } from "react"
 import { createPortal } from "react-dom"
-import { Plus, Pencil, Trash2, X, Search, ChevronDown, Sparkles, DollarSign, Calendar, Flame, FileText, CheckCircle2, Layers, Info } from "lucide-react"
+import { Plus, Pencil, Trash2, X, Search, ChevronDown, Sparkles, DollarSign, Calendar, Flame, FileText, CheckCircle2, Layers } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 import ToggleSwitch from "../../../components/ToggleSwitch"
 
@@ -739,13 +739,7 @@ function SubscriptionsPage() {
                     </div>
                   </div>
 
-                  {/* Quick Tip */}
-                  <div className="flex items-center gap-2 max-w-[290px] bg-blue-50 border border-blue-100 rounded-2xl p-3 text-left">
-                    <Info size={16} className="text-[#258cf4] shrink-0" />
-                    <span className="text-[11px] text-[#258cf4] font-semibold leading-normal">
-                      Thẻ xem trước sẽ cập nhật giao diện thời gian thực giống như đối tác sẽ nhìn thấy.
-                    </span>
-                  </div>
+
                 </div>
               </div>
 

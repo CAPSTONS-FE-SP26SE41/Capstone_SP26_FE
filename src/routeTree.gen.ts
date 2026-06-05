@@ -32,9 +32,11 @@ import { Route as ManagerLayoutAdvertisementsRouteImport } from './routes/manage
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
+import { Route as AdminLayoutTransactionsRouteImport } from './routes/admin/_layout/transactions'
 import { Route as AdminLayoutSubscriptionsRouteImport } from './routes/admin/_layout/subscriptions'
 import { Route as AdminLayoutSettingsRouteImport } from './routes/admin/_layout/settings'
 import { Route as AdminLayoutProfileRouteImport } from './routes/admin/_layout/profile'
+import { Route as AdminLayoutPreferencesRouteImport } from './routes/admin/_layout/preferences'
 import { Route as AdminLayoutDestinationsRouteImport } from './routes/admin/_layout/destinations'
 import { Route as AdminLayoutBookingsRouteImport } from './routes/admin/_layout/bookings'
 import { Route as AdminLayoutAnalyticsRouteImport } from './routes/admin/_layout/analytics'
@@ -163,6 +165,11 @@ const DemoApiNamesRoute = DemoApiNamesRouteImport.update({
   path: '/demo/api/names',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLayoutTransactionsRoute = AdminLayoutTransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => AdminLayoutRoute,
+} as any)
 const AdminLayoutSubscriptionsRoute =
   AdminLayoutSubscriptionsRouteImport.update({
     id: '/subscriptions',
@@ -177,6 +184,11 @@ const AdminLayoutSettingsRoute = AdminLayoutSettingsRouteImport.update({
 const AdminLayoutProfileRoute = AdminLayoutProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AdminLayoutRoute,
+} as any)
+const AdminLayoutPreferencesRoute = AdminLayoutPreferencesRouteImport.update({
+  id: '/preferences',
+  path: '/preferences',
   getParentRoute: () => AdminLayoutRoute,
 } as any)
 const AdminLayoutDestinationsRoute = AdminLayoutDestinationsRouteImport.update({
@@ -237,9 +249,11 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/bookings': typeof AdminLayoutBookingsRoute
   '/admin/destinations': typeof AdminLayoutDestinationsRoute
+  '/admin/preferences': typeof AdminLayoutPreferencesRoute
   '/admin/profile': typeof AdminLayoutProfileRoute
   '/admin/settings': typeof AdminLayoutSettingsRoute
   '/admin/subscriptions': typeof AdminLayoutSubscriptionsRoute
+  '/admin/transactions': typeof AdminLayoutTransactionsRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
@@ -271,9 +285,11 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/bookings': typeof AdminLayoutBookingsRoute
   '/admin/destinations': typeof AdminLayoutDestinationsRoute
+  '/admin/preferences': typeof AdminLayoutPreferencesRoute
   '/admin/profile': typeof AdminLayoutProfileRoute
   '/admin/settings': typeof AdminLayoutSettingsRoute
   '/admin/subscriptions': typeof AdminLayoutSubscriptionsRoute
+  '/admin/transactions': typeof AdminLayoutTransactionsRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
@@ -309,9 +325,11 @@ export interface FileRoutesById {
   '/admin/_layout/analytics': typeof AdminLayoutAnalyticsRoute
   '/admin/_layout/bookings': typeof AdminLayoutBookingsRoute
   '/admin/_layout/destinations': typeof AdminLayoutDestinationsRoute
+  '/admin/_layout/preferences': typeof AdminLayoutPreferencesRoute
   '/admin/_layout/profile': typeof AdminLayoutProfileRoute
   '/admin/_layout/settings': typeof AdminLayoutSettingsRoute
   '/admin/_layout/subscriptions': typeof AdminLayoutSubscriptionsRoute
+  '/admin/_layout/transactions': typeof AdminLayoutTransactionsRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
@@ -348,9 +366,11 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/bookings'
     | '/admin/destinations'
+    | '/admin/preferences'
     | '/admin/profile'
     | '/admin/settings'
     | '/admin/subscriptions'
+    | '/admin/transactions'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
@@ -382,9 +402,11 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/bookings'
     | '/admin/destinations'
+    | '/admin/preferences'
     | '/admin/profile'
     | '/admin/settings'
     | '/admin/subscriptions'
+    | '/admin/transactions'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
@@ -419,9 +441,11 @@ export interface FileRouteTypes {
     | '/admin/_layout/analytics'
     | '/admin/_layout/bookings'
     | '/admin/_layout/destinations'
+    | '/admin/_layout/preferences'
     | '/admin/_layout/profile'
     | '/admin/_layout/settings'
     | '/admin/_layout/subscriptions'
+    | '/admin/_layout/transactions'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
@@ -625,6 +649,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoApiNamesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/_layout/transactions': {
+      id: '/admin/_layout/transactions'
+      path: '/transactions'
+      fullPath: '/admin/transactions'
+      preLoaderRoute: typeof AdminLayoutTransactionsRouteImport
+      parentRoute: typeof AdminLayoutRoute
+    }
     '/admin/_layout/subscriptions': {
       id: '/admin/_layout/subscriptions'
       path: '/subscriptions'
@@ -644,6 +675,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/admin/profile'
       preLoaderRoute: typeof AdminLayoutProfileRouteImport
+      parentRoute: typeof AdminLayoutRoute
+    }
+    '/admin/_layout/preferences': {
+      id: '/admin/_layout/preferences'
+      path: '/preferences'
+      fullPath: '/admin/preferences'
+      preLoaderRoute: typeof AdminLayoutPreferencesRouteImport
       parentRoute: typeof AdminLayoutRoute
     }
     '/admin/_layout/destinations': {
@@ -717,9 +755,11 @@ interface AdminLayoutRouteChildren {
   AdminLayoutAnalyticsRoute: typeof AdminLayoutAnalyticsRoute
   AdminLayoutBookingsRoute: typeof AdminLayoutBookingsRoute
   AdminLayoutDestinationsRoute: typeof AdminLayoutDestinationsRoute
+  AdminLayoutPreferencesRoute: typeof AdminLayoutPreferencesRoute
   AdminLayoutProfileRoute: typeof AdminLayoutProfileRoute
   AdminLayoutSettingsRoute: typeof AdminLayoutSettingsRoute
   AdminLayoutSubscriptionsRoute: typeof AdminLayoutSubscriptionsRoute
+  AdminLayoutTransactionsRoute: typeof AdminLayoutTransactionsRoute
   AdminLayoutIndexRoute: typeof AdminLayoutIndexRoute
 }
 
@@ -728,9 +768,11 @@ const AdminLayoutRouteChildren: AdminLayoutRouteChildren = {
   AdminLayoutAnalyticsRoute: AdminLayoutAnalyticsRoute,
   AdminLayoutBookingsRoute: AdminLayoutBookingsRoute,
   AdminLayoutDestinationsRoute: AdminLayoutDestinationsRoute,
+  AdminLayoutPreferencesRoute: AdminLayoutPreferencesRoute,
   AdminLayoutProfileRoute: AdminLayoutProfileRoute,
   AdminLayoutSettingsRoute: AdminLayoutSettingsRoute,
   AdminLayoutSubscriptionsRoute: AdminLayoutSubscriptionsRoute,
+  AdminLayoutTransactionsRoute: AdminLayoutTransactionsRoute,
   AdminLayoutIndexRoute: AdminLayoutIndexRoute,
 }
 

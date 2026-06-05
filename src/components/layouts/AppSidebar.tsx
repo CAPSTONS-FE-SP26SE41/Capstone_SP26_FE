@@ -74,22 +74,46 @@ export default function AppSidebar({
       }`}
     >
       {/* Logo / Brand */}
-      <div className={`p-4 ${collapsed ? 'px-3' : 'p-6'}`}>
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-          <div className={`${brandBg} flex items-center justify-center rounded-xl h-10 w-10 shrink-0`}>
-            <BrandIcon size={24} className={primaryText} />
-          </div>
-          {!collapsed && (
-            <div className="overflow-hidden">
-              <h1 className="text-lg font-bold text-slate-800 whitespace-nowrap">
-                {brand.name}
-              </h1>
-              <p className="text-xs text-slate-500 whitespace-nowrap">
-                {brand.subtitle}
-              </p>
+      <div className={`p-4 ${collapsed ? 'px-3 pb-2' : 'p-6 pb-4'} flex flex-col gap-4`}>
+        <div className="flex items-center justify-between">
+          <div className={`flex items-center ${collapsed ? 'justify-center w-full' : 'gap-3'}`}>
+            <div className={`${brandBg} flex items-center justify-center rounded-xl h-10 w-10 shrink-0`}>
+              <BrandIcon size={24} className={primaryText} />
             </div>
+            {!collapsed && (
+              <div className="overflow-hidden">
+                <h1 className="text-lg font-bold text-slate-800 whitespace-nowrap">
+                  {brand.name}
+                </h1>
+                <p className="text-xs text-slate-500 whitespace-nowrap">
+                  {brand.subtitle}
+                </p>
+              </div>
+            )}
+          </div>
+          
+          {!collapsed && (
+            <button
+              onClick={onToggle}
+              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all shrink-0"
+              title="Thu gọn menu"
+            >
+              <PanelLeftClose size={18} />
+            </button>
           )}
         </div>
+
+        {collapsed && (
+          <div className="flex justify-center border-t border-slate-100 pt-2">
+            <button
+              onClick={onToggle}
+              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
+              title="Mở rộng menu"
+            >
+              <PanelLeft size={20} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Nav Items */}
@@ -125,24 +149,6 @@ export default function AppSidebar({
           
         })}
       </nav>
-
-      {/* Toggle Button */}
-      <div className={`p-3 border-t border-slate-100 ${collapsed ? 'flex justify-center' : ''}`}>
-        <button
-          onClick={onToggle}
-          className="flex items-center gap-2 w-full justify-center py-2.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
-          title={collapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
-        >
-          {collapsed ? (
-            <PanelLeft size={20} />
-          ) : (
-            <>
-              <PanelLeftClose size={18} />
-              <span className="text-xs font-medium">Thu gọn</span>
-            </>
-          )}
-        </button>
-      </div>
     </aside>
   )
 }
