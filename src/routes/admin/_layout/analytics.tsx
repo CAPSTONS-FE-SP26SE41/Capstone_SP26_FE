@@ -74,10 +74,10 @@ function AdminAnalytics() {
 
   // Format data for Role Pie Chart
   const roleData = [
-    { name: "Người dùng", value: stats.accountRoles.userCount },
-    { name: "Đối tác", value: stats.accountRoles.partnerCount },
-    { name: "Quản lý", value: stats.accountRoles.managerCount },
-    { name: "Nhân viên", value: stats.accountRoles.staffCount },
+    { name: "Người dùng", value: stats.accountRoles?.userCount ?? 0 },
+    { name: "Đối tác", value: stats.accountRoles?.partnerCount ?? 0 },
+    { name: "Quản lý", value: stats.accountRoles?.managerCount ?? 0 },
+    { name: "Nhân viên", value: stats.accountRoles?.staffCount ?? 0 },
   ].filter((r) => r.value > 0)
 
   return (
@@ -114,7 +114,7 @@ function AdminAnalytics() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
           title="Tổng tài khoản"
-          value={stats.totalAccounts.toLocaleString()}
+          value={(stats.totalAccounts ?? 0).toLocaleString()}
           icon={<Users size={22} />}
           gradient="from-blue-500 to-indigo-600"
           shadowColor="shadow-blue-500/20"
@@ -123,7 +123,7 @@ function AdminAnalytics() {
         />
         <StatCard
           title="Tổng doanh thu"
-          value={`${stats.totalRevenue.toLocaleString("vi-VN")} ₫`}
+          value={`${(stats.totalRevenue ?? 0).toLocaleString("vi-VN")} ₫`}
           icon={<DollarSign size={22} />}
           gradient="from-emerald-400 to-teal-600"
           shadowColor="shadow-emerald-500/20"
@@ -132,7 +132,7 @@ function AdminAnalytics() {
         />
         <StatCard
           title="Gói đang hoạt động"
-          value={stats.activeSubscriptions.toLocaleString()}
+          value={(stats.activeSubscriptions ?? 0).toLocaleString()}
           icon={<CreditCard size={22} />}
           gradient="from-violet-500 to-purple-700"
           shadowColor="shadow-violet-500/20"
@@ -141,7 +141,7 @@ function AdminAnalytics() {
         />
         <StatCard
           title="Tài khoản mới"
-          value={stats.accountGrowth.reduce((sum, item) => sum + item.newAccounts, 0).toLocaleString()}
+          value={(stats.accountGrowth ?? []).reduce((sum, item) => sum + item.newAccounts, 0).toLocaleString()}
           icon={<TrendingUp size={22} />}
           gradient="from-rose-400 to-red-600"
           shadowColor="shadow-rose-500/20"
@@ -168,7 +168,7 @@ function AdminAnalytics() {
           }`}
         >
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={stats.accountGrowth} style={{ outline: "none" }} margin={{ top: 5, right: 10, bottom: 5, left: -20 }}>
+            <AreaChart data={stats.accountGrowth ?? []} style={{ outline: "none" }} margin={{ top: 5, right: 10, bottom: 5, left: -20 }}>
               <defs>
                 <linearGradient id="analyticsGrowthGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.25} />
@@ -267,9 +267,9 @@ function AdminAnalytics() {
           </div>
 
           <div className="h-72 w-full [&_.recharts-wrapper]:!outline-none [&_.recharts-surface]:!outline-none">
-            {stats.packagePopularity.length > 0 ? (
+            {(stats.packagePopularity ?? []).length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.packagePopularity} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }} style={{ outline: "none" }}>
+                <BarChart data={stats.packagePopularity ?? []} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }} style={{ outline: "none" }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
                   <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 11 }} />
                   <YAxis type="category" dataKey="packageName" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 12, fontWeight: 500 }} width={120} />
@@ -278,7 +278,7 @@ function AdminAnalytics() {
                     contentStyle={tooltipStyle}
                   />
                   <Bar dataKey="userCount" name="Người sử dụng" radius={[0, 6, 6, 0]} barSize={20}>
-                    {stats.packagePopularity.map((_, index) => (
+                    {(stats.packagePopularity ?? []).map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[(index + 1) % COLORS.length]} />
                     ))}
                   </Bar>
