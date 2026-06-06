@@ -19,8 +19,8 @@ export interface PackagePopularity {
 
 export interface AdminDashboardResponse {
   totalAccounts: number;
-  totalPois: number;
-  totalAds: number;
+  totalRevenue: number;
+  activeSubscriptions: number;
   accountRoles: AccountRoleBreakdown;
   accountGrowth: DailyAccountGrowth[];
   packagePopularity: PackagePopularity[];

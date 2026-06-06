@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useState, useEffect } from "react"
-import { Users, MapPin, Flame, TrendingUp } from "lucide-react"
+import { Users, DollarSign, CreditCard, TrendingUp, Flame } from "lucide-react"
 import {
   AreaChart,
   Area,
@@ -122,21 +122,21 @@ function AdminAnalytics() {
           trend="up"
         />
         <StatCard
-          title="Tổng địa điểm (POI)"
-          value={stats.totalPois.toLocaleString()}
-          icon={<MapPin size={22} />}
+          title="Tổng doanh thu"
+          value={`${stats.totalRevenue.toLocaleString("vi-VN")} ₫`}
+          icon={<DollarSign size={22} />}
           gradient="from-emerald-400 to-teal-600"
           shadowColor="shadow-emerald-500/20"
-          description="Địa điểm trên toàn hệ thống"
+          description="Doanh thu từ gói dịch vụ"
           trend="up"
         />
         <StatCard
-          title="Tổng quảng cáo"
-          value={stats.totalAds.toLocaleString()}
-          icon={<Flame size={22} />}
+          title="Gói đang hoạt động"
+          value={stats.activeSubscriptions.toLocaleString()}
+          icon={<CreditCard size={22} />}
           gradient="from-violet-500 to-purple-700"
           shadowColor="shadow-violet-500/20"
-          description="Các chiến dịch quảng cáo"
+          description="Subscription đang Active"
           trend="neutral"
         />
         <StatCard
