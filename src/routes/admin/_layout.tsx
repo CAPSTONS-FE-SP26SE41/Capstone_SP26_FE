@@ -4,7 +4,7 @@ import {
   Calendar,
   Map,
   BarChart2,
-  PlaneTakeoff,
+  ShieldCheck,
   UserCog,
   CreditCard,
   Receipt,
@@ -78,9 +78,9 @@ function AdminLayout() {
   return (
     <DashboardLayout
       brand={{
-        name: 'TripAdmin',
+        name: 'Admin Dashboard',
         subtitle: 'Bảng điều khiển quản trị',
-        icon: PlaneTakeoff,
+        icon: ShieldCheck,
       }}
       navItems={[
         { to: '/admin/analytics', icon: BarChart2, label: 'Thống kê' },

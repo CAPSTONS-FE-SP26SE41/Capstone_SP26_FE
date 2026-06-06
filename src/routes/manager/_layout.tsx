@@ -3,7 +3,7 @@ import {
   LayoutDashboard,
   MapPin,
   Map,
-  PlaneTakeoff,
+  ClipboardList,
   ClipboardCheck,
   Users
 } from "lucide-react"
@@ -34,9 +34,9 @@ function ManagerLayout() {
   return (
     <DashboardLayout
       brand={{
-        name: "Trip Manager",
+        name: "Manager Dashboard",
         subtitle: "Bảng điều khiển quản lý",
-        icon: PlaneTakeoff,
+        icon: ClipboardList,
       }}
       themeColor="emerald" // Dùng đúng tên prop từ dev_2
       navItems={[

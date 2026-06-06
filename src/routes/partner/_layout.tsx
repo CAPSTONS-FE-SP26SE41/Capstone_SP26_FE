@@ -4,7 +4,7 @@ import {
   Megaphone,
   ChartBar,
   User,
-  Store,
+  Handshake,
   History,
   MapPin
 } from "lucide-react"
@@ -68,9 +68,9 @@ function PartnerLayout() {
   return (
     <DashboardLayout
       brand={{
-        name: "TripPartner",
+        name: "Partner Dashboard",
         subtitle: "Bảng điều khiển Đối tác",
-        icon: Store,
+        icon: Handshake,
       }}
       navItems={[
         { to: "/partner/stats", icon: ChartBar, label: "Thống kê" },
