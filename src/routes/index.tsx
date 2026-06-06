@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { PlaneTakeoff, Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 import { useState, useEffect } from "react"
 import { jwtDecode } from "jwt-decode"
 
@@ -18,6 +18,7 @@ function LoginPortalPage() {
   const [errorMessage, setErrorMessage] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem("login_remember_me")
@@ -31,6 +32,7 @@ function LoginPortalPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMessage("")
+    setIsLoading(true)
 
     try {
       if (rememberMe) {
@@ -102,6 +104,8 @@ function LoginPortalPage() {
     } catch (error) {
       console.log(error)
       setErrorMessage("Email hoặc mật khẩu không đúng")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -114,10 +118,8 @@ function LoginPortalPage() {
       <div className="login-panel">
         <div className="login-card">
           <div className="login-brand">
-            <div className="login-brand-icon">
-              <PlaneTakeoff size={32} className="text-[var(--login-primary)]" />
-            </div>
             <h1 className="login-title">Travel Planner</h1>
+
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -170,9 +172,7 @@ function LoginPortalPage() {
                   Remember me
                 </label>
               </div>
-              <button type="button" className="login-forgot">
-                Forgot password?
-              </button>
+
             </div>
 
             {errorMessage && (
@@ -181,8 +181,15 @@ function LoginPortalPage() {
               </div>
             )}
 
-            <button className="login-button" type="submit">
-              Sign In
+            <button className="login-button" type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <span className="login-spinner" />
+                  Signing In...
+                </>
+              ) : (
+                "Sign In"
+              )}
             </button>
           </form>
         </div>
