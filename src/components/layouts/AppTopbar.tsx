@@ -54,11 +54,11 @@ export default function AppTopbar({
 
   const getPageTitle = (path: string) => {
     // Staff
-    if (path.includes('/staff/partner-requests')) return 'Yêu cầu đối tác'
-    if (path.includes('/staff/advertisements')) return 'Yêu cầu xét duyệt'
-    if (path.includes('/staff/locations')) return 'Quản lý địa điểm'
-    if (path.includes('/staff/pois')) return 'Quản lý POIs'
-    if (path === '/staff') return 'Trang chủ'
+    if (path.includes('/manager/partner-requests')) return 'Yêu cầu đối tác'
+    if (path.includes('/manager/advertisements')) return 'Yêu cầu xét duyệt'
+    if (path.includes('/manager/locations')) return 'Quản lý địa điểm'
+    if (path.includes('/manager/pois')) return 'Quản lý POIs'
+    if (path === '/manager' || path === '/manager/') return 'Thống kê tổng quan'
 
     // Admin
     if (path.includes('/admin/accounts')) return 'Quản lý tài khoản'
@@ -67,6 +67,8 @@ export default function AppTopbar({
     if (path.includes('/admin/destinations')) return 'Quản lý địa điểm'
     if (path.includes('/admin/settings')) return 'Cài đặt hệ thống'
     if (path.includes('/admin/subscriptions')) return 'Quản lý gói dịch vụ'
+    if (path.includes('/admin/transactions')) return 'Lịch sử giao dịch'
+    if (path.includes('/admin/preferences')) return 'Quản lý sở thích'
 
     // Partner
     if (path.includes('/partner/stats')) return 'Thống kê kinh doanh'
@@ -117,7 +119,7 @@ export default function AppTopbar({
               navigate({ to: '/partner/profile' })
             } else if (location.href.includes('/admin')) {
               navigate({ to: '/admin/profile' })
-            } else if (location.href.includes('/staff')) {
+            } else if (location.href.includes('/manager')) {
               // Manager chưa có trang profile riêng
             } else {
               navigate({ to: '/profile' as any })
