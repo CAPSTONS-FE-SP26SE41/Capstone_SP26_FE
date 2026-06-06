@@ -15,7 +15,7 @@ import {
   Cell,
   Legend,
 } from "recharts"
-import { Users, MapPin, Flame, TrendingUp, Sparkles, ChartBar, Layers } from "lucide-react"
+import { Users, DollarSign, CreditCard, TrendingUp, Sparkles, ChartBar, Layers } from "lucide-react"
 
 export const Route = createFileRoute("/admin/_layout/")({
   component: AdminDashboard,
@@ -113,21 +113,21 @@ function AdminDashboard() {
           trend="up"
         />
         <StatCard
-          title="Tổng địa điểm (POI)"
-          value={stats.totalPois.toLocaleString()}
-          icon={<MapPin size={22} />}
+          title="Tổng doanh thu"
+          value={`${(stats.totalRevenue ?? 0).toLocaleString("vi-VN")} ₫`}
+          icon={<DollarSign size={22} />}
           gradient="from-emerald-400 to-teal-600"
           shadowColor="shadow-emerald-500/20"
-          description="Địa điểm trên toàn hệ thống"
+          description="Doanh thu từ gói dịch vụ"
           trend="up"
         />
         <StatCard
-          title="Tổng quảng cáo"
-          value={stats.totalAds.toLocaleString()}
-          icon={<Flame size={22} />}
+          title="Gói đang hoạt động"
+          value={(stats.activeSubscriptions ?? 0).toLocaleString()}
+          icon={<CreditCard size={22} />}
           gradient="from-violet-500 to-purple-700"
           shadowColor="shadow-violet-500/20"
-          description="Các chiến dịch quảng cáo"
+          description="Subscription đang Active"
           trend="neutral"
         />
         <StatCard
