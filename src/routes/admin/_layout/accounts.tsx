@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import {
-  Plus,
   Search,
   ChevronDown
 } from "lucide-react"
@@ -263,11 +262,7 @@ function AccountsPage() {
             </div>
           </div>
 
-          {/* Action Button */}
-          <button className="flex items-center gap-2 bg-[#258cf4] hover:bg-[#1d72cb] text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-colors">
-            <Plus size={18} />
-            <span className="text-sm">Tạo tài khoản mới</span>
-          </button>
+
 
         </div>
       </div>
