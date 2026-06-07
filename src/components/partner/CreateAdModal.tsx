@@ -6,6 +6,25 @@ import { CustomSelect } from '../ui/CustomSelect';
 import { useAlert } from '../ui/AlertContext';
 import { DateTimePicker } from '../ui/DateTimePicker';
 
+const toLocalISOString = (dateInput?: string | null) => {
+  if (!dateInput) return '';
+  const date = new Date(dateInput);
+  if (isNaN(date.getTime())) return '';
+  
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  return `${y}-${m}-${d}T${hh}:${mm}`;
+};
+
+const toUTCISOString = (localDateTimeStr?: string | null) => {
+  if (!localDateTimeStr) return '';
+  const date = new Date(localDateTimeStr);
+  return isNaN(date.getTime()) ? '' : date.toISOString();
+};
+
 interface CreateAdModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -37,8 +56,8 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit, initialData }
           poiId: initialData.poiId || '',
           title: initialData.title || '',
           content: initialData.content || '',
-          startDate: initialData.startDate ? initialData.startDate.slice(0, 16) : '',
-          endDate: initialData.endDate ? initialData.endDate.slice(0, 16) : '',
+          startDate: toLocalISOString(initialData.startDate),
+          endDate: toLocalISOString(initialData.endDate),
           promoTitle: initialData.promotion?.title || '',
           promoDescription: initialData.promotion?.description || '',
           promoTerms: initialData.promotion?.terms || '',
@@ -107,8 +126,8 @@ export default function CreateAdModal({ isOpen, onClose, onSubmit, initialData }
       poiId: newAdForm.poiId,
       title: newAdForm.title,
       content: newAdForm.content,
-      startDate: newAdForm.startDate,
-      endDate: newAdForm.endDate,
+      startDate: toUTCISOString(newAdForm.startDate),
+      endDate: toUTCISOString(newAdForm.endDate),
       promotion: newAdForm.promoTitle ? {
         title: newAdForm.promoTitle,
         description: newAdForm.promoDescription,
